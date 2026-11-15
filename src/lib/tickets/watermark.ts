@@ -10,12 +10,24 @@ const ENTITIES: Record<string, string> = {
   "'": '&apos;',
 };
 
-// Anything outside the XML 1.0 Char production (control chars, U+FFFE/FFFF, lone surrogates).
-const XML_INVALID = /[^\t\n\r -퟿-�\u{10000}-\u{10FFFF}]/gu;
+// The XML 1.0 Char production: excludes control chars, U+FFFE/FFFF and lone surrogates.
+function isXmlChar(cp: number): boolean {
+  return (
+    cp === 0x9 ||
+    cp === 0xa ||
+    cp === 0xd ||
+    (cp >= 0x20 && cp <= 0xd7ff) ||
+    (cp >= 0xe000 && cp <= 0xfffd) ||
+    (cp >= 0x10000 && cp <= 0x10ffff)
+  );
+}
 
 /** Makes arbitrary text safe to place inside an SVG/XML text node or attribute value. */
 export function escapeXml(s: string): string {
-  return s.replace(XML_INVALID, '').replace(/[&<>"']/g, (c) => ENTITIES[c]);
+  return Array.from(s)
+    .filter((ch) => isXmlChar(ch.codePointAt(0)!))
+    .join('')
+    .replace(/[&<>"']/g, (c) => ENTITIES[c]);
 }
 
 function sharpError(e: unknown): InvalidUploadError {
