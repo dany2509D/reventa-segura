@@ -1,0 +1,15 @@
+import { auditLog } from '../db/schema';
+import type { Tx } from '../db/types';
+
+export async function audit(
+  tx: Tx,
+  e: { actorId: string | null; action: string; entity: string; entityId: string; detail?: object },
+): Promise<void> {
+  await tx.insert(auditLog).values({
+    actorId: e.actorId,
+    action: e.action,
+    entity: e.entity,
+    entityId: e.entityId,
+    detail: e.detail ?? null,
+  });
+}
