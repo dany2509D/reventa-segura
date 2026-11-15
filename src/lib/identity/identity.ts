@@ -3,8 +3,9 @@ import { audit } from '@/lib/audit/audit';
 import { assertAdmin } from '@/lib/authz';
 import { users } from '@/lib/db/schema';
 import type { Actor, Db, Tx } from '@/lib/db/types';
-import { NotFoundError, ValidationError } from '@/lib/errors';
+import { ForbiddenError, NotFoundError, ValidationError } from '@/lib/errors';
 import { parseFilePath, type FileKind } from '@/lib/uploads/uploads';
+import { isUuid } from '@/lib/uuid';
 import { IdentityRequiredError, IdentityStateError } from './errors';
 
 export type IdentityDecision = 'approved' | 'rejected';
@@ -50,6 +51,8 @@ export async function reviewIdentity(
   decision: IdentityDecision,
 ): Promise<void> {
   assertAdmin(admin);
+  // Separation of duties: an admin never decides on their own identity.
+  if (admin.userId === userId) throw new ForbiddenError();
   if (decision !== 'approved' && decision !== 'rejected') {
     throw new ValidationError('Invalid decision');
   }
@@ -71,6 +74,7 @@ export async function reviewIdentity(
 }
 
 export async function assertCanSell(db: Db, userId: string): Promise<void> {
+  if (!isUuid(userId)) throw new IdentityRequiredError();
   const [row] = await db
     .select({ status: users.identityStatus })
     .from(users)

@@ -8,11 +8,17 @@ import {
   MIME_TYPES,
   canReadFile,
   detectType,
+  isIdentityKind,
   parseFilePath,
   verifyFileToken,
 } from '@/lib/uploads/uploads';
 
-const NO_STORE = { 'cache-control': 'private, no-store', 'x-content-type-options': 'nosniff' };
+// Sent on every response of this route, success or error.
+const NO_STORE = {
+  'cache-control': 'private, no-store',
+  'x-content-type-options': 'nosniff',
+  'content-security-policy': "default-src 'none'; sandbox",
+};
 
 const deny = (status: 401 | 403 | 404) =>
   NextResponse.json(
@@ -20,8 +26,9 @@ const deny = (status: 401 | 403 | 404) =>
     { status, headers: NO_STORE },
   );
 
-// Serves a private file for a signed, user-bound, 60 s token (SEG-10).
-// Only the owner or an admin with 2FA may read; identity/selfie reads are audited.
+// Serves a private file for a signed, user-bound, short-lived token (SEG-10).
+// Only the owner or an admin with 2FA may read. Audited (fail closed): every
+// identity/selfie read, and every read of a file by someone other than its owner.
 export async function GET(req: Request, ctx: { params: Promise<{ token: string }> }) {
   const { token } = await ctx.params;
   try {
@@ -43,7 +50,7 @@ export async function GET(req: Request, ctx: { params: Promise<{ token: string }
     const data = await getStore().get(path);
     if (!data) return deny(404);
 
-    if (parsed.kind === 'identity' || parsed.kind === 'selfie') {
+    if (isIdentityKind(parsed.kind) || actor.userId !== parsed.ownerId) {
       // Fail closed: if the audit row cannot be written, the file is not served.
       await db.transaction((tx) =>
         audit(tx, {
@@ -63,7 +70,12 @@ export async function GET(req: Request, ctx: { params: Promise<{ token: string }
         ...NO_STORE,
         'content-type': type ? MIME_TYPES[type] : 'application/octet-stream',
         // PDFs are not sanitized, so they are downloaded rather than rendered inline.
-        'content-disposition': type && type !== 'pdf' ? 'inline' : 'attachment',
+        'content-disposition':
+          type === 'pdf'
+            ? 'attachment; filename="documento.pdf"'
+            : type
+              ? 'inline'
+              : 'attachment',
         'referrer-policy': 'no-referrer',
       },
     });

@@ -57,6 +57,13 @@ describe('assertCanSell', () => {
   it('throws IdentityRequiredError for an unknown user', async () => {
     await expect(assertCanSell(db, randomUUID())).rejects.toBeInstanceOf(IdentityRequiredError);
   });
+
+  it.each(['', 'not-a-uuid', "1' or '1'='1", `${randomUUID()}x`])(
+    'throws IdentityRequiredError (not a database error) for the malformed id %j',
+    async (bad) => {
+      await expect(assertCanSell(db, bad)).rejects.toBeInstanceOf(IdentityRequiredError);
+    },
+  );
 });
 
 describe('submitIdentity', () => {
@@ -110,6 +117,22 @@ describe('reviewIdentity', () => {
     ).rejects.toBeInstanceOf(ForbiddenError);
     expect((await statusOf(id)).s).toBe('pending');
     expect(await db.select().from(auditLog)).toHaveLength(0);
+  });
+
+  it.each(['approved', 'rejected'] as const)(
+    'forbids an admin from deciding (%s) on their own identity',
+    async (d) => {
+      await db.update(users).set({ identityStatus: 'pending' }).where(eq(users.id, admin.userId));
+      await expect(reviewIdentity(db, admin, admin.userId, d)).rejects.toBeInstanceOf(ForbiddenError);
+      expect((await statusOf(admin.userId)).s).toBe('pending');
+      expect(await db.select().from(auditLog)).toHaveLength(0);
+    },
+  );
+
+  it('lets a different admin approve an admin identity', async () => {
+    const other: Actor = { userId: await insertUser('admin', 'pending'), role: 'admin', mfa: true };
+    await reviewIdentity(db, admin, other.userId, 'approved');
+    expect((await statusOf(other.userId)).s).toBe('approved');
   });
 
   it.each(['approved', 'rejected'] as const)('moves pending to %s with an audit row', async (d) => {
