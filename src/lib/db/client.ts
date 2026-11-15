@@ -8,3 +8,9 @@ import type { Db } from './types';
 export function createClient(dataDir?: string): Db {
   return drizzle(new PGlite(dataDir), { schema });
 }
+
+const g = globalThis as unknown as { __db?: Db };
+// Process-wide singleton for route handlers (survives dev hot reloads).
+export function getDb(): Db {
+  return (g.__db ??= createClient(process.env.PGLITE_DATA_DIR));
+}
