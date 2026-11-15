@@ -1,4 +1,5 @@
 import { randomBytes, randomUUID } from 'node:crypto';
+import { crc32 } from 'node:zlib';
 import sharp from 'sharp';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Actor } from '@/lib/db/types';
@@ -63,6 +64,16 @@ describe('validateUpload: type detection by content', () => {
   it('rejects random bytes', async () => {
     const junk = Buffer.concat([Buffer.from([0x00, 0x01, 0x02, 0x03]), randomBytes(1024)]);
     expect((await rejection(validateUpload(junk, 'application/pdf'))).reason).toBe('unsupported_type');
+  });
+
+  it('rejects a RIFF container that is not WebP (e.g. WAVE audio)', async () => {
+    const wav = Buffer.concat([
+      Buffer.from('RIFF', 'latin1'),
+      Buffer.from([0x24, 0x00, 0x00, 0x00]),
+      Buffer.from('WAVEfmt ', 'latin1'),
+      randomBytes(64),
+    ]);
+    expect((await rejection(validateUpload(wav, 'image/webp'))).reason).toBe('unsupported_type');
   });
 
   it('rejects an empty file', async () => {
@@ -141,13 +152,17 @@ describe('validateUpload: metadata stripping and image bombs', () => {
   });
 
   it('rejects an image whose header claims huge dimensions (pixel bomb)', async () => {
-    // Patch the IHDR of a tiny PNG to claim 100000 x 100000 pixels.
+    // Patch the IHDR of a tiny PNG to claim 100000 x 100000 pixels and fix up
+    // its CRC, so the header is valid and only the pixel guard can reject it.
     const png = await image('png', 1, 1);
     const bomb = Buffer.from(png);
+    expect(bomb.toString('latin1', 12, 16)).toBe('IHDR');
     bomb.writeUInt32BE(100_000, 16);
     bomb.writeUInt32BE(100_000, 20);
-    const err = await rejection(validateUpload(bomb, 'image/png'));
-    expect(['too_many_pixels', 'corrupt']).toContain(err.reason);
+    bomb.writeUInt32BE(crc32(bomb.subarray(12, 29)), 29);
+    const meta = await sharp(bomb, { limitInputPixels: false }).metadata();
+    expect([meta.width, meta.height]).toEqual([100_000, 100_000]);
+    expect((await rejection(validateUpload(bomb, 'image/png'))).reason).toBe('too_many_pixels');
   });
 
   it('rejects an image that fails to decode', async () => {
@@ -295,10 +310,34 @@ describe('signedUrl / verifyFileToken', () => {
     expect(() => verifyFileToken(token, owner, new Date(now.getTime() + 3_600_000))).toThrow(ForbiddenError);
   });
 
-  it('honours a custom ttl', () => {
+  it('honours a shorter custom ttl', () => {
     const token = tokenOf(signedUrl(path, owner, { now, ttlSeconds: 5 }));
     expect(verifyFileToken(token, owner, new Date(now.getTime() + 4_999))).toBe(path);
     expect(() => verifyFileToken(token, owner, new Date(now.getTime() + 5_000))).toThrow(ForbiddenError);
+  });
+
+  it.each(['identity', 'selfie'] as const)('clamps the ttl of %s files to at most 60 s', (kind) => {
+    const p = `${kind}/${ownerId}/${randomUUID()}`;
+    const token = tokenOf(signedUrl(p, owner, { now, ttlSeconds: 3600 }));
+    expect(verifyFileToken(token, owner, new Date(now.getTime() + 59_999))).toBe(p);
+    expect(() => verifyFileToken(token, owner, new Date(now.getTime() + 60_000))).toThrow(ForbiddenError);
+  });
+
+  it.each(['proof', 'ticket', 'evidence'] as const)('clamps the ttl of %s files to at most 300 s', (kind) => {
+    const p = `${kind}/${ownerId}/${randomUUID()}`;
+    const long = tokenOf(signedUrl(p, owner, { now, ttlSeconds: 86_400 }));
+    expect(verifyFileToken(long, owner, new Date(now.getTime() + 299_999))).toBe(p);
+    expect(() => verifyFileToken(long, owner, new Date(now.getTime() + 300_000))).toThrow(ForbiddenError);
+    // Below the cap the requested ttl is kept.
+    const mid = tokenOf(signedUrl(p, owner, { now, ttlSeconds: 120 }));
+    expect(verifyFileToken(mid, owner, new Date(now.getTime() + 119_999))).toBe(p);
+    expect(() => verifyFileToken(mid, owner, new Date(now.getTime() + 120_000))).toThrow(ForbiddenError);
+  });
+
+  it('rejects a non-positive or non-finite ttl', () => {
+    for (const ttlSeconds of [0, -1, Number.NaN, Number.POSITIVE_INFINITY]) {
+      expect(() => signedUrl(path, owner, { now, ttlSeconds })).toThrow();
+    }
   });
 
   it('rejects a tampered payload or signature', () => {
