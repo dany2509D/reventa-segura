@@ -124,6 +124,32 @@ describe('OTP', () => {
     expect(await verifyOtp(db, PHONE, code, now)).toBeNull();
   });
 
+  it('caps attempts atomically under a parallel burst', async () => {
+    await requestOtp(db, PHONE, sender, now);
+    const code = sender.lastCode();
+    const wrong = code === '000000' ? '111111' : '000000';
+    const calls = [
+      ...Array.from({ length: 20 }, () => verifyOtp(db, PHONE, wrong, now)),
+      verifyOtp(db, PHONE, code, now),
+    ];
+    const results = await Promise.all(calls);
+    expect(results.every((r) => r === null)).toBe(true);
+    const [row] = await db.select().from(otpCodes);
+    expect(row.attempts).toBe(5);
+    expect(await db.select().from(sessions)).toHaveLength(0);
+  });
+
+  it('a newer successful verify revokes older outstanding codes', async () => {
+    await requestOtp(db, PHONE, sender, now);
+    const a = sender.lastCode();
+    const later = new Date(now.getTime() + 1000);
+    await requestOtp(db, PHONE, sender, later);
+    const b = sender.lastCode();
+    if (a === b) return; // 1-in-a-million collision
+    expect(await verifyOtp(db, PHONE, b, later)).not.toBeNull();
+    expect(await verifyOtp(db, PHONE, a, later)).toBeNull();
+  });
+
   it('rate limits the sixth request within an hour', async () => {
     for (let i = 0; i < 5; i++) await requestOtp(db, PHONE, sender, now);
     await expect(requestOtp(db, PHONE, sender, now)).rejects.toBeInstanceOf(RateLimitError);
@@ -171,6 +197,24 @@ describe('sessions', () => {
     expect(await getSession(db, s.sessionToken)).not.toBeNull();
     await revokeSession(db, s.sessionToken);
     expect(await getSession(db, s.sessionToken)).toBeNull();
+  });
+
+  it('rejects a 30-day session promoted to admin after 8h and caps it on MFA', async () => {
+    const db = await makeTestDb();
+    const sender = new FakeSender();
+    const now = new Date('2026-01-01T12:00:00Z');
+    await requestOtp(db, PHONE, sender, now);
+    const s = (await verifyOtp(db, PHONE, sender.lastCode(), now))!;
+    await db.update(users).set({ role: 'admin' }).where(eq(users.id, s.userId));
+    const plus1h = new Date(now.getTime() + 3600_000);
+    const plus9h = new Date(now.getTime() + 9 * 3600_000);
+    expect(await getSession(db, s.sessionToken, plus1h)).not.toBeNull();
+    expect(await getSession(db, s.sessionToken, plus9h)).toBeNull();
+    const { secret } = await enrollTotp(db, s.userId);
+    expect(await completeMfa(db, s.sessionToken, totpAt(secret, plus1h.getTime()), plus1h)).toBe(true);
+    const [row] = await db.select().from(sessions);
+    expect(row.expiresAt.getTime()).toBeLessThanOrEqual(plus1h.getTime() + 8 * 3600_000);
+    expect(await getSession(db, s.sessionToken, plus9h)).toBeNull();
   });
 
   it('returns null for an unknown token', async () => {

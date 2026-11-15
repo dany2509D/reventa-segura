@@ -9,3 +9,16 @@ export class ConsoleSmsSender implements SmsSender {
     console.info(`[sms] to ${phone}: ${text}`);
   }
 }
+
+export class SmsConfigError extends Error {
+  constructor() {
+    super('SMS provider not configured');
+    this.name = 'SmsConfigError';
+  }
+}
+
+// Throws in production until a real provider is wired in.
+export function getSmsSender(): SmsSender {
+  if (process.env.NODE_ENV === 'production') throw new SmsConfigError();
+  return new ConsoleSmsSender();
+}

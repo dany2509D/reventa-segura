@@ -2,17 +2,21 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getDb } from '@/lib/db/client';
 import { InvalidPhoneError, RateLimitError } from '@/lib/auth/errors';
-import { ConsoleSmsSender, requestOtp } from '@/lib/auth/otp';
+import { requestOtp } from '@/lib/auth/otp';
+import { SmsConfigError, getSmsSender } from '@/lib/auth/sms';
+import { internalError, rejectUnsafeRequest } from '@/lib/auth/http';
 
 const body = z.object({ phone: z.string().min(1).max(32) });
 
 export async function POST(req: Request) {
+  const blocked = rejectUnsafeRequest(req);
+  if (blocked) return blocked;
   const parsed = body.safeParse(await req.json().catch(() => null));
   if (!parsed.success) {
     return NextResponse.json({ error: 'Teléfono inválido' }, { status: 400 });
   }
   try {
-    await requestOtp(getDb(), parsed.data.phone, new ConsoleSmsSender());
+    await requestOtp(getDb(), parsed.data.phone, getSmsSender());
     return NextResponse.json({ ok: true });
   } catch (e) {
     if (e instanceof InvalidPhoneError) {
@@ -24,6 +28,13 @@ export async function POST(req: Request) {
         { status: 429 },
       );
     }
-    throw e;
+    if (e instanceof SmsConfigError) {
+      console.error('auth route error', e.name);
+      return NextResponse.json(
+        { error: 'Servicio no disponible por el momento.' },
+        { status: 503 },
+      );
+    }
+    return internalError(e);
   }
 }

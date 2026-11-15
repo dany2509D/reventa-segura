@@ -28,6 +28,7 @@ export async function createSession(
     tokenHash: hashToken(token),
     mfa: false,
     expiresAt: new Date(now.getTime() + sessionTtlMs(role)),
+    createdAt: now,
   });
   return token;
 }
@@ -39,11 +40,22 @@ export async function getSession(
 ): Promise<{ userId: string; role: Role; mfa: boolean } | null> {
   if (!token) return null;
   const [row] = await db
-    .select({ userId: users.id, role: users.role, mfa: sessions.mfa })
+    .select({
+      userId: users.id,
+      role: users.role,
+      mfa: sessions.mfa,
+      createdAt: sessions.createdAt,
+    })
     .from(sessions)
     .innerJoin(users, eq(users.id, sessions.userId))
     .where(and(eq(sessions.tokenHash, hashToken(token)), gt(sessions.expiresAt, now)));
-  return row ?? null;
+  if (!row) return null;
+  // Role is read live: a session minted with a 30-day user lifetime must not
+  // act as an admin session beyond the admin lifetime.
+  if (row.role === 'admin' && now.getTime() - row.createdAt.getTime() >= ADMIN_SESSION_MS) {
+    return null;
+  }
+  return { userId: row.userId, role: row.role, mfa: row.mfa };
 }
 
 export async function revokeSession(db: Db, token: string): Promise<void> {

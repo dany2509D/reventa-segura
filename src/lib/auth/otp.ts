@@ -1,5 +1,5 @@
 import { createHash, randomBytes, randomInt, timingSafeEqual } from 'node:crypto';
-import { and, desc, eq, gt, isNull, sql } from 'drizzle-orm';
+import { and, desc, eq, gt, isNull, lt, sql } from 'drizzle-orm';
 import { otpCodes, users } from '@/lib/db/schema';
 import type { Db } from '@/lib/db/types';
 import { InvalidPhoneError, RateLimitError } from './errors';
@@ -57,25 +57,33 @@ export async function verifyOtp(
   const phone = normalizePanamaPhone(phoneInput);
   if (!phone) return null;
 
-  const [row] = await db
-    .select()
+  const [latest] = await db
+    .select({ id: otpCodes.id })
     .from(otpCodes)
     .where(and(eq(otpCodes.phone, phone), isNull(otpCodes.usedAt)))
     .orderBy(desc(otpCodes.createdAt))
     .limit(1);
-  if (!row || row.expiresAt <= now || row.attempts >= OTP_MAX_ATTEMPTS) return null;
+  if (!latest) return null;
+
+  // Reserve an attempt atomically BEFORE comparing, so parallel requests cannot
+  // exceed the cap. The sixth reservation matches no row and is refused.
+  const [row] = await db
+    .update(otpCodes)
+    .set({ attempts: sql`${otpCodes.attempts} + 1` })
+    .where(
+      and(
+        eq(otpCodes.id, latest.id),
+        isNull(otpCodes.usedAt),
+        lt(otpCodes.attempts, OTP_MAX_ATTEMPTS),
+        gt(otpCodes.expiresAt, now),
+      ),
+    )
+    .returning();
+  if (!row) return null;
 
   const expected = Buffer.from(row.codeHash, 'hex');
   const actual = Buffer.from(hashCode(row.salt, code), 'hex');
-  const ok = expected.length === actual.length && timingSafeEqual(expected, actual);
-
-  if (!ok) {
-    await db
-      .update(otpCodes)
-      .set({ attempts: sql`${otpCodes.attempts} + 1` })
-      .where(eq(otpCodes.id, row.id));
-    return null;
-  }
+  if (expected.length !== actual.length || !timingSafeEqual(expected, actual)) return null;
 
   // Atomically consume: only one concurrent verifier can win.
   const consumed = await db
@@ -84,6 +92,12 @@ export async function verifyOtp(
     .where(and(eq(otpCodes.id, row.id), isNull(otpCodes.usedAt)))
     .returning({ id: otpCodes.id });
   if (consumed.length === 0) return null;
+
+  // Revoke any other outstanding codes so an older one cannot be revived.
+  await db
+    .update(otpCodes)
+    .set({ usedAt: now })
+    .where(and(eq(otpCodes.phone, phone), isNull(otpCodes.usedAt)));
 
   await db.insert(users).values({ phone }).onConflictDoNothing();
   const [user] = await db.select().from(users).where(eq(users.phone, phone));

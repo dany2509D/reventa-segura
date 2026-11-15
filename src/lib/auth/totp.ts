@@ -2,7 +2,7 @@ import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
 import { and, eq, gt } from 'drizzle-orm';
 import { sessions, users } from '@/lib/db/schema';
 import type { Db } from '@/lib/db/types';
-import { hashToken } from './session';
+import { ADMIN_SESSION_MS, hashToken } from './session';
 
 const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
 const STEP_S = 30;
@@ -83,12 +83,22 @@ export async function completeMfa(
   now: Date = new Date(),
 ): Promise<boolean> {
   const [row] = await db
-    .select({ id: sessions.id, userId: sessions.userId, role: users.role })
+    .select({
+      id: sessions.id,
+      userId: sessions.userId,
+      role: users.role,
+      createdAt: sessions.createdAt,
+      expiresAt: sessions.expiresAt,
+    })
     .from(sessions)
     .innerJoin(users, eq(users.id, sessions.userId))
     .where(and(eq(sessions.tokenHash, hashToken(sessionToken)), gt(sessions.expiresAt, now)));
   if (!row || row.role !== 'admin') return false;
+  if (now.getTime() - row.createdAt.getTime() >= ADMIN_SESSION_MS) return false;
   if (!(await verifyTotp(db, row.userId, code, now))) return false;
-  await db.update(sessions).set({ mfa: true }).where(eq(sessions.id, row.id));
+  await db.update(sessions).set({
+      mfa: true,
+      expiresAt: new Date(Math.min(row.expiresAt.getTime(), now.getTime() + ADMIN_SESSION_MS)),
+    }).where(eq(sessions.id, row.id));
   return true;
 }
