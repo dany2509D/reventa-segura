@@ -1,5 +1,5 @@
 {
-  "id": "18a4d758-3361-4786-9381-179c9132c5ee",
+  "id": "192f686d-45cf-4297-ae62-e25b8b415077",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -546,6 +546,38 @@
             }
           ],
           "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "orders_provider_ref_uq": {
+          "name": "orders_provider_ref_uq",
+          "columns": [
+            {
+              "expression": "provider_ref",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "where": "\"orders\".\"provider_ref\" is not null",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "orders_live_listing_uq": {
+          "name": "orders_live_listing_uq",
+          "columns": [
+            {
+              "expression": "listing_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "where": "\"orders\".\"state\" not in ('cancelada', 'reembolsada')",
           "concurrently": false,
           "method": "btree",
           "with": {}

@@ -129,4 +129,6 @@ ALTER TABLE "payouts" ADD CONSTRAINT "payouts_order_id_orders_id_fk" FOREIGN KEY
 ALTER TABLE "payouts" ADD CONSTRAINT "payouts_seller_id_users_id_fk" FOREIGN KEY ("seller_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "sessions" ADD CONSTRAINT "sessions_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 CREATE UNIQUE INDEX "listings_active_fingerprint_uq" ON "listings" USING btree ("fingerprint") WHERE "listings"."status" in ('pending', 'verified', 'sold');--> statement-breakpoint
-CREATE INDEX "orders_listing_idx" ON "orders" USING btree ("listing_id");
+CREATE INDEX "orders_listing_idx" ON "orders" USING btree ("listing_id");--> statement-breakpoint
+CREATE UNIQUE INDEX "orders_provider_ref_uq" ON "orders" USING btree ("provider_ref") WHERE "orders"."provider_ref" is not null;--> statement-breakpoint
+CREATE UNIQUE INDEX "orders_live_listing_uq" ON "orders" USING btree ("listing_id") WHERE "orders"."state" not in ('cancelada', 'reembolsada');

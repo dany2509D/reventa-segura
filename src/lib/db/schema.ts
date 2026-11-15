@@ -75,7 +75,6 @@ export const orders = pgTable(
     state: text('state', {
       enum: [
         'creada',
-        'pagada',
         'transferencia_pendiente',
         'entrada_recibida',
         'ingreso_confirmado',
@@ -95,7 +94,15 @@ export const orders = pgTable(
     needsManualReview: boolean('needs_manual_review').notNull().default(false),
     createdAt: createdAt(),
   },
-  (t) => [index('orders_listing_idx').on(t.listingId)],
+  (t) => [
+    index('orders_listing_idx').on(t.listingId),
+    // Idempotency: a payment provider reference can back at most one order.
+    uniqueIndex('orders_provider_ref_uq').on(t.providerRef).where(sql`${t.providerRef} is not null`),
+    // Double-sale guard: at most one live order per listing.
+    uniqueIndex('orders_live_listing_uq')
+      .on(t.listingId)
+      .where(sql`${t.state} not in ('cancelada', 'reembolsada')`),
+  ],
 );
 
 export const ledgerEntries = pgTable('ledger_entries', {

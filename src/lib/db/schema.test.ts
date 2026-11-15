@@ -78,4 +78,34 @@ describe('schema', () => {
       db.insert(s.listings).values({ sellerId: l.sellerId, eventId: l.eventId, askCents: 1, deliveryMode: 'transfer', fingerprint: l.fingerprint, proofPath: 'p' }),
     ).resolves.toBeDefined();
   });
+
+  it('rejects duplicate non-null provider_ref but allows many NULLs', async () => {
+    const a = await seedOrder();
+    const b = await seedOrder();
+    const c = await seedOrder();
+    await db.update(s.orders).set({ providerRef: 'pay-1' }).where(sql`${s.orders.id} = ${a.id}`);
+    await expect(
+      db.update(s.orders).set({ providerRef: 'pay-1' }).where(sql`${s.orders.id} = ${b.id}`),
+    ).rejects.toThrow();
+    expect(c.providerRef).toBeNull();
+    expect(b.providerRef).toBeNull();
+  });
+
+  it('allows only one live order per listing', async () => {
+    const first = await seedOrder();
+    const dup = {
+      listingId: first.listingId,
+      buyerId: first.buyerId,
+      state: 'creada' as const,
+      priceCents: 5000,
+      feeCents: 500,
+    };
+    await expect(db.insert(s.orders).values(dup)).rejects.toThrow();
+    for (const state of ['cancelada', 'reembolsada'] as const) {
+      await db.update(s.orders).set({ state }).where(sql`${s.orders.listingId} = ${first.listingId} AND ${s.orders.state} IN ('creada', 'cancelada', 'reembolsada') AND ${s.orders.id} = ${first.id}`);
+      const [again] = await db.insert(s.orders).values(dup).returning();
+      expect(again.id).toBeDefined();
+      await db.update(s.orders).set({ state }).where(sql`${s.orders.id} = ${again.id}`);
+    }
+  });
 });
