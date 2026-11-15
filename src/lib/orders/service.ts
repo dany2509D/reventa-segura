@@ -284,7 +284,7 @@ async function refundUnfulfillablePayment(tx: Tx, gw: PaymentGateway, order: Ord
   });
 }
 
-async function applyTransition(
+export async function applyTransition(
   tx: Tx,
   order: { id: string; state: OrderState },
   event: OrderEvent,
