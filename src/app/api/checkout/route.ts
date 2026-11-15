@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { getSession } from '@/lib/auth/session';
 import { getDb } from '@/lib/db/client';
 import { ListingUnavailableError, SelfPurchaseError, startCheckout } from '@/lib/orders/service';
-import { FakeGateway } from '@/lib/payments/fake-gateway';
+import { getPaymentGateway } from '@/lib/payments';
 
 const body = z.object({ listingId: z.uuid() });
 
@@ -18,8 +18,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Solicitud inválida' }, { status: 400 });
   }
   try {
-    // Test-mode gateway until a real adapter is configured.
-    const result = await startCheckout(db, new FakeGateway(), session.userId, parsed.data.listingId);
+    const result = await startCheckout(db, getPaymentGateway(), session.userId, parsed.data.listingId);
     return NextResponse.json(result);
   } catch (e) {
     if (e instanceof ListingUnavailableError) {
