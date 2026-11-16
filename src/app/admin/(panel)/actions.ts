@@ -7,6 +7,7 @@ import { getDb } from '@/lib/db/client';
 import { resolveDispute } from '@/lib/disputes/disputes';
 import { cancelEvent, createEvent } from '@/lib/events/events';
 import { reviewIdentity } from '@/lib/identity/identity';
+import { errorName, log } from '@/lib/observability/log';
 import { getPaymentGateway } from '@/lib/payments';
 import { markPayoutPaid, queuePayoutOnRelease } from '@/lib/payouts/payouts';
 import { reviewListing } from '@/lib/tickets/listings';
@@ -31,8 +32,8 @@ async function run(path: string, work: (actor: Awaited<ReturnType<typeof require
     const done = await work(actor);
     flash = { kind: 'ok', text: done || 'Listo.' };
   } catch (e) {
-    const name = e instanceof Error ? e.name : 'UnknownError';
-    console.error('admin action failed', name); // never the message: it can carry ids or parameters
+    const name = errorName(e);
+    log('error', 'admin action failed', { error: name }); // never the message: it can carry ids or parameters
     flash = { kind: 'error', text: MESSAGES[name] ?? 'No se pudo completar la acción.' };
   }
   revalidatePath(path);

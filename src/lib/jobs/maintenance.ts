@@ -1,5 +1,6 @@
 import { and, eq, inArray, isNotNull, isNull, lt, lte, notExists, or, sql, type SQL } from 'drizzle-orm';
 import { audit } from '@/lib/audit/audit';
+import { alert, errorName } from '@/lib/observability/log';
 import { appConfig, auditLog, disputes, events, listings, orders, users } from '@/lib/db/schema';
 import type { Db } from '@/lib/db/types';
 import { CONFIRMATION_WINDOW_MS, confirmationWindowEndsAt } from '@/lib/entry/confirmation';
@@ -61,8 +62,9 @@ export async function runMaintenance(db: Db, deps: MaintenanceDeps, now: Date): 
 
   const fail = (step: string, e: unknown) => {
     result.failed++;
-    // Name only: messages can carry ids, file paths or bound query parameters.
-    console.error(`maintenance: ${step} failed`, e instanceof Error ? e.name : 'UnknownError');
+    // A failed refund, release or purge needs a person (RNF-10). Name only: messages can carry
+    // ids, file paths or bound query parameters.
+    alert('maintenance_step_failed', { step, error: errorName(e) });
   };
 
   const forEach = async (step: string, list: () => Promise<string[]>, run: (id: string) => Promise<boolean>) => {

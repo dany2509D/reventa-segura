@@ -124,6 +124,13 @@ describe('runMaintenance: expired transfers', () => {
     };
     const later = new Date(DEADLINE.getTime() + MIN);
     expect(await runMaintenance(db, { gw: flaky }, later)).toEqual({ ...ZERO, expiredTransfers: 1, failed: 1 });
+    // A failed refund pages an operator (RNF-10): one alert line per failed item.
+    const alerts = (errors.mock.calls as unknown[][])
+      .map((c) => JSON.parse(String(c[0])) as Record<string, unknown>)
+      .filter((l) => l.alert === true);
+    expect(alerts).toEqual([
+      expect.objectContaining({ msg: 'maintenance_step_failed', ctx: { step: 'expire_transfers', error: 'Error' } }),
+    ]);
     expect((await getOrder(db, first.order.id)).state).toBe('transferencia_pendiente');
     expect(await ledgerOf(db, first.order.id)).toHaveLength(3);
     expect((await getOrder(db, second.order.id)).state).toBe('reembolsada');
