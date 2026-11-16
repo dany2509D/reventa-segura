@@ -19,7 +19,9 @@ const createdAt = () => timestamp('created_at', { withTimezone: true }).notNull(
 
 export const users = pgTable('users', {
   id: id(),
-  phone: text('phone').notNull().unique(), // E.164
+  phone: text('phone').unique(), // E.164; null until a phone is verified
+  /** Set when the phone was proven via Firebase Phone Auth (or the fake-SMS dev mode). */
+  phoneVerifiedAt: timestamp('phone_verified_at', { withTimezone: true }),
   role: text('role', { enum: ['user', 'admin'] }).notNull().default('user'),
   identityStatus: text('identity_status', { enum: ['none', 'pending', 'approved', 'rejected'] })
     .notNull()

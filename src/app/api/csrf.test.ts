@@ -19,6 +19,7 @@ type Guard =
 const GUARDS: Record<string, Guard> = {
   'POST /api/auth/logout': 'json',
   'POST /api/auth/mfa': 'json',
+  'POST /api/auth/phone/verify': 'json',
   'POST /api/auth/request': 'json',
   'POST /api/auth/test-code': 'json', // login-code TEST MODE only; 404 (before the guard) when the mode is off
   'POST /api/auth/verify': 'json',

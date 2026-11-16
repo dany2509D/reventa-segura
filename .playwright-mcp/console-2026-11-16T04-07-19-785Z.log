@@ -1,0 +1,679 @@
+[    2276ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[    2417ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[    3538ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[    5633ms] [LOG] [Fast Refresh] done in 2204ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[    5847ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[    6840ms] [LOG] [Fast Refresh] done in 1093ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[   30153ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[   31395ms] [LOG] [Fast Refresh] done in 1349ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[   31607ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[   32403ms] [LOG] [Fast Refresh] done in 900ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[   34654ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[   34843ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[   35111ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[   35139ms] [LOG] [Fast Refresh] done in 144ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[   56190ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[   56607ms] [LOG] [Fast Refresh] done in 531ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[   57996ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[   58117ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[   59475ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[   61353ms] [LOG] [Fast Refresh] done in 1991ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[   70409ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[   70545ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[   72341ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[   72471ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[   76033ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[   76153ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[   78840ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[   80052ms] [LOG] [Fast Refresh] done in 1320ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[   82792ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[   82915ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[   86482ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[   86569ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[   89592ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[   92030ms] [LOG] [Fast Refresh] done in 2546ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[   93099ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[   93374ms] [LOG] [Fast Refresh] done in 384ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[   94383ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[   94534ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[   98827ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[   98914ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  101949ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  103798ms] [LOG] [Fast Refresh] done in 1960ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  104128ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  104855ms] [LOG] [Fast Refresh] done in 831ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  105874ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  106030ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  110116ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  110211ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  158208ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  158935ms] [LOG] [Fast Refresh] done in 721ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  159805ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  159831ms] [LOG] [Fast Refresh] done in 131ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  163576ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  163626ms] [LOG] [Fast Refresh] done in 146ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  164254ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  164359ms] [LOG] [Fast Refresh] done in 206ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  169440ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  169535ms] [LOG] [Fast Refresh] done in 93ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  192367ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  192575ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  195176ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  195276ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  200637ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  200755ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  206401ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  206539ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  211887ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  212069ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  217383ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  217614ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  223306ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  223464ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  229844ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  229990ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  236424ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  236556ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  236813ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  236932ms] [LOG] [Fast Refresh] done in 227ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  241108ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  241754ms] [LOG] [Fast Refresh] done in 753ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  242492ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  242579ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  249100ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  249196ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  254033ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  254123ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  259866ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  259959ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  265275ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  265392ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  265667ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  265687ms] [LOG] [Fast Refresh] done in 134ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  268692ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  268879ms] [LOG] [Fast Refresh] done in 298ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  270895ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  271528ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  275644ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  275686ms] [LOG] [Fast Refresh] done in 148ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  275893ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  276072ms] [LOG] [Fast Refresh] done in 286ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  277462ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  277571ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  282249ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  282345ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  287500ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  287584ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  291787ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  292076ms] [LOG] [Fast Refresh] done in 402ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  292687ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  292889ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  298122ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  298251ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  298532ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  298608ms] [LOG] [Fast Refresh] done in 176ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  303906ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  304012ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  311640ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  311677ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  316472ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  316559ms] [LOG] [Fast Refresh] done in 194ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  316893ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  316923ms] [LOG] [Fast Refresh] done in 133ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  317972ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  318022ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  324094ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  324126ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  330198ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  330324ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  334545ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  335130ms] [LOG] [Fast Refresh] done in 697ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  336857ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  336973ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  345003ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  345097ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  345429ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  345436ms] [LOG] [Fast Refresh] done in 114ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  351892ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  351982ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  358970ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  359105ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  364963ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  365101ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  369664ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  371640ms] [LOG] [Fast Refresh] done in 2084ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  373881ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  373980ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  379255ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  379356ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  385625ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  385727ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  391040ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  391175ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  396992ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  397126ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  402673ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  402814ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  419092ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  419872ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  420894ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  421010ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  426565ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  426659ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  431836ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  431941ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  437324ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  437467ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  443324ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  443449ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  448890ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  448993ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  454438ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  454564ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  459309ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  459322ms] [LOG] [Fast Refresh] done in 126ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  461673ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  461784ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  466733ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  466845ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  471410ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  471504ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  476586ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  476683ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  481366ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  481488ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  486598ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  486702ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  491334ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  491496ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  495661ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  495862ms] [LOG] [Fast Refresh] done in 311ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  496626ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  496745ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  501681ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  501800ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  506556ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  506656ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  511760ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  511853ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  516815ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  516927ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  520990ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  521495ms] [LOG] [Fast Refresh] done in 607ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  522246ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  522355ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  526941ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  527026ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  532131ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  532383ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  537508ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  537609ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  542069ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  542166ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  546336ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  546421ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  550512ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  550626ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  554876ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  554933ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  558727ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  558781ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  562602ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  562681ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  566558ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  566614ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  570426ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  570486ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  574356ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  574438ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  578431ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  578499ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  582612ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  582692ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  586585ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  586639ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  615908ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  615943ms] [LOG] [Fast Refresh] done in 8ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  616639ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  616668ms] [LOG] [Fast Refresh] done in 3ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  617615ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  617626ms] [LOG] [Fast Refresh] done in 63ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  617701ms] [LOG] [Fast Refresh] done in 63ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  648460ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  648590ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  648752ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  648822ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  673027ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  673058ms] [LOG] [Fast Refresh] done in 8ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  687156ms] [LOG] [Fast Refresh] done in 8ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  687251ms] [LOG] [Fast Refresh] done in 8ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  687513ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  687599ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  687902ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  687991ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  689695ms] TypeError: Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.
+    at <anonymous>:4:161
+    at <anonymous>:5:5
+    at <anonymous>:6:7
+[  689826ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  689907ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  693791ms] TypeError: Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.
+    at <anonymous>:4:161
+    at <anonymous>:5:5
+    at <anonymous>:6:7
+[  693908ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  693989ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  729430ms] TypeError: Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.
+    at <anonymous>:4:161
+    at <anonymous>:5:5
+    at <anonymous>:6:7
+[  729572ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  729681ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  729913ms] TypeError: Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.
+    at <anonymous>:4:161
+    at <anonymous>:5:5
+    at <anonymous>:6:7
+[  730097ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  730194ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  731195ms] TypeError: Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.
+    at <anonymous>:4:161
+    at <anonymous>:5:5
+    at <anonymous>:6:7
+[  731299ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  731381ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  736318ms] TypeError: Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.
+    at <anonymous>:4:161
+    at <anonymous>:5:5
+    at <anonymous>:6:7
+[  736448ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  736531ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  737648ms] TypeError: Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.
+    at <anonymous>:4:161
+    at <anonymous>:5:5
+    at <anonymous>:6:7
+[  737837ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  737910ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  738217ms] TypeError: Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.
+    at <anonymous>:4:161
+    at <anonymous>:5:5
+    at <anonymous>:6:7
+[  738355ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  738383ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  740218ms] TypeError: Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.
+    at <anonymous>:4:161
+    at <anonymous>:5:5
+    at <anonymous>:6:7
+[  740342ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  740369ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  740728ms] TypeError: Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.
+    at <anonymous>:4:161
+    at <anonymous>:5:5
+    at <anonymous>:6:7
+[  740845ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  740879ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  742502ms] TypeError: Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.
+    at <anonymous>:4:161
+    at <anonymous>:5:5
+    at <anonymous>:6:7
+[  742616ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  742692ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  772362ms] TypeError: Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.
+    at <anonymous>:4:161
+    at <anonymous>:5:5
+    at <anonymous>:6:7
+[  772889ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  772953ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  779892ms] TypeError: Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.
+    at <anonymous>:4:161
+    at <anonymous>:5:5
+    at <anonymous>:6:7
+[  780003ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  780033ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  797814ms] TypeError: Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.
+    at <anonymous>:4:161
+    at <anonymous>:5:5
+    at <anonymous>:6:7
+[  797943ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  797973ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  802890ms] TypeError: Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.
+    at <anonymous>:4:161
+    at <anonymous>:5:5
+    at <anonymous>:6:7
+[  803030ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  803063ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  808016ms] TypeError: Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.
+    at <anonymous>:4:161
+    at <anonymous>:5:5
+    at <anonymous>:6:7
+[  808128ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  808158ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  813096ms] TypeError: Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.
+    at <anonymous>:4:161
+    at <anonymous>:5:5
+    at <anonymous>:6:7
+[  813221ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  813253ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  818194ms] TypeError: Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.
+    at <anonymous>:4:161
+    at <anonymous>:5:5
+    at <anonymous>:6:7
+[  818347ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  818377ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  838703ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  838725ms] [LOG] [Fast Refresh] done in 4ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  839434ms] [LOG] [Fast Refresh] done in 4ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  839552ms] TypeError: Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.
+    at <anonymous>:4:161
+    at <anonymous>:5:5
+    at <anonymous>:6:7
+[  839678ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  839706ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  844734ms] TypeError: Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.
+    at <anonymous>:4:161
+    at <anonymous>:5:5
+    at <anonymous>:6:7
+[  844851ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  844878ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  849917ms] TypeError: Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.
+    at <anonymous>:4:161
+    at <anonymous>:5:5
+    at <anonymous>:6:7
+[  850045ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  850074ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  855125ms] TypeError: Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.
+    at <anonymous>:4:161
+    at <anonymous>:5:5
+    at <anonymous>:6:7
+[  855252ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  855278ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  873643ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  873650ms] [LOG] [Fast Refresh] done in 6ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  877507ms] [LOG] [Fast Refresh] done in 6ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  880740ms] [LOG] [Fast Refresh] done in 6ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  881006ms] [LOG] [Fast Refresh] done in 6ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  881100ms] [LOG] [Fast Refresh] done in 6ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  884503ms] [LOG] [Fast Refresh] done in 6ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  884951ms] [LOG] [Fast Refresh] done in 6ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  885097ms] [LOG] [Fast Refresh] done in 6ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  885222ms] [LOG] [Fast Refresh] done in 6ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  886574ms] [LOG] [Fast Refresh] done in 6ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  886640ms] [LOG] [Fast Refresh] done in 6ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  889781ms] [LOG] [Fast Refresh] done in 6ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  889968ms] [LOG] [Fast Refresh] done in 6ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  890250ms] [LOG] [Fast Refresh] done in 6ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  890801ms] [LOG] [Fast Refresh] done in 6ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  912975ms] [LOG] [Fast Refresh] done in 6ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  913980ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  914001ms] [LOG] [Fast Refresh] done in 99ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  914064ms] [LOG] [Fast Refresh] done in 99ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  914328ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  914363ms] [LOG] [Fast Refresh] done in 144ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  914970ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  914985ms] [LOG] [Fast Refresh] done in 20ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  915082ms] [LOG] [Fast Refresh] done in 20ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  924024ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  924549ms] [LOG] [Fast Refresh] done in 631ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  943115ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  943144ms] [LOG] [Fast Refresh] done in 64ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  943214ms] [LOG] [Fast Refresh] done in 64ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  943418ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  943474ms] [LOG] [Fast Refresh] done in 159ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  944201ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  944248ms] [LOG] [Fast Refresh] done in 103ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  944297ms] [LOG] [Fast Refresh] done in 103ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  953414ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[  954020ms] [LOG] [Fast Refresh] done in 712ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1003481ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3200/ingresar:1
+[ 1003501ms] TypeError: Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.
+    at <anonymous>:4:161
+    at <anonymous>:5:5
+    at <anonymous>:6:7
+[ 1003915ms] Minified React error #441; visit https://react.dev/errors/441 for the full message or use the non-minified dev environment for full errors and additional helpful warnings.
+[ 1003941ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3200/favicon.ico:1
+[ 1005971ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3200/no-existe:1
+[ 1005987ms] TypeError: Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.
+    at <anonymous>:4:161
+    at <anonymous>:5:5
+    at <anonymous>:6:7
+[ 1006040ms] Minified React error #441; visit https://react.dev/errors/441 for the full message or use the non-minified dev environment for full errors and additional helpful warnings.
+[ 1008145ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3200/:1
+[ 1008163ms] TypeError: Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.
+    at <anonymous>:4:161
+    at <anonymous>:5:5
+    at <anonymous>:6:7
+[ 1008188ms] Minified React error #441; visit https://react.dev/errors/441 for the full message or use the non-minified dev environment for full errors and additional helpful warnings.
+[ 1011192ms] [WARNING] The resource http://localhost:3200/_next/static/chunks/1n1013nhr5wvl.css was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3200/:1
+[ 1011192ms] [WARNING] The resource http://localhost:3200/_next/static/chunks/2q11r-t24s06v.css was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3200/:1
+[ 1023279ms] TypeError: Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.
+    at <anonymous>:4:161
+    at <anonymous>:5:5
+    at <anonymous>:6:7
+[ 1025750ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3200/no-existe:1
+[ 1025768ms] TypeError: Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.
+    at <anonymous>:4:161
+    at <anonymous>:5:5
+    at <anonymous>:6:7
+[ 1028324ms] TypeError: Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.
+    at <anonymous>:4:161
+    at <anonymous>:5:5
+    at <anonymous>:6:7
+[ 1028432ms] [ERROR] Error: Minified React error #441; visit https://react.dev/errors/441 for the full message or use the non-minified dev environment for full errors and additional helpful warnings. @ http://localhost:3200/_next/static/chunks/092r-mewpaf3q.js:1
+[ 1072281ms] TypeError: Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.
+    at <anonymous>:4:161
+    at <anonymous>:5:5
+    at <anonymous>:6:7
+[ 1072369ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1072392ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1085632ms] TypeError: Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.
+    at <anonymous>:4:161
+    at <anonymous>:5:5
+    at <anonymous>:6:7
+[ 1085734ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1085761ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1086074ms] TypeError: Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.
+    at <anonymous>:4:161
+    at <anonymous>:5:5
+    at <anonymous>:6:7
+[ 1086230ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1086258ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1090033ms] TypeError: Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.
+    at <anonymous>:4:161
+    at <anonymous>:5:5
+    at <anonymous>:6:7
+[ 1090155ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1090230ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1094065ms] TypeError: Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.
+    at <anonymous>:4:161
+    at <anonymous>:5:5
+    at <anonymous>:6:7
+[ 1094216ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1094292ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1098056ms] TypeError: Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.
+    at <anonymous>:4:161
+    at <anonymous>:5:5
+    at <anonymous>:6:7
+[ 1098143ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1098200ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1102031ms] TypeError: Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.
+    at <anonymous>:4:161
+    at <anonymous>:5:5
+    at <anonymous>:6:7
+[ 1102115ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1102172ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1105968ms] TypeError: Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.
+    at <anonymous>:4:161
+    at <anonymous>:5:5
+    at <anonymous>:6:7
+[ 1106052ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1106115ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1109916ms] TypeError: Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.
+    at <anonymous>:4:161
+    at <anonymous>:5:5
+    at <anonymous>:6:7
+[ 1110054ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1110110ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1113993ms] TypeError: Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.
+    at <anonymous>:4:161
+    at <anonymous>:5:5
+    at <anonymous>:6:7
+[ 1114093ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1114147ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1117906ms] TypeError: Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.
+    at <anonymous>:4:161
+    at <anonymous>:5:5
+    at <anonymous>:6:7
+[ 1118006ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1118060ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1121805ms] TypeError: Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.
+    at <anonymous>:4:161
+    at <anonymous>:5:5
+    at <anonymous>:6:7
+[ 1121906ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1121961ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1125689ms] TypeError: Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.
+    at <anonymous>:4:161
+    at <anonymous>:5:5
+    at <anonymous>:6:7
+[ 1125789ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1125848ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1129660ms] TypeError: Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.
+    at <anonymous>:4:161
+    at <anonymous>:5:5
+    at <anonymous>:6:7
+[ 1129773ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1129834ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1133577ms] TypeError: Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.
+    at <anonymous>:4:161
+    at <anonymous>:5:5
+    at <anonymous>:6:7
+[ 1133682ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1133738ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1137484ms] TypeError: Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.
+    at <anonymous>:4:161
+    at <anonymous>:5:5
+    at <anonymous>:6:7
+[ 1137616ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1137673ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1141418ms] TypeError: Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.
+    at <anonymous>:4:161
+    at <anonymous>:5:5
+    at <anonymous>:6:7
+[ 1141528ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1141593ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1145345ms] TypeError: Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.
+    at <anonymous>:4:161
+    at <anonymous>:5:5
+    at <anonymous>:6:7
+[ 1145460ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1145522ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1149335ms] TypeError: Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.
+    at <anonymous>:4:161
+    at <anonymous>:5:5
+    at <anonymous>:6:7
+[ 1149443ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1149501ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1153281ms] TypeError: Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.
+    at <anonymous>:4:161
+    at <anonymous>:5:5
+    at <anonymous>:6:7
+[ 1153390ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1153444ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1157234ms] TypeError: Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.
+    at <anonymous>:4:161
+    at <anonymous>:5:5
+    at <anonymous>:6:7
+[ 1157342ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1157402ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1161193ms] TypeError: Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.
+    at <anonymous>:4:161
+    at <anonymous>:5:5
+    at <anonymous>:6:7
+[ 1161306ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1161363ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1165218ms] TypeError: Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.
+    at <anonymous>:4:161
+    at <anonymous>:5:5
+    at <anonymous>:6:7
+[ 1165333ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1165390ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1169351ms] TypeError: Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.
+    at <anonymous>:4:161
+    at <anonymous>:5:5
+    at <anonymous>:6:7
+[ 1169510ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1169570ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1173344ms] TypeError: Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.
+    at <anonymous>:4:161
+    at <anonymous>:5:5
+    at <anonymous>:6:7
+[ 1173438ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1173494ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1177240ms] TypeError: Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.
+    at <anonymous>:4:161
+    at <anonymous>:5:5
+    at <anonymous>:6:7
+[ 1177361ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1177434ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1181206ms] TypeError: Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.
+    at <anonymous>:4:161
+    at <anonymous>:5:5
+    at <anonymous>:6:7
+[ 1181392ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1181458ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1185202ms] TypeError: Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.
+    at <anonymous>:4:161
+    at <anonymous>:5:5
+    at <anonymous>:6:7
+[ 1185344ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1185399ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1189150ms] TypeError: Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.
+    at <anonymous>:4:161
+    at <anonymous>:5:5
+    at <anonymous>:6:7
+[ 1189289ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1189341ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1193092ms] TypeError: Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.
+    at <anonymous>:4:161
+    at <anonymous>:5:5
+    at <anonymous>:6:7
+[ 1193194ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1193260ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1240357ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1240394ms] [LOG] [Fast Refresh] done in 147ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1330179ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1330527ms] [LOG] [Fast Refresh] done in 417ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1330631ms] [LOG] [Fast Refresh] done in 417ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1330728ms] [LOG] [Fast Refresh] done in 417ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1400139ms] TypeError: Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.
+    at <anonymous>:4:161
+    at <anonymous>:5:5
+    at <anonymous>:6:7
+[ 1400453ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1400539ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1405209ms] TypeError: Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.
+    at <anonymous>:4:161
+    at <anonymous>:5:5
+    at <anonymous>:6:7
+[ 1405396ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1405460ms] [LOG] [HMR] connected @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1414671ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 1414989ms] [LOG] [Fast Refresh] done in 426ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 2377190ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 2377545ms] [LOG] [Fast Refresh] done in 448ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 2377546ms] [LOG] [Fast Refresh] done in 448ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 2377662ms] [LOG] [Fast Refresh] done in 448ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 2377775ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 2377848ms] [LOG] [Fast Refresh] done in 24ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 2377941ms] [LOG] [Fast Refresh] done in 24ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 2378133ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 2378257ms] [LOG] [Fast Refresh] done in 226ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 2378863ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 2378870ms] [LOG] [Fast Refresh] done in 112ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 2379567ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 2379581ms] [LOG] [Fast Refresh] done in 124ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 2454230ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 2454680ms] [LOG] [Fast Refresh] done in 565ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 2454896ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 2455044ms] [LOG] [Fast Refresh] done in 253ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 3196532ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761
+[ 3196836ms] [LOG] [Fast Refresh] done in 414ms @ http://localhost:3300/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js:761

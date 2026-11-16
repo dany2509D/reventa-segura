@@ -43,6 +43,13 @@
       "when": 1794795258358,
       "tag": "0005_no_truncate",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1794820183235,
+      "tag": "0006_phone_verified",
+      "breakpoints": true
     }
   ]
 }
