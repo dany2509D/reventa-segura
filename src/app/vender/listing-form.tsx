@@ -5,6 +5,7 @@ import { usdToCents } from '@/lib/admin/forms';
 import { errorText, postMultipart } from '@/lib/client/http';
 import { prepareImage } from '@/lib/client/image';
 import { formatUsd } from '@/lib/format';
+import { IconChevronDown } from '../_components/icons';
 
 type EventOption = { id: string; name: string; faceValueCents: number; allowsTransfer: boolean };
 
@@ -60,7 +61,7 @@ export default function ListingForm({ events, capBps }: { events: EventOption[];
 
   if (done) {
     return (
-      <div className="card">
+      <div className="card pastel tone-mint">
         <h3>¡Publicación enviada!</h3>
         <p>La revisamos y, cuando esté verificada, aparecerá en el evento. Puedes seguirla en <a href="/mis-ordenes">Mis órdenes</a>.</p>
       </div>
@@ -71,9 +72,12 @@ export default function ListingForm({ events, capBps }: { events: EventOption[];
     <form className="form" onSubmit={submit}>
       <label>
         Evento
-        <select value={eventId} onChange={(e) => setEventId(e.target.value)}>
-          {events.map((e) => <option key={e.id} value={e.id}>{e.name}</option>)}
-        </select>
+        <span className="select-wrap">
+          <select value={eventId} onChange={(e) => setEventId(e.target.value)}>
+            {events.map((e) => <option key={e.id} value={e.id}>{e.name}</option>)}
+          </select>
+          <IconChevronDown />
+        </span>
       </label>
       <label>
         Tu precio (USD)
@@ -83,11 +87,11 @@ export default function ListingForm({ events, capBps }: { events: EventOption[];
       <fieldset className="choice-group">
         <legend>¿Cómo entregarás la entrada?</legend>
         <label className="choice">
-          <input type="radio" checked={effectiveMode === 'transfer'} disabled={!transferOk} onChange={() => setMode('transfer')} />
+          <input type="radio" name="deliveryMode" checked={effectiveMode === 'transfer'} disabled={!transferOk} onChange={() => setMode('transfer')} />
           <span>Transferirla en la boletera (recomendado){!transferOk ? ' — no disponible en este evento' : ''}</span>
         </label>
         <label className="choice">
-          <input type="radio" checked={effectiveMode === 'file'} onChange={() => setMode('file')} />
+          <input type="radio" name="deliveryMode" checked={effectiveMode === 'file'} onChange={() => setMode('file')} />
           <span>Enviar la entrada como imagen</span>
         </label>
       </fieldset>
@@ -104,9 +108,12 @@ export default function ListingForm({ events, capBps }: { events: EventOption[];
       ) : null}
       <p className="muted">Cobras cuando el comprador entra al evento. Descontamos una comisión del 10 %.</p>
       {error ? <p role="alert" className="error">{error}</p> : null}
-      <button className="btn" type="submit" disabled={busy || !proof || !price}>
-        {busy ? 'Publicando…' : 'Publicar entrada'}
-      </button>
+      <div className="cta-row">
+        <a className="btn text" href="/">Cancelar</a>
+        <button className="btn" type="submit" disabled={busy || !proof || !price}>
+          {busy ? 'Publicando…' : 'Publicar entrada'}
+        </button>
+      </div>
     </form>
   );
 }

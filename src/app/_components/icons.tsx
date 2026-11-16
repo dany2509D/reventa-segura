@@ -23,7 +23,13 @@ export function BrandMark() {
   );
 }
 
-export const IconEvents = () => <Icon d="M7 3v3M17 3v3M4 10h16M6 5h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z" />;
+export const IconEvents = () => <Icon d="M4 10.5L12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1z" />;
+export const IconCalendar = () => <Icon d="M7 3v3M17 3v3M4 10h16M6 5h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z" />;
+export const IconSearch = () => <Icon d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-4-4" />;
+export const IconChevronLeft = () => <Icon d="M15 5l-7 7 7 7" />;
+export const IconChevronRight = () => <Icon d="M9 5l7 7-7 7" />;
+export const IconChevronDown = () => <Icon d="M5 9l7 7 7-7" />;
+export const IconWallet = () => <Icon d="M4 7a2 2 0 0 1 2-2h11a1 1 0 0 1 1 1v2M4 7v11a2 2 0 0 0 2 2h13a1 1 0 0 0 1-1v-3M4 7a2 2 0 0 0 2 2h13a1 1 0 0 1 1 1v3M20 13h-4a2 2 0 0 0 0 4h4" />;
 export const IconOrders = () => (
   <Icon d="M4 8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v1.5a2.5 2.5 0 0 0 0 5V16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-1.5a2.5 2.5 0 0 0 0-5zM14.5 6v2M14.5 11v2M14.5 16v2" />
 );

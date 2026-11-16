@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import { buyerOrders } from '@/lib/account/queries';
 import { getDb } from '@/lib/db/client';
 import { formatPanamaDateTime } from '@/lib/format';
+import BackLink from '../../_components/back-link';
 import { requireUser } from '../../session';
 import DisputeForm from './dispute-form';
 
@@ -17,7 +18,7 @@ export default async function DisputePage({ params }: { params: Promise<{ orderI
   if (!order) notFound();
   return (
     <main className="page">
-      <a href="/mis-ordenes" className="back-link">← Mis órdenes</a>
+      <BackLink href="/mis-ordenes">Mis órdenes</BackLink>
       <h1>Reportar un problema</h1>
       <p className="muted">{order.eventName} · {formatPanamaDateTime(order.startsAt)}</p>
       {DISPUTABLE.includes(order.state) ? (

@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation';
+import { DoodlePanel } from '../_components/doodle';
 import { currentUser, safeNext } from '../session';
 import LoginForm from './login-form';
 
@@ -9,11 +10,10 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   if (await currentUser()) redirect(next);
   return (
     <main className="page">
+      <DoodlePanel tone="sky" compact />
       <h1>Ingresar</h1>
       <p className="lead">Te enviamos un código por mensaje de texto. No necesitas contraseña.</p>
-      <div className="card auth-card">
-        <LoginForm next={next} />
-      </div>
+      <LoginForm next={next} />
     </main>
   );
 }

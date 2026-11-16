@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import { buyerOrders } from '@/lib/account/queries';
 import { getDb } from '@/lib/db/client';
 import { formatPanamaDateTime } from '@/lib/format';
+import BackLink from '../../_components/back-link';
 import { requireUser } from '../../session';
 import EntryForm from './entry-form';
 
@@ -15,7 +16,7 @@ export default async function EntryPage({ params }: { params: Promise<{ orderId:
   if (!order) notFound();
   return (
     <main className="page">
-      <a href="/mis-ordenes" className="back-link">← Mis órdenes</a>
+      <BackLink href="/mis-ordenes">Mis órdenes</BackLink>
       <h1>Confirmar mi ingreso</h1>
       <p className="muted">{order.eventName} · {formatPanamaDateTime(order.startsAt)}</p>
       {order.state === 'entrada_recibida' ? (

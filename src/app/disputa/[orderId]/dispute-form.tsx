@@ -30,7 +30,7 @@ export default function DisputeForm({ orderId }: { orderId: string }) {
 
   if (done) {
     return (
-      <div className="card">
+      <div className="card pastel tone-sky">
         <h3>Recibimos tu reporte</h3>
         <p>Lo revisaremos y te avisaremos en Mis órdenes. Tu dinero está retenido mientras tanto.</p>
         <a className="btn" href="/mis-ordenes">Ir a mis órdenes</a>
@@ -49,9 +49,12 @@ export default function DisputeForm({ orderId }: { orderId: string }) {
         <input type="file" accept="image/*" multiple onChange={(e) => setFiles(Array.from(e.target.files ?? []).slice(0, 5))} />
       </label>
       {error ? <p role="alert" className="error">{error}</p> : null}
-      <button className="btn" type="submit" disabled={busy || reason.trim().length < 5}>
-        {busy ? 'Enviando…' : 'Enviar reporte'}
-      </button>
+      <div className="cta-row">
+        <a className="btn text" href="/mis-ordenes">Cancelar</a>
+        <button className="btn" type="submit" disabled={busy || reason.trim().length < 5}>
+          {busy ? 'Enviando…' : 'Enviar reporte'}
+        </button>
+      </div>
     </form>
   );
 }

@@ -38,15 +38,14 @@ function findBlock(selectorPattern: RegExp, source = css): string {
   return blockBody(source, m.index + m[0].length - 1);
 }
 
-const light = declarations(findBlock(/(^|\n)\s*:root\s*\{/));
-const darkMediaBody = findBlock(/@media\s*\(\s*prefers-color-scheme\s*:\s*dark\s*\)\s*\{/);
-const darkMedia = declarations(findBlock(/:root:not\(\[data-theme=['"]light['"]\]\)\s*\{/, darkMediaBody));
-const darkForced = declarations(findBlock(/:root\[data-theme=['"]dark['"]\]\s*\{/));
+// Light is the default whatever the OS setting; dark applies only when [data-theme='dark'] is set.
+const lightBody = findBlock(/(^|\n)\s*:root\s*\{/);
+const light = declarations(lightBody);
+const dark = declarations(findBlock(/:root\[data-theme=['"]dark['"]\]\s*\{/));
 
 const themes: [string, Tokens][] = [
-  ['light', light],
-  ['dark (prefers-color-scheme)', { ...light, ...darkMedia }],
-  ["dark ([data-theme='dark'])", { ...light, ...darkForced }],
+  ['light (default)', light],
+  ["dark ([data-theme='dark'])", { ...light, ...dark }],
 ];
 
 function resolve(tokens: Tokens, name: string, seen = new Set<string>()): string {
@@ -94,6 +93,23 @@ const TEXT_PAIRS: [string, string][] = [
   ['on-pastel', 'accent'],
   ['on-pastel', 'success-fill'],
   ['on-pastel', 'warning-fill'],
+  // Big pastel blocks (cards, hero panels, illustration circles) carry near-black text.
+  ['on-pastel', 'sky'],
+  ['on-pastel', 'sky-soft'],
+  ['on-pastel', 'sky-deep'],
+  ['on-pastel', 'mint'],
+  ['on-pastel', 'mint-soft'],
+  ['on-pastel', 'mint-deep'],
+  ['on-pastel', 'pink'],
+  ['on-pastel', 'pink-soft'],
+  ['on-pastel', 'pink-deep'],
+  ['on-pastel-muted', 'sky'],
+  ['on-pastel-muted', 'sky-soft'],
+  ['on-pastel-muted', 'mint'],
+  ['on-pastel-muted', 'mint-soft'],
+  ['on-pastel-muted', 'pink'],
+  ['on-pastel-muted', 'pink-soft'],
+  ['feature-text', 'feature-tag-bg'],
   ['link', 'bg'],
   ['link', 'surface'],
   ['danger', 'bg'],
@@ -126,22 +142,25 @@ describe('design tokens', () => {
       'brand', 'brand-hover', 'brand-contrast', 'accent', 'accent-hover', 'accent-contrast', 'on-pastel',
       'success', 'success-soft', 'success-fill', 'warning', 'warning-soft', 'warning-fill',
       'danger', 'danger-soft', 'info', 'info-soft', 'link', 'focus', 'feature-bg', 'feature-text',
-      'feature-muted', 'nav-active-bg', 'shadow-sm', 'shadow-lg',
-      'radius-sm', 'radius-md', 'radius-lg', 'radius-pill',
+      'feature-muted', 'feature-tag-bg', 'nav-active-bg', 'shadow-sm', 'shadow-lg',
+      'sky', 'sky-soft', 'sky-deep', 'mint', 'mint-soft', 'mint-deep', 'pink', 'pink-soft', 'pink-deep',
+      'on-pastel-muted',
+      'radius-sm', 'radius-md', 'radius-lg', 'radius-xl', 'radius-pill',
       'space-1', 'space-2', 'space-3', 'space-4', 'space-6', 'space-8',
       'fs-caption', 'fs-small', 'fs-body', 'fs-card-title', 'fs-title', 'fs-display', 'fs-price',
     ];
     for (const name of required) expect(light, `--${name}`).toHaveProperty(name);
   });
 
-  it('keeps both dark-mode blocks identical (prefers-color-scheme and [data-theme=dark])', () => {
-    expect(Object.keys(darkMedia).length).toBeGreaterThan(10);
-    expect(darkForced).toEqual(darkMedia);
+  it('is light by default regardless of the OS colour scheme', () => {
+    expect(lightBody).toMatch(/color-scheme\s*:\s*light\s*;/);
+    expect(css).not.toMatch(/prefers-color-scheme/);
   });
 
-  it('redefines every colour token in dark mode', () => {
+  it('redefines every colour token in the dark theme', () => {
     const colourTokens = Object.keys(light).filter((k) => /^#/.test(light[k]));
-    for (const name of colourTokens) expect(darkMedia, `--${name} in dark`).toHaveProperty(name);
+    expect(colourTokens.length).toBeGreaterThan(20);
+    for (const name of colourTokens) expect(dark, `--${name} in dark`).toHaveProperty(name);
   });
 
   for (const [theme, tokens] of themes) {
