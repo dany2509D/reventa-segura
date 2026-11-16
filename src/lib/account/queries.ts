@@ -16,6 +16,8 @@ export async function upcomingEvents(db: Db, now: Date = new Date()) {
       venue: events.venue,
       startsAt: events.startsAt,
       resaleProhibited: events.resaleProhibited,
+      allowsTransfer: events.allowsTransfer,
+      faceValueCents: events.faceValueCents,
       fromCents: min(listings.askCents),
       listingCount: count(listings.id),
     })
@@ -108,5 +110,27 @@ export async function profileOf(db: Db, userId: string) {
     .select({ userId: users.id, phone: users.phone, identityStatus: users.identityStatus })
     .from(users)
     .where(eq(users.id, userId));
+  return row ?? null;
+}
+
+/** A listing a visitor can buy right now (verified, active future event), for the purchase page. */
+export async function listingOffer(db: Db, listingId: string, now: Date = new Date()) {
+  if (!isUuid(listingId)) return null;
+  const [row] = await db
+    .select({
+      listingId: listings.id,
+      askCents: listings.askCents,
+      deliveryMode: listings.deliveryMode,
+      sellerId: listings.sellerId,
+      eventId: events.id,
+      eventName: events.name,
+      venue: events.venue,
+      startsAt: events.startsAt,
+      resaleProhibited: events.resaleProhibited,
+      allowsTransfer: events.allowsTransfer,
+    })
+    .from(listings)
+    .innerJoin(events, eq(events.id, listings.eventId))
+    .where(and(eq(listings.id, listingId), eq(listings.status, 'verified'), eq(events.status, 'active'), gt(events.startsAt, now)));
   return row ?? null;
 }

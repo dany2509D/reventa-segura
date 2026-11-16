@@ -7,7 +7,7 @@ import { openDispute } from '@/lib/disputes/disputes';
 import { DAY, seedPaidOrder } from '@/lib/orders/paid-order-fixture';
 import { newUser, seedListing } from '@/lib/orders/test-fixtures';
 import { FakeGateway } from '@/lib/payments/fake-gateway';
-import { buyerOrders, eventDetail, profileOf, sellerListings, sellerSales, upcomingEvents } from './queries';
+import { buyerOrders, eventDetail, listingOffer, profileOf, sellerListings, sellerSales, upcomingEvents } from './queries';
 
 let db: Db;
 const gw = new FakeGateway('acct-secret');
@@ -24,7 +24,7 @@ describe('upcomingEvents', () => {
 
     const rows = await upcomingEvents(db);
     expect(rows.map((r) => r.id)).toEqual([a.event.id, later.event.id]);
-    expect(rows[0]).toMatchObject({ fromCents: 7000, listingCount: 2, name: 'Concierto' });
+    expect(rows[0]).toMatchObject({ fromCents: 7000, listingCount: 2, name: 'Concierto', faceValueCents: 5000, allowsTransfer: true });
   });
 
   it('hides cancelled and past events, and shows an event with no listings (price null, count 0)', async () => {
@@ -89,5 +89,35 @@ describe('profileOf', () => {
     await db.update(users).set({ identityStatus: 'pending' }).where(eq(users.id, u.id));
     expect(await profileOf(db, u.id)).toEqual({ userId: u.id, phone: u.phone, identityStatus: 'pending' });
     expect(await profileOf(db, '00000000-0000-4000-8000-000000000000')).toBeNull();
+  });
+});
+
+describe('listingOffer', () => {
+  it('returns a verified listing of an active future event for the buy page', async () => {
+    const a = await seedListing(db, { askCents: 9000 });
+    expect(await listingOffer(db, a.listing.id)).toMatchObject({
+      listingId: a.listing.id,
+      askCents: 9000,
+      deliveryMode: 'transfer',
+      eventName: 'Concierto',
+      sellerId: a.seller.id,
+      resaleProhibited: false,
+    });
+  });
+
+  it.each([
+    ['pending', { status: 'pending' as const }],
+    ['sold', { status: 'sold' as const }],
+    ['withdrawn', { status: 'withdrawn' as const }],
+    ['of a cancelled event', { eventStatus: 'cancelled' as const }],
+    ['of a past event', { startsAt: new Date(Date.now() - DAY) }],
+  ])('is null for a listing that is %s', async (_n, o) => {
+    const a = await seedListing(db, o);
+    expect(await listingOffer(db, a.listing.id)).toBeNull();
+  });
+
+  it('is null for unknown or malformed ids', async () => {
+    expect(await listingOffer(db, '00000000-0000-4000-8000-000000000000')).toBeNull();
+    expect(await listingOffer(db, "x' or 1=1 --")).toBeNull();
   });
 });
