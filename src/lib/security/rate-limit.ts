@@ -1,10 +1,11 @@
-import { and, count, gt, lt, min, eq, sql } from 'drizzle-orm';
+import { and, count, gt, inArray, lt, min, eq, sql } from 'drizzle-orm';
 import { rateLimitHits } from '@/lib/db/schema';
 import type { Db } from '@/lib/db/types';
 
 /**
  * Sliding-window limiter backed by the database (works across serverless instances).
- * Every call records a hit, allowed or not, so a client that keeps hammering stays locked out.
+ * Only allowed calls are recorded: a flood of rejected requests adds no rows (the table cannot be
+ * filled by an attacker), and the lockout ends when the oldest allowed hit leaves the window.
  * A per-key advisory lock inside the transaction makes the decision exact under concurrency:
  * of N parallel calls exactly `limit` are allowed.
  */
@@ -25,23 +26,32 @@ export async function rateLimit(
 
   return db.transaction(async (tx) => {
     await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${key}))`);
-    await tx.insert(rateLimitHits).values({ key, at: now });
     const [row] = await tx
       .select({ n: count(), oldest: min(rateLimitHits.at) })
       .from(rateLimitHits)
       .where(and(eq(rateLimitHits.key, key), gt(rateLimitHits.at, cutoff)));
-    if (row.n <= limit) return { allowed: true, retryAfterSeconds: 0 };
-    const oldest = row.oldest ? new Date(row.oldest).getTime() : now.getTime();
-    return { allowed: false, retryAfterSeconds: Math.max(1, Math.ceil((oldest + windowMs - now.getTime()) / 1000)) };
+    if (row.n >= limit) {
+      const oldest = row.oldest ? new Date(row.oldest).getTime() : now.getTime();
+      return { allowed: false, retryAfterSeconds: Math.max(1, Math.ceil((oldest + windowMs - now.getTime()) / 1000)) };
+    }
+    await tx.insert(rateLimitHits).values({ key, at: now });
+    return { allowed: true, retryAfterSeconds: 0 };
   });
 }
 
 /** Hits older than this are outside every window in use (the longest is one day). */
 export const RATE_LIMIT_RETENTION_SECONDS = 2 * 24 * 60 * 60;
 
-/** Deletes expired hits (run by the maintenance cron); returns how many rows went. */
-export async function purgeRateLimitHits(db: Db, now: Date = new Date()): Promise<number> {
+/** Deletes expired hits in bounded batches (run by the maintenance cron); returns how many rows went. */
+export async function purgeRateLimitHits(db: Db, now: Date = new Date(), batchSize = 1000): Promise<number> {
   const cutoff = new Date(now.getTime() - RATE_LIMIT_RETENTION_SECONDS * 1000);
-  const deleted = await db.delete(rateLimitHits).where(lt(rateLimitHits.at, cutoff)).returning({ id: rateLimitHits.id });
-  return deleted.length;
+  let total = 0;
+  for (;;) {
+    const ids = await db.select({ id: rateLimitHits.id }).from(rateLimitHits).where(lt(rateLimitHits.at, cutoff)).limit(batchSize);
+    if (ids.length === 0) return total;
+    await db.delete(rateLimitHits).where(inArray(rateLimitHits.id, ids.map((r) => r.id)));
+    const n = ids.length;
+    total += n;
+    if (n < batchSize) return total;
+  }
 }

@@ -27,6 +27,18 @@ describe('rateLimit', () => {
     expect((await rateLimit(db, 'k', 3, 60, at(200))).allowed).toBe(true);
   });
 
+  it('does not store denied attempts: a flood of rejected calls adds no rows', async () => {
+    for (let i = 0; i < 3; i++) await rateLimit(db, 'k', 3, 60, at(i));
+    for (let i = 0; i < 50; i++) expect((await rateLimit(db, 'k', 3, 60, at(5 + i / 100))).allowed).toBe(false);
+    expect(await db.select().from(rateLimitHits)).toHaveLength(3);
+  });
+
+  it('a denied caller is let back in as soon as the oldest allowed hit leaves the window (hammering does not extend the lockout)', async () => {
+    for (let i = 0; i < 3; i++) await rateLimit(db, 'k', 3, 60, at(i));
+    for (let i = 0; i < 20; i++) await rateLimit(db, 'k', 3, 60, at(10 + i));
+    expect((await rateLimit(db, 'k', 3, 60, at(61))).allowed).toBe(true);
+  });
+
   it('keeps keys independent', async () => {
     for (let i = 0; i < 3; i++) await rateLimit(db, 'a', 3, 60, at(i));
     expect((await rateLimit(db, 'a', 3, 60, at(4))).allowed).toBe(false);
@@ -51,6 +63,12 @@ describe('rateLimit', () => {
 });
 
 describe('purgeRateLimitHits', () => {
+  it('purges in batches until nothing expired is left', async () => {
+    await db.insert(rateLimitHits).values(Array.from({ length: 25 }, () => ({ key: 'x', at: at(-3 * 24 * 3600) })));
+    expect(await purgeRateLimitHits(db, T0, 10)).toBe(25);
+    expect(await db.select().from(rateLimitHits)).toHaveLength(0);
+  });
+
   it('deletes hits older than the longest window (2 days) and keeps recent ones', async () => {
     await rateLimit(db, 'old', 5, 60, at(-3 * 24 * 3600));
     await rateLimit(db, 'recent', 5, 86400, at(-23 * 3600));
