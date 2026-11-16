@@ -9,15 +9,16 @@
     body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 24px;
            font: 16px/1.5 system-ui, sans-serif; background: #fafaf7; color: #16201b; text-align: center; }
     @media (prefers-color-scheme: dark) { body { background: #101512; color: #eef2ee; } }
-    button { font: inherit; font-weight: 700; min-height: 44px; padding: 0 20px; border-radius: 12px;
-             border: 1px solid #0b6b4f; background: #0b6b4f; color: #fff; cursor: pointer; }
+    .retry { display: inline-flex; align-items: center; font: inherit; font-weight: 700; min-height: 44px; padding: 0 20px;
+             border-radius: 12px; border: 1px solid #0b6b4f; background: #0b6b4f; color: #fff; text-decoration: none; }
   </style>
 </head>
 <body>
   <main>
     <h1>Sin conexión</h1>
     <p>No pudimos conectarnos. Revisa tu internet e inténtalo de nuevo.<br>Tu compra y tu dinero siguen protegidos.</p>
-    <button onclick="location.reload()">Reintentar</button>
+    <!-- A link to the current address, not an inline onclick: the CSP forbids inline scripts. -->
+    <a class="retry" href="">Reintentar</a>
   </main>
 </body>
 </html>

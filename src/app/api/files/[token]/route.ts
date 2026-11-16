@@ -3,6 +3,8 @@ import { audit } from '@/lib/audit/audit';
 import { sessionFromRequest } from '@/lib/auth/request-session';
 import { getDb } from '@/lib/db/client';
 import { ForbiddenError } from '@/lib/errors';
+import { errorName, log } from '@/lib/observability/log';
+import { PRIVATE_FILE_CSP } from '@/lib/security/headers';
 import { getStore } from '@/lib/uploads/store';
 import {
   MIME_TYPES,
@@ -13,11 +15,12 @@ import {
   verifyFileToken,
 } from '@/lib/uploads/uploads';
 
-// Sent on every response of this route, success or error.
+// Sent on every response of this route, success or error. Under Next, next.config.ts headers()
+// replace same-named headers, so the CSP is declared there too (same constant).
 const NO_STORE = {
   'cache-control': 'private, no-store',
   'x-content-type-options': 'nosniff',
-  'content-security-policy': "default-src 'none'; sandbox",
+  'content-security-policy': PRIVATE_FILE_CSP,
 };
 
 const deny = (status: 401 | 403 | 404) =>
@@ -80,7 +83,7 @@ export async function GET(req: Request, ctx: { params: Promise<{ token: string }
       },
     });
   } catch (e) {
-    console.error('files route error', e instanceof Error ? e.name : 'UnknownError');
+    log('error', 'files route error', { error: errorName(e) });
     return NextResponse.json({ error: 'Error interno.' }, { status: 500, headers: NO_STORE });
   }
 }
