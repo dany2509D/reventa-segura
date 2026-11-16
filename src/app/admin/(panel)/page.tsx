@@ -1,13 +1,16 @@
 import { openDisputes, pendingIdentities, pendingListings, queuedPayouts } from '@/lib/admin/queries';
 import { getDb } from '@/lib/db/client';
+import { requireAdminPage } from '../session';
 
 export default async function AdminHome() {
+  // Next can render a page without running its layout: the page gates itself.
+  const actor = await requireAdminPage();
   const db = getDb();
   const [ids, listings, disputes, payouts] = await Promise.all([
-    pendingIdentities(db),
-    pendingListings(db),
-    openDisputes(db),
-    queuedPayouts(db),
+    pendingIdentities(getDb(), actor),
+    pendingListings(getDb(), actor),
+    openDisputes(getDb(), actor),
+    queuedPayouts(getDb(), actor),
   ]);
   const rows: [string, number, string][] = [
     ['Identidades por revisar', ids.length, '/admin/identidades'],

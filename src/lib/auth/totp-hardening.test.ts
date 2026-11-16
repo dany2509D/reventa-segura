@@ -1,10 +1,10 @@
 import { createHmac } from 'node:crypto';
 import { eq } from 'drizzle-orm';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { users } from '@/lib/db/schema';
+import { sessions, users } from '@/lib/db/schema';
 import { makeTestDb } from '@/lib/db/test-db';
 import type { Db } from '@/lib/db/types';
-import { createSession, getSession } from './session';
+import { createSession, getSession, hashToken } from './session';
 import { TotpAlreadyEnrolledError, completeMfa, enrollTotp, verifyTotp } from './totp';
 
 // Independent RFC 6238 reference implementation.
@@ -23,6 +23,8 @@ function totpAt(secret: string, atMs: number): string {
 
 const T = new Date('2027-02-01T12:00:10Z').getTime(); // 10 s into a 30 s step
 const at = (ms: number) => new Date(ms);
+
+const sessions_setMfa = (token: string) => db.update(sessions).set({ mfa: true }).where(eq(sessions.tokenHash, hashToken(token)));
 
 let db: Db;
 let adminId: string;
@@ -86,6 +88,26 @@ describe('enrollTotp overwrite guard', () => {
     expect(fresh).not.toBe(secret);
     expect(await verifyTotp(db, adminId, totpAt(secret, T), at(T))).toBe(false);
     expect(await verifyTotp(db, adminId, totpAt(fresh, T), at(T))).toBe(true);
+  });
+
+  it('rotation revokes every session of that admin (a leaked 2FA-verified session must not survive it)', async () => {
+    const now = new Date();
+    const verified = await createSession(db, adminId, 'admin', now);
+    await sessions_setMfa(verified);
+    const other = await createSession(db, adminId, 'admin', now);
+    expect((await getSession(db, verified, now))?.mfa).toBe(true);
+
+    await enrollTotp(db, adminId, { rotate: true });
+
+    expect(await getSession(db, verified, now)).toBeNull();
+    expect(await getSession(db, other, now)).toBeNull();
+  });
+
+  it('a refused enrollment (no rotate) leaves existing sessions alone', async () => {
+    const now = new Date();
+    const token = await createSession(db, adminId, 'admin', now);
+    await expect(enrollTotp(db, adminId)).rejects.toBeInstanceOf(TotpAlreadyEnrolledError);
+    expect(await getSession(db, token, now)).not.toBeNull();
   });
 });
 

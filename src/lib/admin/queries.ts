@@ -1,16 +1,25 @@
 import { asc, desc, eq } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 import { disputes, events, listings, orders, payouts, users } from '@/lib/db/schema';
-import type { Db } from '@/lib/db/types';
+import { assertAdmin } from '@/lib/authz';
+import type { Actor, Db } from '@/lib/db/types';
+import { ForbiddenError } from '@/lib/errors';
 
 /*
- * Read models for the admin panel queues. Admin-only callers (the page runs requireAdmin first);
+ * Read models for the admin panel queues. Every read takes the caller and requires an admin who passed
+ * 2FA: Next can render a page WITHOUT re-running its layout, so the layout check alone is not a gate.
  * rows carry phone numbers and private file paths, so never return them from a public route.
  */
 
+function requireAdminActor(actor: Actor | null): asserts actor is Actor {
+  if (!actor) throw new ForbiddenError();
+  assertAdmin(actor);
+}
+
 export type PendingIdentity = { userId: string; phone: string; idDocPath: string | null; selfiePath: string | null };
 
-export async function pendingIdentities(db: Db): Promise<PendingIdentity[]> {
+export async function pendingIdentities(db: Db, actor: Actor | null): Promise<PendingIdentity[]> {
+  requireAdminActor(actor);
   return db
     .select({ userId: users.id, phone: users.phone, idDocPath: users.idDocPath, selfiePath: users.selfiePath })
     .from(users)
@@ -18,7 +27,8 @@ export async function pendingIdentities(db: Db): Promise<PendingIdentity[]> {
     .orderBy(asc(users.createdAt));
 }
 
-export async function openDisputes(db: Db) {
+export async function openDisputes(db: Db, actor: Actor | null) {
+  requireAdminActor(actor);
   const buyer = alias(users, 'buyer');
   return db
     .select({
@@ -41,7 +51,8 @@ export async function openDisputes(db: Db) {
     .orderBy(asc(disputes.createdAt));
 }
 
-export async function queuedPayouts(db: Db) {
+export async function queuedPayouts(db: Db, actor: Actor | null) {
+  requireAdminActor(actor);
   return db
     .select({
       payoutId: payouts.id,
@@ -60,7 +71,8 @@ export async function queuedPayouts(db: Db) {
     .orderBy(asc(orders.createdAt));
 }
 
-export async function allEvents(db: Db) {
+export async function allEvents(db: Db, actor: Actor | null) {
+  requireAdminActor(actor);
   return db
     .select({
       id: events.id,
@@ -76,7 +88,8 @@ export async function allEvents(db: Db) {
     .orderBy(desc(events.startsAt));
 }
 
-export async function pendingListings(db: Db) {
+export async function pendingListings(db: Db, actor: Actor | null) {
+  requireAdminActor(actor);
   return db
     .select({
       listingId: listings.id,

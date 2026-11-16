@@ -1,11 +1,14 @@
 import { pendingListings } from '@/lib/admin/queries';
 import { getDb } from '@/lib/db/client';
+import { requireAdminPage } from '../../session';
 import { formatUsd } from '@/lib/format';
 import { reviewListingAction } from '../actions';
 import { FileLink, Flash, type FlashParams } from '../flash';
 
 export default async function ListingsPage({ searchParams }: { searchParams: Promise<FlashParams> }) {
-  const rows = await pendingListings(getDb());
+  // Next can render a page without running its layout: the page gates itself.
+  const actor = await requireAdminPage();
+  const rows = await pendingListings(getDb(), actor);
   return (
     <main>
       <h1>Publicaciones por verificar</h1>

@@ -1,11 +1,14 @@
 import { allEvents } from '@/lib/admin/queries';
 import { getDb } from '@/lib/db/client';
+import { requireAdminPage } from '../../session';
 import { formatPanamaDateTime, formatUsd } from '@/lib/format';
 import { cancelEventAction, createEventAction } from '../actions';
 import { Flash, type FlashParams } from '../flash';
 
 export default async function EventsPage({ searchParams }: { searchParams: Promise<FlashParams> }) {
-  const rows = await allEvents(getDb());
+  // Next can render a page without running its layout: the page gates itself.
+  const actor = await requireAdminPage();
+  const rows = await allEvents(getDb(), actor);
   return (
     <main>
       <h1>Eventos</h1>
