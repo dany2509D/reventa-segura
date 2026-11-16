@@ -87,7 +87,7 @@ export async function cancelEvent(
       and(
         eq(listings.eventId, eventId),
         or(
-          inArray(orders.state, ['creada', ...REFUNDABLE]),
+          inArray(orders.state, ['creada', 'comprobante_en_revision', ...REFUNDABLE]),
           and(eq(orders.state, 'liquidada'), eq(orders.needsManualReview, false)),
         ),
       ),
@@ -167,6 +167,17 @@ function settleOrder(
         action: 'order.cancelled_by_event',
         actorId: actor.userId,
         detail: { eventId },
+      });
+      return 'abandoned';
+    }
+
+    // Manual (Yappy / ACH) order never confirmed by an admin: no money was charged through the
+    // gateway, so it is cancelled, never refunded.
+    if (order.paymentMethod !== null && (order.state === 'transferencia_pendiente' || order.state === 'comprobante_en_revision')) {
+      await applyTransition(tx, order, 'MANUAL_EVENT_CANCELLED', {
+        action: 'order.cancelled_by_event',
+        actorId: actor.userId,
+        detail: { eventId, manual: true },
       });
       return 'abandoned';
     }

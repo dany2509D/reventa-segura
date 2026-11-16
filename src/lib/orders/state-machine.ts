@@ -20,6 +20,9 @@ export const ORDER_EVENTS = [
   'MANUAL_PENDING',
   'PROOF_SUBMITTED',
   'MANUAL_EXPIRED',
+  'MANUAL_APPROVED',
+  'MANUAL_REJECTED',
+  'MANUAL_EVENT_CANCELLED',
   'PAID_TRANSFER',
   'PAID_FILE',
   'TRANSFER_EXPIRED',
@@ -63,11 +66,19 @@ const TRANSITIONS: Record<OrderState, Partial<Record<OrderEvent, OrderState>>> =
   // Manual payment whose receipt an admin has yet to review. Holds no confirmed money either.
   comprobante_en_revision: {
     PROOF_SUBMITTED: 'comprobante_en_revision',
+    // An admin checked the receipt: approved (money confirmed) or rejected (nothing was paid).
+    MANUAL_APPROVED: 'entrada_recibida',
+    MANUAL_REJECTED: 'cancelada',
+    MANUAL_EVENT_CANCELLED: 'cancelada',
     EVENT_CANCELLED: 'cancelada',
   },
   transferencia_pendiente: {
     PROOF_SUBMITTED: 'comprobante_en_revision',
     MANUAL_EXPIRED: 'cancelada',
+    // Manual orders only (service.ts checks paymentMethod): never a gateway refund, nothing was charged.
+    MANUAL_APPROVED: 'entrada_recibida',
+    MANUAL_REJECTED: 'cancelada',
+    MANUAL_EVENT_CANCELLED: 'cancelada',
     RECEIVED_CONFIRMED: 'entrada_recibida',
     TRANSFER_EXPIRED: 'reembolsada',
     DISPUTE_OPENED: 'disputada',

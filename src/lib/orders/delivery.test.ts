@@ -248,7 +248,7 @@ describe('getDeliveredFile', () => {
     await getDeliveredFile(db, store, buyer.id, order.id);
     expect(watermark).toHaveBeenCalledTimes(1);
     const text = vi.mocked(watermark).mock.calls[0][1];
-    expect(text).toBe(`+507…${buyer.phone.slice(-4)} · ${order.id.slice(0, 8)}`);
+    expect(text).toBe(`+507…${buyer.phone!.slice(-4)} · ${order.id.slice(0, 8)}`);
     expect(text).not.toContain(buyer.phone);
   });
 

@@ -9,6 +9,7 @@ import { cancelEvent, createEvent } from '@/lib/events/events';
 import { reviewIdentity } from '@/lib/identity/identity';
 import { errorName, log } from '@/lib/observability/log';
 import { getPaymentGateway } from '@/lib/payments';
+import { approveManualPayment, rejectManualPayment } from '@/lib/orders/service';
 import { markPayoutPaid, queuePayoutOnRelease } from '@/lib/payouts/payouts';
 import { reviewListing } from '@/lib/tickets/listings';
 import { requireAdminPage } from '../session';
@@ -23,6 +24,7 @@ const MESSAGES: Record<string, string> = {
   ListingStateError: 'La publicación ya fue revisada.',
   IdentityStateError: 'La identidad ya no está pendiente.',
   InvalidTransitionError: 'La orden ya cambió de estado.',
+  ListingUnavailableError: 'La publicación o el evento ya no están disponibles.',
 };
 
 async function run(path: string, work: (actor: Awaited<ReturnType<typeof requireAdminPage>>) => Promise<string | void>) {
@@ -76,6 +78,20 @@ export async function markPayoutPaidAction(fd: FormData) {
   await run('/admin/pagos', async (actor) => {
     await markPayoutPaid(getDb(), actor, field(fd, 'payoutId'), field(fd, 'bankRef'));
     return 'Pago registrado.';
+  });
+}
+
+export async function approveManualPaymentAction(fd: FormData) {
+  await run('/admin/pagos', async (actor) => {
+    await approveManualPayment(getDb(), actor, field(fd, 'orderId'));
+    return 'Pago aprobado. El comprador ya puede descargar su entrada.';
+  });
+}
+
+export async function rejectManualPaymentAction(fd: FormData) {
+  await run('/admin/pagos', async (actor) => {
+    await rejectManualPayment(getDb(), actor, field(fd, 'orderId'), field(fd, 'reason'));
+    return 'Pago rechazado. La entrada vuelve a estar disponible.';
   });
 }
 

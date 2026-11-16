@@ -1,4 +1,4 @@
-import { asc, desc, eq } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, isNotNull } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 import { disputes, events, listings, orders, payouts, users } from '@/lib/db/schema';
 import { assertAdmin } from '@/lib/authz';
@@ -16,7 +16,7 @@ function requireAdminActor(actor: Actor | null): asserts actor is Actor {
   assertAdmin(actor);
 }
 
-export type PendingIdentity = { userId: string; phone: string; idDocPath: string | null; selfiePath: string | null };
+export type PendingIdentity = { userId: string; phone: string | null; idDocPath: string | null; selfiePath: string | null };
 
 export async function pendingIdentities(db: Db, actor: Actor | null): Promise<PendingIdentity[]> {
   requireAdminActor(actor);
@@ -68,6 +68,34 @@ export async function queuedPayouts(db: Db, actor: Actor | null) {
     .innerJoin(events, eq(events.id, listings.eventId))
     .innerJoin(users, eq(users.id, payouts.sellerId))
     .where(eq(payouts.status, 'queued'))
+    .orderBy(asc(orders.createdAt));
+}
+
+/** Manual (Yappy / ACH) orders waiting for an admin to check the buyer's receipt. */
+export async function manualPaymentQueue(db: Db, actor: Actor | null) {
+  requireAdminActor(actor);
+  const buyer = alias(users, 'buyer');
+  return db
+    .select({
+      orderId: orders.id,
+      ref: orders.providerRef,
+      method: orders.paymentMethod,
+      state: orders.state,
+      priceCents: orders.priceCents,
+      proofKey: orders.paymentProofKey,
+      buyerReference: orders.paymentReference,
+      deliveryMode: listings.deliveryMode,
+      eventName: events.name,
+      buyerPhone: buyer.phone,
+      createdAt: orders.createdAt,
+    })
+    .from(orders)
+    .innerJoin(listings, eq(listings.id, orders.listingId))
+    .innerJoin(events, eq(events.id, listings.eventId))
+    .innerJoin(buyer, eq(buyer.id, orders.buyerId))
+    .where(
+      and(isNotNull(orders.paymentMethod), inArray(orders.state, ['comprobante_en_revision', 'transferencia_pendiente'])),
+    )
     .orderBy(asc(orders.createdAt));
 }
 

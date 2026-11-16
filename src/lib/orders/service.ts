@@ -2,13 +2,14 @@ import { randomBytes } from 'node:crypto';
 import { and, eq, isNotNull, isNull, lt } from 'drizzle-orm';
 import { audit } from '@/lib/audit/audit';
 import { events, ledgerEntries, listings, orders } from '@/lib/db/schema';
-import type { Db, Tx } from '@/lib/db/types';
-import { ForbiddenError } from '@/lib/errors';
+import type { Actor, Db, Tx } from '@/lib/db/types';
+import { assertAdmin } from '@/lib/authz';
+import { ForbiddenError, NotFoundError, ValidationError } from '@/lib/errors';
 import type { PaymentGateway } from '@/lib/payments/gateway';
 import { computeFees, DEFAULT_FEE_BPS } from '@/lib/pricing/pricing';
 import { isSellerBlocked } from '@/lib/tickets/listings';
 import { appendEntry } from './ledger';
-import { transition, type OrderEvent, type OrderState } from './state-machine';
+import { InvalidTransitionError, transition, type OrderEvent, type OrderState } from './state-machine';
 
 /** An unpaid `creada` order older than this is abandoned and stops holding its listing. */
 export const CHECKOUT_TTL_MS = 15 * 60 * 1000;
@@ -394,13 +395,73 @@ async function recordSale(tx: Tx, order: Order, listing: Listing, event: Event, 
     },
   });
   await tx.update(listings).set({ status: 'sold' }).where(eq(listings.id, listing.id));
-  await appendEntry(tx, { orderId: order.id, kind: 'charge', amountCents: order.priceCents, ref: providerRef });
-  await appendEntry(tx, { orderId: order.id, kind: 'fee', amountCents: -order.feeCents, ref: providerRef });
-  await appendEntry(tx, {
-    orderId: order.id,
-    kind: 'seller_due',
-    amountCents: order.priceCents - order.feeCents,
-    ref: providerRef,
+  await appendSaleEntries(tx, order, providerRef);
+}
+
+async function appendSaleEntries(tx: Tx, order: Order, ref: string) {
+  await appendEntry(tx, { orderId: order.id, kind: 'charge', amountCents: order.priceCents, ref });
+  await appendEntry(tx, { orderId: order.id, kind: 'fee', amountCents: -order.feeCents, ref });
+  await appendEntry(tx, { orderId: order.id, kind: 'seller_due', amountCents: order.priceCents - order.feeCents, ref });
+}
+
+const MANUAL_REVIEW_STATES: readonly OrderState[] = ['comprobante_en_revision', 'transferencia_pendiente'];
+const ORDER_UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** Locks listing then order (the module's lock order) and checks the order is a manual one under review. */
+async function lockManualOrder(tx: Tx, orderId: string, listingId: string) {
+  const listing = await lockListing(tx, listingId);
+  const order = await lockOrder(tx, orderId);
+  if (!listing) throw new NotFoundError();
+  if (order.paymentMethod === null) throw new ValidationError('Not a manual payment order');
+  if (!MANUAL_REVIEW_STATES.includes(order.state)) throw new InvalidTransitionError(order.state, 'MANUAL_APPROVED');
+  return { listing, order };
+}
+
+async function manualOrderRef(db: Db, orderId: string): Promise<{ listingId: string }> {
+  if (!ORDER_UUID_RE.test(orderId)) throw new NotFoundError();
+  const [ref] = await db.select({ listingId: orders.listingId }).from(orders).where(eq(orders.id, orderId));
+  if (!ref) throw new NotFoundError();
+  return ref;
+}
+
+/**
+ * An admin (2FA) confirms the Yappy / ACH money arrived: the order becomes paid exactly like a
+ * gateway payment of a file-mode ticket (`entrada_recibida`, listing sold, charge/fee/seller_due
+ * ledger entries), which unlocks the watermarked download for the buyer.
+ */
+export async function approveManualPayment(db: Db, actor: Actor, orderId: string, now: Date = new Date()): Promise<void> {
+  assertAdmin(actor);
+  const { listingId } = await manualOrderRef(db, orderId);
+  await db.transaction(async (tx) => {
+    const { listing, order } = await lockManualOrder(tx, orderId, listingId);
+    const event = await getEvent(tx, listing.eventId);
+    if (listing.status !== 'verified' || event.status !== 'active') throw new ListingUnavailableError();
+    // Transfer-mode tickets need the seller's transfer step, which manual payments do not model yet.
+    if (listing.deliveryMode !== 'file') throw new ValidationError('Manual approval supports file tickets only');
+    if (!order.providerRef) throw new Error(`Order ${order.id} has no payment reference`);
+    await applyTransition(tx, order, 'MANUAL_APPROVED', {
+      action: 'order.manual_approved',
+      actorId: actor.userId,
+      detail: { method: order.paymentMethod, ref: order.providerRef, approvedAt: now.toISOString(), listingId: listing.id },
+    });
+    await tx.update(listings).set({ status: 'sold' }).where(eq(listings.id, listing.id));
+    await appendSaleEntries(tx, order, order.providerRef);
+  });
+}
+
+/** An admin (2FA) rejects the receipt: the order is cancelled (nothing was charged) and the listing is free again. */
+export async function rejectManualPayment(db: Db, actor: Actor, orderId: string, reason: string): Promise<void> {
+  assertAdmin(actor);
+  const clean = reason.trim();
+  if (clean.length < 1 || clean.length > 500) throw new ValidationError('Reason is required (max 500 chars)');
+  const { listingId } = await manualOrderRef(db, orderId);
+  await db.transaction(async (tx) => {
+    const { order } = await lockManualOrder(tx, orderId, listingId);
+    await applyTransition(tx, order, 'MANUAL_REJECTED', {
+      action: 'order.manual_rejected',
+      actorId: actor.userId,
+      detail: { method: order.paymentMethod, ref: order.providerRef, reason: clean },
+    });
   });
 }
 

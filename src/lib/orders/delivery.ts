@@ -119,7 +119,8 @@ export async function confirmReceived(
 }
 
 /** Watermark text: country code, last 4 phone digits and a short order id. Never the full phone. */
-export function watermarkLabel(phone: string, orderId: string): string {
+export function watermarkLabel(phone: string | null, orderId: string): string {
+  if (!phone) return orderId.slice(0, 8);
   const prefix = phone.startsWith('+507') ? '+507' : '';
   return `${prefix}…${phone.replace(/\D/g, '').slice(-4)} · ${orderId.slice(0, 8)}`;
 }
