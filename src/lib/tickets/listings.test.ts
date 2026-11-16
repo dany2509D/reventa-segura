@@ -10,6 +10,7 @@ import { InvalidUploadError } from '@/lib/uploads/errors';
 import { MemoryBlobStore } from '@/lib/uploads/store';
 import { parseFilePath } from '@/lib/uploads/uploads';
 import {
+  AmbiguousTicketError,
   DuplicateTicketError,
   EventClosedError,
   ListingBusyError,
@@ -19,6 +20,7 @@ import {
   ResaleProhibitedError,
   TransferNotAllowedError,
 } from './errors';
+import { qrScannerTestHooks } from './fingerprint';
 import { createListing, listVerifiedListings, reviewListing, withdrawListing } from './listings';
 import { dbCloner, patternImage, qrPng, qrScreenshot } from './test-helpers';
 
@@ -44,7 +46,14 @@ let ticketB: Buffer;
 let accountShot: Buffer; // QR-less screenshot of the seller's account (proof for file mode)
 let photoPng: Buffer;
 let photoWebp: Buffer; // same picture as photoPng, re-encoded losslessly
+let decoyFile: Buffer; // a ticket file showing some other QR
+let ticketAExif: Buffer; // ticket A with identifying EXIF metadata
+let ticketBExif: Buffer;
+let accountShotExif: Buffer;
 const pdf = Buffer.from('%PDF-1.7\n1 0 obj<<>>endobj\n%%EOF\n');
+
+const withExif = (img: Buffer, secret: string) =>
+  sharp(img).withExif({ IFD0: { Artist: secret, Copyright: secret } }).jpeg().toBuffer();
 
 beforeAll(async () => {
   ticketA = await qrScreenshot('TICKET-A-0001');
@@ -53,6 +62,10 @@ beforeAll(async () => {
   accountShot = await patternImage(7).jpeg().toBuffer();
   photoPng = await patternImage(1).png().toBuffer();
   photoWebp = await patternImage(1).webp({ lossless: true }).toBuffer();
+  decoyFile = await qrScreenshot('DECOY-QR-9999', { banner: '#7d3c98' });
+  ticketAExif = await withExif(ticketA, 'SECRET-TICKET-A-OWNER');
+  ticketBExif = await withExif(ticketB, 'SECRET-TICKET-B-OWNER');
+  accountShotExif = await withExif(accountShot, 'SECRET-ACCOUNT-OWNER');
   await freshDb(); // migrates the template once, outside any single test
 });
 
@@ -60,7 +73,10 @@ beforeEach(async () => {
   db = await freshDb();
   store = new MemoryBlobStore();
 });
-afterEach(() => vi.restoreAllMocks());
+afterEach(() => {
+  vi.restoreAllMocks();
+  qrScannerTestHooks.setBudgetMs();
+});
 
 async function newUser(identityStatus: IdentityStatus = 'approved', role: 'user' | 'admin' = 'user') {
   const [u] = await db
@@ -154,10 +170,36 @@ describe('createListing', () => {
     expect(l.fingerprint).toBe(`qr:${sha256('TICKET-A-0001')}`);
     expect(l.filePath).toBeNull();
     expect(parseFilePath(l.proofPath)).toEqual({ kind: 'proof', ownerId: seller.id });
-    const stored = (await store.get(l.proofPath))!;
+    expect(await store.get(l.proofPath)).not.toBeNull();
+    expect(await listingRow(l.id)).toMatchObject({ status: 'pending', fingerprint: l.fingerprint });
+  });
+
+  async function expectStrippedCopyOf(path: string, input: Buffer, secret: string) {
+    // The input really carries EXIF, so the assertions below are not vacuous.
+    expect((await sharp(input).metadata()).exif).toBeDefined();
+    expect(input.includes(secret)).toBe(true);
+    const stored = (await store.get(path))!;
     expect(stored).not.toBeNull();
     expect((await sharp(stored).metadata()).exif).toBeUndefined();
-    expect(await listingRow(l.id)).toMatchObject({ status: 'pending', fingerprint: l.fingerprint });
+    expect(stored.includes(secret)).toBe(false);
+    expect(stored.equals(input)).toBe(false);
+  }
+
+  it('stores the transfer proof without its EXIF metadata', async () => {
+    const l = await createListing(db, store, input({ proof: ticketAExif }));
+    expect(l.fingerprint).toBe(`qr:${sha256('TICKET-A-0001')}`);
+    await expectStrippedCopyOf(l.proofPath, ticketAExif, 'SECRET-TICKET-A-OWNER');
+  });
+
+  it('stores the file-mode proof and ticket without their EXIF metadata', async () => {
+    const l = await createListing(
+      db,
+      store,
+      input({ deliveryMode: 'file', proof: accountShotExif, file: ticketBExif }),
+    );
+    expect(l.fingerprint).toBe(`qr:${sha256('TICKET-B-0002')}`);
+    await expectStrippedCopyOf(l.proofPath, accountShotExif, 'SECRET-ACCOUNT-OWNER');
+    await expectStrippedCopyOf(l.filePath!, ticketBExif, 'SECRET-TICKET-B-OWNER');
   });
 
   it('writes an audit row by the seller without paths or fingerprint', async () => {
@@ -178,6 +220,61 @@ describe('createListing', () => {
     expect(parseFilePath(l.proofPath)).toEqual({ kind: 'proof', ownerId: seller.id });
     expect(await store.get(l.filePath!)).not.toBeNull();
     expect(await storedCount()).toBe(2);
+  });
+
+  describe('file mode: the proof QR is checked too', () => {
+    const qrA = `qr:${sha256('TICKET-A-0001')}`;
+
+    it('blocks a decoy QR in the ticket file when the proof shows an already listed QR', async () => {
+      const other = await newUser();
+      await rawListing(other.id, event.id, { fingerprint: qrA, status: 'verified' });
+      await expect(
+        createListing(db, store, input({ deliveryMode: 'file', proof: ticketA2, file: decoyFile })),
+      ).rejects.toBeInstanceOf(DuplicateTicketError);
+      expect(await storedCount()).toBe(0);
+    });
+
+    it('blocks a ticket file with an unreadable QR when the proof shows an already listed QR', async () => {
+      const other = await newUser();
+      await rawListing(other.id, event.id, { fingerprint: qrA });
+      await expect(
+        createListing(db, store, input({ deliveryMode: 'file', proof: ticketA2, file: photoPng })),
+      ).rejects.toBeInstanceOf(DuplicateTicketError);
+    });
+
+    it('rejects a ticket file whose QR differs from the QR in the proof', async () => {
+      await expect(
+        createListing(db, store, input({ deliveryMode: 'file', proof: ticketA, file: ticketB })),
+      ).rejects.toBeInstanceOf(AmbiguousTicketError);
+      expect(await storedCount()).toBe(0);
+      expect(await db.select().from(listings)).toHaveLength(0);
+    });
+
+    it('accepts a proof showing the same QR as the ticket file', async () => {
+      const l = await createListing(db, store, input({ deliveryMode: 'file', proof: ticketA2, file: ticketA }));
+      expect(l.fingerprint).toBe(qrA);
+    });
+
+    it('does not block on a proof without a QR (its img: fingerprint is not used)', async () => {
+      // An existing transfer listing whose fingerprint is the img: hash of the same proof picture.
+      const first = await createListing(db, store, input({ proof: accountShot }));
+      expect(first.fingerprint).toMatch(/^img:/);
+      const l = await createListing(db, store, input({ deliveryMode: 'file', proof: accountShot, file: ticketB }));
+      expect(l.fingerprint).toBe(`qr:${sha256('TICKET-B-0002')}`);
+    });
+
+    it('in transfer mode only the proof is fingerprinted, as before', async () => {
+      const l = await createListing(db, store, input({ proof: ticketB }));
+      expect(l.fingerprint).toBe(`qr:${sha256('TICKET-B-0002')}`);
+    });
+  });
+
+  it('flags in the audit row when the QR scan timed out and img: was used', async () => {
+    qrScannerTestHooks.setBudgetMs(0);
+    const l = await createListing(db, store, input());
+    expect(l.fingerprint).toMatch(/^img:/);
+    const [row] = await auditRows('listing.create');
+    expect(row.detail).toMatchObject({ method: 'img', qrScanTimedOut: true });
   });
 
   it('uses the img: heuristic when no QR is readable', async () => {
@@ -353,11 +450,25 @@ describe('createListing', () => {
     expect(l.askCents).toBe(10000);
   });
 
-  it('falls back to the default cap when app_config holds an invalid value', async () => {
-    await setConfig('priceCapBps', 'abc');
-    await expect(createListing(db, store, input({ askCents: 7501 }))).rejects.toBeInstanceOf(PriceCapError);
-    expect((await createListing(db, store, input({ askCents: 7500 }))).status).toBe('pending');
-  });
+  it.each(['abc', '0', '-1', '1.5', ''])(
+    'falls back to the default cap when app_config priceCapBps is %j (positive integers only)',
+    async (value) => {
+      await setConfig('priceCapBps', value);
+      await expect(createListing(db, store, input({ askCents: 7501 }))).rejects.toBeInstanceOf(PriceCapError);
+      expect((await createListing(db, store, input({ askCents: 7500 }))).status).toBe('pending');
+    },
+  );
+
+  it.each(['0', '-3', 'x'])(
+    'falls back to the default limit when app_config maxActiveListingsPerSeller is %j',
+    async (value) => {
+      await setConfig('maxActiveListingsPerSeller', value);
+      for (let i = 0; i < 9; i++) await rawListing(seller.id, event.id);
+      // 9 active < default 10: allowed (a '0' read literally would block every listing).
+      expect((await createListing(db, store, input())).status).toBe('pending');
+      await expect(createListing(db, store, input({ proof: ticketB }))).rejects.toBeInstanceOf(ListingLimitError);
+    },
+  );
 
   it('allows file delivery on an event without transfers', async () => {
     const e = await newEvent({ allowsTransfer: false });

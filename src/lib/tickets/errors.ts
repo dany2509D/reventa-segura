@@ -9,6 +9,14 @@ export class DuplicateTicketError extends Error {
   }
 }
 
+// File delivery where the ticket file and the proof show different readable QR codes.
+export class AmbiguousTicketError extends Error {
+  constructor(message = 'Ticket file and proof show different QR codes') {
+    super(message);
+    this.name = 'AmbiguousTicketError';
+  }
+}
+
 // The event is cancelled or has already started.
 export class EventClosedError extends Error {
   constructor(message = 'The event is closed for listings') {

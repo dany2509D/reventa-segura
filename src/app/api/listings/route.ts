@@ -6,6 +6,7 @@ import { NotFoundError, ValidationError } from '@/lib/errors';
 import { IdentityRequiredError } from '@/lib/identity/errors';
 import { assertCanSell } from '@/lib/identity/identity';
 import {
+  AmbiguousTicketError,
   DuplicateTicketError,
   EventClosedError,
   ListingLimitError,
@@ -47,6 +48,9 @@ function errorResponse(e: unknown): NextResponse {
   if (e instanceof IdentityRequiredError) return json({ error: IDENTITY_REQUIRED }, 403);
   if (e instanceof NotFoundError) return json({ error: 'Evento no encontrado.' }, 404);
   if (e instanceof DuplicateTicketError) return json({ error: 'Esta entrada ya está publicada.' }, 409);
+  if (e instanceof AmbiguousTicketError) {
+    return json({ error: 'El código QR del archivo no coincide con el de la captura de tu cuenta.' }, 422);
+  }
   if (e instanceof EventClosedError) return json({ error: 'Este evento ya no admite publicaciones.' }, 422);
   if (e instanceof ResaleProhibitedError) {
     return json({ error: 'El organizador prohíbe la reventa de entradas para este evento.' }, 422);

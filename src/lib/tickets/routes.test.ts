@@ -205,6 +205,16 @@ describe('POST /api/listings', () => {
     expect(await errorOf(res)).toMatch(/ya está publicada/i);
   });
 
+  it('returns 422 when the ticket file QR differs from the proof QR', async () => {
+    const other = await qrScreenshot('ROUTE-TICKET-OTHER', { format: 'png' });
+    const res = await POST(
+      form(fields({ deliveryMode: 'file', proof: blob(ticket, 'image/jpeg'), file: blob(other, 'image/png') })),
+    );
+    expect(res.status).toBe(422);
+    expect(await errorOf(res)).toMatch(/no coincide/i);
+    expect(await db.select().from(listings)).toHaveLength(0);
+  });
+
   it('returns 422 with the maximum for a price over the cap', async () => {
     const res = await POST(form(fields({ askCents: '7501' })));
     expect(res.status).toBe(422);

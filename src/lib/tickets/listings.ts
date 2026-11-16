@@ -12,6 +12,7 @@ import type { BlobStore } from '@/lib/uploads/store';
 import { MIME_TYPES, detectType, storePrivate, validateUpload } from '@/lib/uploads/uploads';
 import { isUuid } from '@/lib/uuid';
 import {
+  AmbiguousTicketError,
   DuplicateTicketError,
   EventClosedError,
   ListingBusyError,
@@ -21,7 +22,7 @@ import {
   ResaleProhibitedError,
   TransferNotAllowedError,
 } from './errors';
-import { computeFingerprint } from './fingerprint';
+import { extractQrPayload, fingerprintTicket, qrFingerprint } from './fingerprint';
 
 export type Listing = typeof listings.$inferSelect;
 export type DeliveryMode = Listing['deliveryMode'];
@@ -62,11 +63,21 @@ function isImage(buf: Buffer): boolean {
   return t === 'jpeg' || t === 'png' || t === 'webp';
 }
 
-/** Non-negative integer from app_config, or `fallback` when missing or malformed. */
+/** Positive integer from app_config, or `fallback` when missing, zero or malformed. */
 async function configInt(db: Db, key: string, fallback: number): Promise<number> {
   const [row] = await db.select({ value: appConfig.value }).from(appConfig).where(eq(appConfig.key, key));
   const v = row?.value.trim();
-  return v && /^\d{1,9}$/.test(v) ? Number(v) : fallback;
+  return v && /^[1-9]\d{0,8}$/.test(v) ? Number(v) : fallback;
+}
+
+/** Any of `fingerprints` held by a pending, verified or sold listing? */
+async function fingerprintTaken(db: Db, fingerprints: string[]): Promise<boolean> {
+  const [row] = await db
+    .select({ id: listings.id })
+    .from(listings)
+    .where(and(inArray(listings.fingerprint, fingerprints), inArray(listings.status, [...FINGERPRINT_STATUSES])))
+    .limit(1);
+  return Boolean(row);
 }
 
 function assertEventOpen(event: Event | undefined, now: Date): asserts event is Event {
@@ -128,13 +139,18 @@ export async function createListing(db: Db, store: BlobStore, input: NewListingI
   const cleanFile = file ? await validateUpload(file, declared(file, input.fileType)) : undefined;
 
   // Fingerprinted from the original bytes: the ticket file when there is one, else the proof.
-  const fingerprint = await computeFingerprint(file ?? proof);
-  const [taken] = await db
-    .select({ id: listings.id })
-    .from(listings)
-    .where(and(eq(listings.fingerprint, fingerprint), inArray(listings.status, [...FINGERPRINT_STATUSES])))
-    .limit(1);
-  if (taken) throw new DuplicateTicketError();
+  // That value is stored (and guarded by the unique index).
+  const ticket = await fingerprintTicket(file ?? proof);
+  const fingerprint = ticket.fingerprint;
+  // File mode: a readable QR in the proof must be free as well, so a decoy or degraded QR in
+  // the file cannot re-list a ticket. A proof without a QR adds nothing (its img: hash is
+  // not used for blocking).
+  const proofQr = file ? await extractQrPayload(proof) : null;
+  const blocking = [fingerprint];
+  if (proofQr && qrFingerprint(proofQr) !== fingerprint) blocking.push(qrFingerprint(proofQr));
+  if (await fingerprintTaken(db, blocking)) throw new DuplicateTicketError();
+  // Both readable but different: the file is not the ticket shown in the seller's account.
+  if (proofQr && ticket.qrPayload && proofQr !== ticket.qrPayload) throw new AmbiguousTicketError();
 
   const stored: string[] = [];
   try {
@@ -158,6 +174,9 @@ export async function createListing(db: Db, store: BlobStore, input: NewListingI
       const [current] = await tx.select().from(events).where(eq(events.id, eventId)).for('share');
       assertEventOpen(current, now);
       if ((await activeListingCount(tx, sellerId)) >= limit) throw new ListingLimitError(limit);
+      // The stored fingerprint is guarded by the unique index; the proof's QR (not stored)
+      // is re-checked here to narrow the race window.
+      if (blocking.length > 1 && (await fingerprintTaken(tx, blocking))) throw new DuplicateTicketError();
 
       const [row] = await tx
         .insert(listings)
@@ -168,7 +187,14 @@ export async function createListing(db: Db, store: BlobStore, input: NewListingI
         action: 'listing.create',
         entity: 'listing',
         entityId: row.id,
-        detail: { eventId, askCents, deliveryMode, method: fingerprint.startsWith('qr:') ? 'qr' : 'img' },
+        detail: {
+          eventId,
+          askCents,
+          deliveryMode,
+          method: fingerprint.startsWith('qr:') ? 'qr' : 'img',
+          // Surfaced for the admin review: the QR scan ran out of time, so img: was used.
+          ...(ticket.qrScanTimedOut ? { qrScanTimedOut: true } : {}),
+        },
       });
       return row;
     });
