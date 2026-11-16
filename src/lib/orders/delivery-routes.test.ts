@@ -202,9 +202,12 @@ describe('POST /api/orders/[id]/received', () => {
     const cookie = await cookieFor(buyer.id);
     const err = vi.spyOn(console, 'error').mockImplementation(() => {});
     const del = vi.spyOn(MemoryBlobStore.prototype, 'del');
-    vi.spyOn(db, 'transaction').mockImplementation((() => {
-      throw new Error(`db down for ${buyer.phone}`);
-    }) as unknown as Db['transaction']);
+    const realTx = db.transaction.bind(db);
+    vi.spyOn(db, 'transaction')
+      .mockImplementationOnce(realTx) // the route's rate limiter
+      .mockImplementation((() => {
+        throw new Error(`db down for ${buyer.phone}`);
+      }) as unknown as Db['transaction']);
     const res = await received(order.id, cookie);
     expect(res.status).toBe(500);
     expect(del).toHaveBeenCalledTimes(1);

@@ -1,8 +1,9 @@
 import { createHash, randomBytes, randomInt, timingSafeEqual } from 'node:crypto';
 import { and, desc, eq, gt, isNull, lt, sql } from 'drizzle-orm';
+import { configInt } from '@/lib/config/app-config';
 import { otpCodes, users } from '@/lib/db/schema';
 import type { Db } from '@/lib/db/types';
-import { InvalidPhoneError, RateLimitError } from './errors';
+import { InvalidPhoneError, RateLimitError, SmsCapError } from './errors';
 import { normalizePanamaPhone } from './phone';
 import { createSession } from './session';
 import type { SmsSender } from './sms';
@@ -13,12 +14,23 @@ export { ConsoleSmsSender } from './sms';
 export const OTP_TTL_MS = 10 * 60 * 1000;
 export const OTP_MAX_ATTEMPTS = 5;
 export const OTP_MAX_REQUESTS_PER_HOUR = 5;
+/** app_config key: SMS codes the whole platform may send in any 24 h (cost guard, SEG-07/RNF-12). */
+export const SMS_DAILY_CAP_KEY = 'smsDailyCap';
+export const DEFAULT_SMS_DAILY_CAP = 500;
 const HOUR_MS = 60 * 60 * 1000;
+const DAY_MS = 24 * HOUR_MS;
 
 function hashCode(salt: string, code: string): string {
   return createHash('sha256').update(`${salt}:${code}`).digest('hex');
 }
 
+/**
+ * Sends a login code. Each stored code is one SMS, so otp_codes is also the SMS ledger: the
+ * per-phone limit (5/hour) and the platform-wide cap (smsDailyCap per sliding 24 h) both count
+ * rows. One global advisory lock serialises the check-and-insert, so neither limit can be
+ * overshot by a parallel burst (login traffic is low; the lock is held for three statements).
+ * The SMS goes out after commit: a failed send costs a code, never a duplicate.
+ */
 export async function requestOtp(
   db: Db,
   phoneInput: string,
@@ -28,22 +40,30 @@ export async function requestOtp(
   const phone = normalizePanamaPhone(phoneInput);
   if (!phone) throw new InvalidPhoneError();
 
-  const [{ n }] = await db
-    .select({ n: sql<number>`count(*)::int` })
-    .from(otpCodes)
-    .where(
-      and(eq(otpCodes.phone, phone), gt(otpCodes.createdAt, new Date(now.getTime() - HOUR_MS))),
-    );
-  if (n >= OTP_MAX_REQUESTS_PER_HOUR) throw new RateLimitError();
-
   const code = String(randomInt(0, 1_000_000)).padStart(6, '0');
   const salt = randomBytes(16).toString('hex');
-  await db.insert(otpCodes).values({
-    phone,
-    salt,
-    codeHash: hashCode(salt, code),
-    expiresAt: new Date(now.getTime() + OTP_TTL_MS),
-    createdAt: now,
+  await db.transaction(async (tx) => {
+    await tx.execute(sql`select pg_advisory_xact_lock(hashtext('otp:request'))`);
+    const [{ n }] = await tx
+      .select({ n: sql<number>`count(*)::int` })
+      .from(otpCodes)
+      .where(and(eq(otpCodes.phone, phone), gt(otpCodes.createdAt, new Date(now.getTime() - HOUR_MS))));
+    if (n >= OTP_MAX_REQUESTS_PER_HOUR) throw new RateLimitError();
+
+    const cap = await configInt(tx, SMS_DAILY_CAP_KEY, DEFAULT_SMS_DAILY_CAP);
+    const [{ sent }] = await tx
+      .select({ sent: sql<number>`count(*)::int` })
+      .from(otpCodes)
+      .where(gt(otpCodes.createdAt, new Date(now.getTime() - DAY_MS)));
+    if (sent >= cap) throw new SmsCapError(cap);
+
+    await tx.insert(otpCodes).values({
+      phone,
+      salt,
+      codeHash: hashCode(salt, code),
+      expiresAt: new Date(now.getTime() + OTP_TTL_MS),
+      createdAt: now,
+    });
   });
   await sender.send(phone, `Tu código de Reventa Segura es ${code}. Vence en 10 minutos.`);
 }

@@ -200,9 +200,11 @@ describe('POST /api/identity', () => {
     const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
     const del = vi.spyOn(MemoryBlobStore.prototype, 'del');
     const realTx = db.transaction.bind(db);
-    vi.spyOn(db, 'transaction').mockImplementation((() => {
-      throw new Error('db down');
-    }) as unknown as typeof realTx);
+    vi.spyOn(db, 'transaction')
+      .mockImplementationOnce(realTx) // the route's rate limiter
+      .mockImplementation((() => {
+        throw new Error('db down');
+      }) as unknown as typeof realTx);
     const res = await POST(
       upload({ doc: blob(docPng, 'image/png'), selfie: blob(selfieJpg, 'image/jpeg') }),
     );

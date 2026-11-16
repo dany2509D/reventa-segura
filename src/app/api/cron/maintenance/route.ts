@@ -2,8 +2,10 @@ import { createHash, timingSafeEqual } from 'node:crypto';
 import { NextResponse } from 'next/server';
 import { getDb } from '@/lib/db/client';
 import { runMaintenance } from '@/lib/jobs/maintenance';
+import { alert, errorName, log } from '@/lib/observability/log';
 import { getPaymentGateway } from '@/lib/payments';
 import { queuePayoutOnRelease } from '@/lib/payouts/payouts';
+import { purgeRateLimitHits } from '@/lib/security/rate-limit';
 import { getStore } from '@/lib/uploads/store';
 
 const json = (body: object, status: number) =>
@@ -17,12 +19,12 @@ function hasBearer(req: Request, secret: string): boolean {
 }
 
 // Vercel Cron (every 10 min, see vercel.ts) calls this with `Authorization: Bearer $CRON_SECRET`.
-// Responds with counts only.
+// Bearer-authenticated, so no Origin guard (the caller is not a browser). Responds with counts only.
 export async function GET(req: Request) {
   const secret = process.env.CRON_SECRET;
   if (!secret) {
     if (process.env.NODE_ENV === 'production') {
-      console.error('cron maintenance: CRON_SECRET is not configured');
+      alert('cron_secret_missing');
       return json({ error: 'Cron no configurado' }, 500);
     }
     return json({ error: 'No autorizado' }, 401);
@@ -30,8 +32,10 @@ export async function GET(req: Request) {
   if (!hasBearer(req, secret)) return json({ error: 'No autorizado' }, 401);
 
   try {
+    const db = getDb();
+    const now = new Date();
     const result = await runMaintenance(
-      getDb(),
+      db,
       {
         gw: getPaymentGateway(),
         // Queues the seller's manual payout inside the releasing transaction (Task 10).
@@ -40,12 +44,14 @@ export async function GET(req: Request) {
         // misconfiguration cannot block refunds, releases or abandoned-checkout expiry.
         deleteBlob: (path) => getStore().del(path),
       },
-      new Date(),
+      now,
     );
+    // Housekeeping only: a failure here must not hide the money results above.
+    await purgeRateLimitHits(db, now).catch((e) => log('error', 'rate limit purge failed', { error: errorName(e) }));
     return json(result, 200);
   } catch (e) {
     // Never log the message: it may carry ids or bound query parameters.
-    console.error('cron maintenance error', e instanceof Error ? e.name : 'UnknownError');
+    alert('maintenance_run_failed', { error: errorName(e) });
     return json({ error: 'Error interno' }, 500);
   }
 }

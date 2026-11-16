@@ -1,7 +1,8 @@
-import { and, asc, count, eq, gt, inArray, notInArray } from 'drizzle-orm';
+import { and, asc, count, eq, gt, gte, inArray, ne, notInArray } from 'drizzle-orm';
 import { audit } from '@/lib/audit/audit';
 import { assertAdmin } from '@/lib/authz';
-import { appConfig, events, listings, orders, users } from '@/lib/db/schema';
+import { configInt } from '@/lib/config/app-config';
+import { disputes, events, listings, orders, users } from '@/lib/db/schema';
 import type { Actor, Db, Tx } from '@/lib/db/types';
 import { ForbiddenError, NotFoundError, ValidationError } from '@/lib/errors';
 import { IdentityRequiredError } from '@/lib/identity/errors';
@@ -20,6 +21,7 @@ import {
   ListingStateError,
   PriceCapError,
   ResaleProhibitedError,
+  SellerBlockedError,
   TransferNotAllowedError,
 } from './errors';
 import { extractQrPayload, fingerprintTicket, qrFingerprint } from './fingerprint';
@@ -47,6 +49,10 @@ export type NewListingInput = {
 };
 
 export const DEFAULT_MAX_ACTIVE_LISTINGS = 10;
+/** app_config key and default: lost disputes within LOST_DISPUTE_WINDOW_DAYS that block selling. */
+export const MAX_LOST_DISPUTES_KEY = 'maxLostDisputes';
+export const DEFAULT_MAX_LOST_DISPUTES = 3;
+export const LOST_DISPUTE_WINDOW_DAYS = 90;
 export const MAX_REVIEW_REASON = 500;
 const INT32_MAX = 2_147_483_647;
 
@@ -61,13 +67,6 @@ type Event = typeof events.$inferSelect;
 function isImage(buf: Buffer): boolean {
   const t = detectType(buf);
   return t === 'jpeg' || t === 'png' || t === 'webp';
-}
-
-/** Positive integer from app_config, or `fallback` when missing, zero or malformed. */
-async function configInt(db: Db, key: string, fallback: number): Promise<number> {
-  const [row] = await db.select({ value: appConfig.value }).from(appConfig).where(eq(appConfig.key, key));
-  const v = row?.value.trim();
-  return v && /^[1-9]\d{0,8}$/.test(v) ? Number(v) : fallback;
 }
 
 /** Any of `fingerprints` held by a pending, verified or sold listing? */
@@ -95,6 +94,31 @@ async function activeListingCount(db: Db, sellerId: string): Promise<number> {
 }
 
 /**
+ * SEG-08: a seller whose buyers won `maxLostDisputes` disputes (resolved as refunded) in the last
+ * 90 days may not publish. Refunds forced by an event cancellation are not the seller's fault and
+ * do not count. Unblocking is an operator decision (raise the setting or wait out the window).
+ */
+export async function assertSellerNotBlocked(db: Db, sellerId: string, now: Date = new Date()): Promise<void> {
+  const max = await configInt(db, MAX_LOST_DISPUTES_KEY, DEFAULT_MAX_LOST_DISPUTES);
+  const since = new Date(now.getTime() - LOST_DISPUTE_WINDOW_DAYS * 24 * 60 * 60 * 1000);
+  const [row] = await db
+    .select({ n: count() })
+    .from(disputes)
+    .innerJoin(orders, eq(orders.id, disputes.orderId))
+    .innerJoin(listings, eq(listings.id, orders.listingId))
+    .innerJoin(events, eq(events.id, listings.eventId))
+    .where(
+      and(
+        eq(listings.sellerId, sellerId),
+        eq(disputes.status, 'refunded'),
+        gte(disputes.resolvedAt, since),
+        ne(events.status, 'cancelled'),
+      ),
+    );
+  if (row.n >= max) throw new SellerBlockedError();
+}
+
+/**
  * Publishes a ticket for resale as a 'pending' listing (RF-07, RF-08). Cheap checks run
  * first; files are stored only after every validation passed, and removed again if the
  * insert fails. The partial unique index on the fingerprint is the final word on duplicates
@@ -106,6 +130,7 @@ export async function createListing(db: Db, store: BlobStore, input: NewListingI
 
   if (!isUuid(sellerId)) throw new ValidationError('Invalid seller id', [{ path: 'sellerId', message: 'not a uuid' }]);
   await assertCanSell(db, sellerId);
+  await assertSellerNotBlocked(db, sellerId, now);
 
   if (!isUuid(eventId)) throw new NotFoundError('Event not found');
   const [event] = await db.select().from(events).where(eq(events.id, eventId));

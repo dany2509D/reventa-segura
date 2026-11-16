@@ -6,6 +6,8 @@ import { getDb } from '@/lib/db/client';
 import { users } from '@/lib/db/schema';
 import { IdentityStateError } from '@/lib/identity/errors';
 import { submitIdentity } from '@/lib/identity/identity';
+import { errorName, log } from '@/lib/observability/log';
+import { LIMITS, limitOr429 } from '@/lib/security/limits';
 import { InvalidUploadError } from '@/lib/uploads/errors';
 import { BodyTooLargeError, fileField, readMultipart, uploadErrorMessage } from '@/lib/uploads/http';
 import { getStore } from '@/lib/uploads/store';
@@ -28,6 +30,8 @@ export async function POST(req: Request) {
     const db = getDb();
     const actor = await sessionFromRequest(db, req);
     if (!actor) return json({ error: 'Inicia sesión para continuar.' }, 401);
+    const limited = await limitOr429(db, LIMITS.identity, actor.userId);
+    if (limited) return limited;
 
     const [current] = await db
       .select({ status: users.identityStatus })
@@ -69,7 +73,7 @@ export async function POST(req: Request) {
     if (e instanceof InvalidUploadError) return json({ error: uploadErrorMessage(e.reason) }, 400);
     if (e instanceof IdentityStateError) return json({ error: ALREADY_SUBMITTED }, 409);
     // Never log the message: it may carry bound query parameters.
-    console.error('identity route error', e instanceof Error ? e.name : 'UnknownError');
+    log('error', 'identity route error', { error: errorName(e) });
     return json({ error: 'Error interno. Intenta de nuevo.' }, 500);
   }
 }

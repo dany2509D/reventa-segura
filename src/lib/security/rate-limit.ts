@@ -1,4 +1,4 @@
-import { and, count, gt, min, eq, sql } from 'drizzle-orm';
+import { and, count, gt, lt, min, eq, sql } from 'drizzle-orm';
 import { rateLimitHits } from '@/lib/db/schema';
 import type { Db } from '@/lib/db/types';
 
@@ -34,4 +34,14 @@ export async function rateLimit(
     const oldest = row.oldest ? new Date(row.oldest).getTime() : now.getTime();
     return { allowed: false, retryAfterSeconds: Math.max(1, Math.ceil((oldest + windowMs - now.getTime()) / 1000)) };
   });
+}
+
+/** Hits older than this are outside every window in use (the longest is one day). */
+export const RATE_LIMIT_RETENTION_SECONDS = 2 * 24 * 60 * 60;
+
+/** Deletes expired hits (run by the maintenance cron); returns how many rows went. */
+export async function purgeRateLimitHits(db: Db, now: Date = new Date()): Promise<number> {
+  const cutoff = new Date(now.getTime() - RATE_LIMIT_RETENTION_SECONDS * 1000);
+  const deleted = await db.delete(rateLimitHits).where(lt(rateLimitHits.at, cutoff)).returning({ id: rateLimitHits.id });
+  return deleted.length;
 }

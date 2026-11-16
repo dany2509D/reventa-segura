@@ -265,9 +265,12 @@ describe('POST /api/listings', () => {
 
   it('returns 500 without leaking the error message', async () => {
     const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
-    vi.spyOn(db, 'transaction').mockImplementation((() => {
-      throw new Error('secret +50760000001');
-    }) as unknown as Db['transaction']);
+    const realTx = db.transaction.bind(db);
+    vi.spyOn(db, 'transaction')
+      .mockImplementationOnce(realTx) // the route's rate limiter
+      .mockImplementation((() => {
+        throw new Error('secret +50760000001');
+      }) as unknown as Db['transaction']);
     const res = await POST(form(fields()));
     expect(res.status).toBe(500);
     expect(await res.text()).not.toContain('secret');
