@@ -16,7 +16,10 @@ function sources(dir: string): string[] {
 
 const root = process.cwd();
 const files = [...sources(join(root, 'src')), ...sources(join(root, 'scripts')), join(root, 'next.config.ts'), join(root, 'vercel.ts')];
-const read = new Set(files.flatMap((f) => [...readFileSync(f, 'utf8').matchAll(/process\.env\.([A-Z][A-Z0-9_]*)/g)].map((m) => m[1])));
+// Reads are `process.env.NAME`, `env.NAME` (functions that take the environment as a parameter) and
+// `intFromEnv(env, 'NAME', ...)`-style helpers that take the variable name as a string.
+const READ = [/\benv\.([A-Z][A-Z0-9_]*)/g, /\(\s*env,\s*'([A-Z][A-Z0-9_]*)'/g];
+const read = new Set(files.flatMap((f) => READ.flatMap((re) => [...readFileSync(f, 'utf8').matchAll(re)].map((m) => m[1]))));
 const example = readFileSync(join(root, '.env.example'), 'utf8');
 const listed = new Set([...example.matchAll(/^([A-Z][A-Z0-9_]*)=/gm)].map((m) => m[1]));
 

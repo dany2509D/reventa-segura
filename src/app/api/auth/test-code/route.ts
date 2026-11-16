@@ -5,6 +5,7 @@ import { normalizePanamaPhone } from '@/lib/auth/phone';
 import { isLoginCodeTestMode, peekCapturedLoginCode } from '@/lib/auth/test-mode';
 import { getDb } from '@/lib/db/client';
 import { users } from '@/lib/db/schema';
+import { getClientIp } from '@/lib/security/client-ip';
 import { rateLimit } from '@/lib/security/rate-limit';
 
 /*
@@ -20,19 +21,13 @@ const LIMIT_PER_MINUTE = 10;
 
 const notFound = () => new Response(null, { status: 404, headers: { 'cache-control': 'no-store' } });
 
-// On Vercel the platform sets x-forwarded-for to the real client IP.
-function clientIp(req: Request): string {
-  const forwarded = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim();
-  return forwarded || req.headers.get('x-real-ip')?.trim() || 'unknown';
-}
-
 export async function POST(req: Request) {
   if (!isLoginCodeTestMode()) return notFound();
   const blocked = rejectUnsafeRequest(req);
   if (blocked) return blocked;
   try {
     const db = getDb();
-    const limit = await rateLimit(db, `test-code:${clientIp(req)}`, LIMIT_PER_MINUTE, 60);
+    const limit = await rateLimit(db, `test-code:${getClientIp(req)}`, LIMIT_PER_MINUTE, 60);
     if (!limit.allowed) {
       return NextResponse.json(
         { error: 'Demasiados intentos. Intenta de nuevo más tarde.' },

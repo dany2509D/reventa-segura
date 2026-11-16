@@ -143,6 +143,12 @@ const MATRIX: Record<string, Row> = {
     expect: { anon: [200] },
     call: () => json('POST /api/auth/request', '/api/auth/request', { phone: '+50769990001' }),
   },
+  'POST /api/auth/test-code': {
+    access: 'public',
+    why: 'login-code TEST MODE only (empty 404 when off); never returns a code for an admin phone; a phone with no captured code is a 404',
+    expect: { anon: [404] },
+    call: () => json('POST /api/auth/test-code', '/api/auth/test-code', { phone: '+50769990002' }),
+  },
   'POST /api/auth/verify': {
     access: 'public',
     why: 'login step 2: the SMS code is the credential',
