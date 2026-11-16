@@ -22,7 +22,7 @@ export default async function EventsPage({ searchParams }: { searchParams: Promi
         <label>Valor nominal de la entrada (USD)<input name="faceValue" inputMode="decimal" required placeholder="85.00" /></label>
         <label><input name="allowsTransfer" type="checkbox" defaultChecked /> La boletera permite transferir entradas</label>
         <label><input name="resaleProhibited" type="checkbox" /> El evento prohíbe la reventa</label>
-        <button type="submit">Crear evento</button>
+        <button className="btn" type="submit">Crear evento</button>
       </form>
 
       <h2>Todos los eventos</h2>
@@ -43,7 +43,7 @@ export default async function EventsPage({ searchParams }: { searchParams: Promi
                   <form action={cancelEventAction} className="admin-inline">
                     <input type="hidden" name="eventId" value={e.id} />
                     <label><input name="confirm" type="checkbox" /> Confirmo: reembolsa todas las órdenes</label>
-                    <button type="submit">{e.status === 'cancelled' ? 'Reintentar reembolsos' : 'Cancelar evento'}</button>
+                    <button className="btn danger" type="submit">{e.status === 'cancelled' ? 'Reintentar reembolsos' : 'Cancelar evento'}</button>
                   </form>
                 </td>
               </tr>

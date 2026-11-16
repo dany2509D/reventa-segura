@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { IconLogout } from './icons';
 
 export default function LogoutButton() {
   const [busy, setBusy] = useState(false);
@@ -13,8 +14,9 @@ export default function LogoutButton() {
     }
   }
   return (
-    <button type="button" onClick={logout} disabled={busy}>
-      Salir
+    <button type="button" className="nav-item" onClick={logout} disabled={busy}>
+      <IconLogout />
+      <span>Salir</span>
     </button>
   );
 }

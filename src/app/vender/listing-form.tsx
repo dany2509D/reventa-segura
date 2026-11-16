@@ -80,15 +80,15 @@ export default function ListingForm({ events, capBps }: { events: EventOption[];
         <input inputMode="decimal" placeholder="85.00" value={price} onChange={(e) => setPrice(e.target.value)} required />
         {event ? <span className="hint">Valor original {formatUsd(event.faceValueCents)}. Máximo permitido {formatUsd(maxCents)}.</span> : null}
       </label>
-      <fieldset style={{ border: 0, padding: 0, margin: 0 }}>
-        <legend style={{ fontWeight: 600 }}>¿Cómo entregarás la entrada?</legend>
-        <label style={{ fontWeight: 400, display: 'flex', gap: 8, alignItems: 'center' }}>
-          <input type="radio" checked={effectiveMode === 'transfer'} disabled={!transferOk} onChange={() => setMode('transfer')} style={{ width: 'auto', minHeight: 'auto' }} />
-          Transferirla en la boletera (recomendado){!transferOk ? ' — no disponible en este evento' : ''}
+      <fieldset className="choice-group">
+        <legend>¿Cómo entregarás la entrada?</legend>
+        <label className="choice">
+          <input type="radio" checked={effectiveMode === 'transfer'} disabled={!transferOk} onChange={() => setMode('transfer')} />
+          <span>Transferirla en la boletera (recomendado){!transferOk ? ' — no disponible en este evento' : ''}</span>
         </label>
-        <label style={{ fontWeight: 400, display: 'flex', gap: 8, alignItems: 'center' }}>
-          <input type="radio" checked={effectiveMode === 'file'} onChange={() => setMode('file')} style={{ width: 'auto', minHeight: 'auto' }} />
-          Enviar la entrada como imagen
+        <label className="choice">
+          <input type="radio" checked={effectiveMode === 'file'} onChange={() => setMode('file')} />
+          <span>Enviar la entrada como imagen</span>
         </label>
       </fieldset>
       <label>

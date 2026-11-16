@@ -49,7 +49,7 @@ export default function MfaForm() {
         required
       />
       {error ? <p role="alert" className="admin-error">{error}</p> : null}
-      <button type="submit" disabled={busy || code.length !== 6}>
+      <button className="btn" type="submit" disabled={busy || code.length !== 6}>
         {busy ? 'Verificando…' : 'Verificar'}
       </button>
     </form>

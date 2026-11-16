@@ -21,9 +21,9 @@ export default async function SellPage() {
       {status === 'none' || status === 'rejected' ? (
         <>
           {status === 'rejected' ? (
-            <p className="notice">No pudimos verificar tu identidad. Vuelve a enviar tus documentos con fotos más claras.</p>
+            <p className="notice warning">No pudimos verificar tu identidad. Vuelve a enviar tus documentos con fotos más claras.</p>
           ) : (
-            <p>Para vender necesitamos verificar quién eres. Así protegemos a los compradores de estafas.</p>
+            <p className="lead">Para vender necesitamos verificar quién eres. Así protegemos a los compradores de estafas.</p>
           )}
           <IdentityForm />
         </>
@@ -35,7 +35,7 @@ export default async function SellPage() {
 
       {status === 'approved' ? (
         events.length === 0 ? (
-          <p>No hay eventos disponibles para publicar por ahora.</p>
+          <p className="empty">No hay eventos disponibles para publicar por ahora.</p>
         ) : (
           <ListingForm
             capBps={DEFAULT_PRICE_CAP_BPS}

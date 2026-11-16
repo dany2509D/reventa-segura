@@ -30,9 +30,9 @@ export default async function TestPaymentPage({ params }: { params: Promise<{ re
   return (
     <main className="page">
       <h1>Pago de prueba</h1>
-      <p className="notice">Modo de prueba: no se cobra dinero real.</p>
+      <p className="notice warning">Modo de prueba: no se cobra dinero real.</p>
       <div className="card">
-        <p className="price">{formatUsd(order.priceCents)}</p>
+        <p className="price price-lg">{formatUsd(order.priceCents)}</p>
         <form action={simulatePaymentAction} className="stack">
           <input type="hidden" name="ref" value={decodeURIComponent(ref)} />
           <button className="btn" name="outcome" value="paid" type="submit">Simular pago exitoso</button>

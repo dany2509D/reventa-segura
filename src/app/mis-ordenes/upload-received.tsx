@@ -30,7 +30,7 @@ export default function UploadReceived({ orderId }: { orderId: string }) {
   }
 
   return (
-    <form className="form" onSubmit={submit} style={{ marginTop: 12 }}>
+    <form className="form form-inset" onSubmit={submit}>
       <label>
         Captura de la entrada en tu cuenta de la boletera
         <input type="file" accept="image/*" onChange={(e) => setFile(e.target.files?.[0] ?? null)} required />
