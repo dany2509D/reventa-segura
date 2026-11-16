@@ -145,7 +145,7 @@ const MATRIX: Record<string, Row> = {
   },
   'POST /api/auth/test-code': {
     access: 'public',
-    why: 'login-code TEST MODE only (empty 404 when off); never returns a code for an admin phone; a phone with no captured code is a 404',
+    why: 'login-code TEST MODE only (empty 404 when off); an admin phone only with the local TEST_MODE_ADMIN_KEY header and never in production (TOTP still required); a phone with no captured code is a 404',
     expect: { anon: [404] },
     call: () => json('POST /api/auth/test-code', '/api/auth/test-code', { phone: '+50769990002' }),
   },

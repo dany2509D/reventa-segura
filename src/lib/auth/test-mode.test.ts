@@ -139,4 +139,12 @@ describe('getSmsSender', () => {
     vi.stubEnv('TEST_MODE_SHOW_LOGIN_CODE', '');
     expect(getSmsSender()).toBeInstanceOf(ConsoleSmsSender);
   });
+
+  it('TEST_MODE_ADMIN_KEY changes nothing: it neither turns test mode on nor stands in for an SMS provider', () => {
+    const TEST_MODE_ADMIN_KEY = 'k'.repeat(64);
+    expect(getSmsSender({ NODE_ENV: 'development', TEST_MODE_ADMIN_KEY })).toBeInstanceOf(ConsoleSmsSender);
+    expect(getSmsSender({ NODE_ENV: 'development', TEST_MODE_SHOW_LOGIN_CODE: '1', TEST_MODE_ADMIN_KEY })).toBeInstanceOf(CapturingSmsSender);
+    expect(() => getSmsSender({ NODE_ENV: 'production', TEST_MODE_ADMIN_KEY })).toThrow(SmsConfigError);
+    expect(isLoginCodeTestMode({ NODE_ENV: 'development', TEST_MODE_ADMIN_KEY })).toBe(false);
+  });
 });

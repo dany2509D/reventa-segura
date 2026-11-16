@@ -3,8 +3,9 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { REQUIRED_PRODUCTION_ENV } from './env';
 
-// Set by Node, Next.js or the platform, never by us.
-const PLATFORM = new Set(['NODE_ENV', 'NEXT_RUNTIME', 'NEXT_PHASE']);
+// Set by Node, Next.js or the platform, never by us. PORT: the dev server's port comes from the shell
+// (Next.js does not read it from .env files); `npm run admin:code` only follows it.
+const PLATFORM = new Set(['NODE_ENV', 'NEXT_RUNTIME', 'NEXT_PHASE', 'PORT']);
 
 function sources(dir: string): string[] {
   return readdirSync(dir, { withFileTypes: true }).flatMap((e) => {

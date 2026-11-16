@@ -184,10 +184,11 @@ código se verifica igual que uno enviado por SMS (vence en 10 minutos, máximo 
 
 ### Por qué los administradores están excluidos
 
-Aunque el modo esté activo, **nunca** se muestra el código de un número con rol de administrador.
-Un administrador puede aprobar identidades, resolver disputas y liberar pagos; su ingreso debe
-seguir pasando por el SMS real **y** el segundo factor (TOTP). Mientras no haya proveedor de SMS,
-el administrador no puede ingresar por este camino: es intencional.
+Aunque el modo esté activo, la pantalla de ingreso **nunca** muestra el código de un número con rol
+de administrador. Un administrador puede aprobar identidades, resolver disputas y liberar pagos; su
+ingreso debe seguir pasando por el SMS real **y** el segundo factor (TOTP). La única excepción,
+mientras no haya proveedor de SMS, es **tu propia computadora** con una clave local: ver
+[Entrar como administrador sin SMS (solo en tu computadora)](#entrar-como-administrador-sin-sms-solo-en-tu-computadora).
 
 ### Qué no hace
 
@@ -199,5 +200,74 @@ el administrador no puede ingresar por este camino: es intencional.
 ### Antes del lanzamiento
 
 Este modo se reemplaza por un proveedor real de SMS (por ejemplo Twilio o un proveedor panameño).
-Con el proveedor configurado, deja `TEST_MODE_SHOW_LOGIN_CODE` y `ALLOW_TEST_LOGIN_CODES` vacías en
-todos los entornos.
+Con el proveedor configurado, deja `TEST_MODE_SHOW_LOGIN_CODE`, `ALLOW_TEST_LOGIN_CODES` y
+`TEST_MODE_ADMIN_KEY` vacías en todos los entornos.
+
+---
+
+## Entrar como administrador sin SMS (solo en tu computadora)
+
+Mientras no haya proveedor de SMS, el código de ingreso de un **administrador** no aparece en la
+pantalla (ver arriba), así que no podrías entrar al panel de administración. Para eso existe un
+camino que solo funciona **en tu computadora de desarrollo**: una clave secreta que vive únicamente
+en tu `.env.local`.
+
+Necesitas: `TEST_MODE_SHOW_LOGIN_CODE=1` en `.env.local` (ver la sección anterior), tu usuario
+administrador creado con `npm run admin:create` y su secreto TOTP en tu app de autenticación.
+
+### Paso a paso
+
+1. **Crea la clave (una sola vez) y reinicia el servidor de desarrollo.** En la carpeta del
+   proyecto:
+
+   ```bash
+   npm run admin:code -- --init
+   ```
+
+   Agrega `TEST_MODE_ADMIN_KEY` a `.env.local` con un valor aleatorio largo (no se muestra en
+   pantalla). Si ya existe, no la cambia. Después detén `npm run dev` (Ctrl+C) y vuelve a
+   ejecutarlo, para que el servidor lea la clave.
+
+2. **Pide el código.** Abre <http://localhost:3000/ingresar>, escribe el número del administrador y
+   pide el código. En pantalla no aparece ningún código: es lo esperado.
+
+3. **Lee el código en una terminal de la misma computadora** (en la carpeta del proyecto):
+
+   ```bash
+   npm run admin:code -- +5076XXXXXXX
+   ```
+
+   Muestra `Código de ingreso: 123456`. Si tu servidor usa otro puerto, agrégalo así:
+   `npm run admin:code -- +5076XXXXXXX --url http://localhost:3001`.
+
+4. **Escribe el código** en la pantalla de ingreso y, cuando lo pida, el **código TOTP** de tu app
+   de autenticación.
+
+Si el comando dice *"No hay un código reciente"*, vuelve al paso 2 y ejecútalo otra vez; el mensaje
+también lista lo demás que conviene revisar (la clave creada, el servidor reiniciado, el número
+correcto). El servidor responde exactamente igual a todos los rechazos, a propósito, así que el
+comando no puede decirte cuál fue la causa. Si dice que no hay un servidor encendido, inicia
+`npm run dev`.
+
+### Por qué es seguro
+
+- **La clave no sale de tu computadora.** Está solo en `.env.local`, que nunca se sube a git. No la
+  pongas en Vercel ni la compartas. El comando solo la envía a `localhost`, `127.0.0.1` o `[::1]`
+  (se niega con cualquier otra dirección) y nunca la muestra.
+- **No depende de la IP.** Cualquiera conectado a tu Wi-Fi puede abrir el servidor de desarrollo (así
+  pruebas desde el celular), pero sin la clave recibe la misma respuesta vacía de siempre.
+- **Nunca en producción.** Un build de producción (`next build`, Vercel) jamás muestra el código de
+  un administrador, aunque estén activas `TEST_MODE_SHOW_LOGIN_CODE` y `ALLOW_TEST_LOGIN_CODES`.
+- **El TOTP sigue siendo obligatorio.** El código de ingreso es solo el primer paso; sin la app de
+  autenticación no se entra al panel.
+- **Con límite y sin rastros.** Cada intento cuenta para el límite de 10 consultas por minuto, y ni
+  la clave, ni el código, ni el teléfono se escriben en los registros (logs).
+
+Si crees que la clave se filtró: borra la línea `TEST_MODE_ADMIN_KEY` de `.env.local`, ejecuta de
+nuevo `npm run admin:code -- --init` y reinicia el servidor.
+
+### Antes del lanzamiento
+
+Esto es temporal: se reemplaza por un proveedor real de SMS. Con el proveedor configurado, borra
+`TEST_MODE_ADMIN_KEY` de `.env.local` y deja vacías `TEST_MODE_SHOW_LOGIN_CODE` y
+`ALLOW_TEST_LOGIN_CODES`.
