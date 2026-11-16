@@ -10,6 +10,7 @@
     "test": "vitest run",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx scripts/db-migrate.ts",
+    "db:check": "tsx scripts/db-check.ts",
     "admin:create": "tsx scripts/create-admin.ts",
     "seed:dev": "tsx scripts/seed-dev.ts",
     "db:set-password": "tsx scripts/set-db-password.ts",

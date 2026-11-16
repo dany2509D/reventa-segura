@@ -2,11 +2,27 @@
 
 import { useState, type FormEvent } from 'react';
 import { errorText, postJson } from '@/lib/client/http';
+import { fetchTestLoginCode } from '@/lib/client/test-login-code';
+
+// Login-code test mode only (no SMS provider yet): the server reveals the code to show here.
+export function TestCodeNotice({ code, onUse }: { code: string; onUse: () => void }) {
+  return (
+    <>
+      <p className="notice warning" role="status">
+        Modo de prueba: tu código es <strong>{code}</strong>
+      </p>
+      <button className="btn secondary" type="button" onClick={onUse}>
+        Usar este código
+      </button>
+    </>
+  );
+}
 
 export default function LoginForm({ next }: { next: string }) {
   const [step, setStep] = useState<'phone' | 'code'>('phone');
   const [phone, setPhone] = useState('');
   const [code, setCode] = useState('');
+  const [testCode, setTestCode] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -14,10 +30,13 @@ export default function LoginForm({ next }: { next: string }) {
     e.preventDefault();
     setBusy(true);
     setError(null);
+    setTestCode(null);
     const r = await postJson('/api/auth/request', { phone });
     setBusy(false);
-    if (r.ok) setStep('code');
-    else if (r.status === 429) setError('Pediste muchos códigos. Espera un rato e inténtalo de nuevo.');
+    if (r.ok) {
+      setStep('code');
+      setTestCode(await fetchTestLoginCode(phone)); // null (404) unless test mode is on
+    } else if (r.status === 429) setError('Pediste muchos códigos. Espera un rato e inténtalo de nuevo.');
     else if (r.status === 400) setError('Escribe un celular panameño válido, por ejemplo 6123-4567.');
     else setError(errorText(r));
   }
@@ -61,6 +80,7 @@ export default function LoginForm({ next }: { next: string }) {
   return (
     <form className="form" onSubmit={verify}>
       <p>Enviamos un código de 6 dígitos a <strong>{phone}</strong>.</p>
+      {testCode ? <TestCodeNotice code={testCode} onUse={() => setCode(testCode)} /> : null}
       <label>
         Código
         <input
@@ -74,7 +94,7 @@ export default function LoginForm({ next }: { next: string }) {
       </label>
       {error ? <p role="alert" className="error">{error}</p> : null}
       <div className="cta-row">
-        <button className="btn text" type="button" onClick={() => { setStep('phone'); setCode(''); setError(null); }}>
+        <button className="btn text" type="button" onClick={() => { setStep('phone'); setCode(''); setTestCode(null); setError(null); }}>
           Cambiar número
         </button>
         <button className="btn" type="submit" disabled={busy || code.length !== 6}>
