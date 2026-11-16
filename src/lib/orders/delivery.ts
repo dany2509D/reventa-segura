@@ -137,11 +137,9 @@ export async function getDeliveredFile(
       sellerId: listings.sellerId,
       deliveryMode: listings.deliveryMode,
       filePath: listings.filePath,
-      buyerPhone: users.phone,
     })
     .from(orders)
     .innerJoin(listings, eq(listings.id, orders.listingId))
-    .innerJoin(users, eq(users.id, orders.buyerId))
     .where(eq(orders.id, orderId));
   if (!row) throw new NotFoundError();
   if (row.buyerId !== buyerId) throw new ForbiddenError();
@@ -157,8 +155,12 @@ export async function getDeliveredFile(
   if (!raw) throw new NotFoundError('No ticket file for this order');
   if (detectType(raw) === 'pdf') throw new UnsupportedDeliveryError('PDF tickets cannot be watermarked');
 
+  // The buyer's phone (PII) is read only once every access and file check has passed.
+  const [buyer] = await db.select({ phone: users.phone }).from(users).where(eq(users.id, row.buyerId));
+  if (!buyer) throw new Error(`Buyer of order ${row.id} not found`);
+
   try {
-    const bytes = await watermark(raw, watermarkLabel(row.buyerPhone, row.id));
+    const bytes = await watermark(raw, watermarkLabel(buyer.phone, row.id));
     return { bytes, contentType: 'image/jpeg' };
   } catch (e) {
     if (e instanceof InvalidUploadError) throw new UnsupportedDeliveryError();
