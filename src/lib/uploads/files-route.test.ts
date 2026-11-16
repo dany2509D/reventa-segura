@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import sharp from 'sharp';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { eq } from 'drizzle-orm';
 import { makeTestDb } from '@/lib/db/test-db';
 import { auditLog, sessions, users } from '@/lib/db/schema';
@@ -51,6 +51,7 @@ beforeEach(async () => {
     .png()
     .toBuffer();
 });
+afterEach(() => vi.restoreAllMocks());
 
 describe('GET /api/files/[token]', () => {
   it('serves the owner their file with hardened headers', async () => {
@@ -136,18 +137,59 @@ describe('GET /api/files/[token]', () => {
     expect(rows.every((r) => r.actorId === owner.actor.userId)).toBe(true);
   });
 
-  it('does not audit reads of non-identity kinds', async () => {
+  it('does not audit an owner reading their own non-identity file', async () => {
     const proof = await storePrivate(getStore(), png, 'proof', owner.actor.userId);
     expect((await fetchFile(signedUrl(proof, owner.actor), owner.cookie)).status).toBe(200);
     expect(await readAudits()).toHaveLength(0);
   });
 
-  it('serves PDFs as attachments with the PDF content type', async () => {
+  it.each(['proof', 'ticket', 'evidence'] as const)(
+    "audits an admin reading someone else's %s file",
+    async (kind) => {
+      const path = await storePrivate(getStore(), png, kind, owner.actor.userId);
+      expect((await fetchFile(signedUrl(path, admin.actor), admin.cookie)).status).toBe(200);
+      const rows = await readAudits();
+      expect(rows).toHaveLength(1);
+      expect(rows[0]).toMatchObject({
+        actorId: admin.actor.userId,
+        entity: 'file',
+        entityId: path,
+        detail: { kind, ownerId: owner.actor.userId },
+      });
+    },
+  );
+
+  it('does not serve a cross-owner read when the audit row cannot be written', async () => {
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const path = await storePrivate(getStore(), png, 'ticket', owner.actor.userId);
+    const url = signedUrl(path, admin.actor);
+    vi.spyOn(db, 'transaction').mockImplementation((() => {
+      throw new Error('db down');
+    }) as unknown as Db['transaction']);
+    const res = await fetchFile(url, admin.cookie);
+    expect(res.status).toBe(500);
+    expect(Buffer.from(await res.arrayBuffer()).equals(png)).toBe(false);
+    expect(spy).toHaveBeenCalled();
+  });
+
+  it('serves PDFs as named attachments with the PDF content type', async () => {
     const pdf = Buffer.from('%PDF-1.7\n%%EOF\n');
     const path = await storePrivate(getStore(), pdf, 'identity', owner.actor.userId);
     const res = await fetchFile(signedUrl(path, owner.actor), owner.cookie);
     expect(res.status).toBe(200);
     expect(res.headers.get('content-type')).toBe('application/pdf');
-    expect(res.headers.get('content-disposition')).toMatch(/^attachment/);
+    expect(res.headers.get('content-disposition')).toBe('attachment; filename="documento.pdf"');
+    expect(res.headers.get('content-security-policy')).toBe("default-src 'none'; sandbox");
+  });
+
+  it('sends a sandboxing CSP on image and error responses too', async () => {
+    const path = await storePrivate(getStore(), png, 'proof', owner.actor.userId);
+    const ok = await fetchFile(signedUrl(path, owner.actor), owner.cookie);
+    expect(ok.status).toBe(200);
+    expect(ok.headers.get('content-disposition')).toBe('inline');
+    expect(ok.headers.get('content-security-policy')).toBe("default-src 'none'; sandbox");
+    const denied = await fetchFile(signedUrl(path, owner.actor), other.cookie);
+    expect(denied.status).toBe(403);
+    expect(denied.headers.get('content-security-policy')).toBe("default-src 'none'; sandbox");
   });
 });

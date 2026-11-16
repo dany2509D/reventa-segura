@@ -3,17 +3,26 @@ import sharp from 'sharp';
 import { isAdmin } from '@/lib/authz';
 import type { Actor } from '@/lib/db/types';
 import { ForbiddenError } from '@/lib/errors';
+import { isUuid } from '@/lib/uuid';
 import { InvalidUploadError } from './errors';
 import type { BlobStore } from './store';
 
 // SEG-09: only JPEG/PNG/WebP/PDF, max 8 MB, detected by content, metadata stripped.
 export const MAX_UPLOAD_BYTES = 8 * 1024 * 1024;
 export const MAX_IMAGE_SIDE = 8000;
-// SEG-10: signed file URLs live 60 s.
+// SEG-10: signed file URLs live 60 s by default. Callers may ask for a
+// different ttl, but it is clamped to a hard maximum per kind.
 export const FILE_URL_TTL_SECONDS = 60;
+export const IDENTITY_URL_MAX_TTL_SECONDS = 60;
+export const FILE_URL_MAX_TTL_SECONDS = 300;
 
 export const FILE_KINDS = ['identity', 'selfie', 'proof', 'ticket', 'evidence'] as const;
 export type FileKind = (typeof FILE_KINDS)[number];
+
+// Identity documents and selfies: tightest URL lifetime, every read audited.
+export function isIdentityKind(kind: FileKind): boolean {
+  return kind === 'identity' || kind === 'selfie';
+}
 export type UploadType = 'jpeg' | 'png' | 'webp' | 'pdf';
 
 export const MIME_TYPES: Record<UploadType, string> = {
@@ -32,7 +41,6 @@ const DECLARED: Record<UploadType, readonly string[]> = {
 };
 
 const PNG_MAGIC = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
 // Magic-byte detection; the file name and declared type are never trusted.
 export function detectType(buf: Buffer): UploadType | null {
@@ -99,7 +107,7 @@ export function parseFilePath(path: string): { kind: FileKind; ownerId: string }
   if (parts.length !== 3) return null;
   const [kind, ownerId, id] = parts;
   if (!(FILE_KINDS as readonly string[]).includes(kind)) return null;
-  if (!UUID_RE.test(ownerId) || !UUID_RE.test(id)) return null;
+  if (!isUuid(ownerId) || !isUuid(id)) return null;
   return { kind: kind as FileKind, ownerId };
 }
 
@@ -111,7 +119,7 @@ export async function storePrivate(
   ownerId: string,
 ): Promise<string> {
   if (!(FILE_KINDS as readonly string[]).includes(kind)) throw new Error('Invalid file kind');
-  if (!UUID_RE.test(ownerId)) throw new Error('Invalid owner id');
+  if (!isUuid(ownerId)) throw new Error('Invalid owner id');
   const path = `${kind}/${ownerId}/${randomUUID()}`;
   await store.put(path, clean);
   return path;
@@ -147,9 +155,12 @@ export function signedUrl(
   actor: Actor,
   opts: { now?: Date; ttlSeconds?: number } = {},
 ): string {
-  if (!canReadFile(path, actor)) throw new ForbiddenError();
-  const ttl = opts.ttlSeconds ?? FILE_URL_TTL_SECONDS;
-  if (!Number.isFinite(ttl) || ttl <= 0) throw new Error('Invalid ttl');
+  const parsed = parseFilePath(path);
+  if (!parsed || !canReadFile(path, actor)) throw new ForbiddenError();
+  const requested = opts.ttlSeconds ?? FILE_URL_TTL_SECONDS;
+  if (!Number.isFinite(requested) || requested <= 0) throw new Error('Invalid ttl');
+  const maxTtl = isIdentityKind(parsed.kind) ? IDENTITY_URL_MAX_TTL_SECONDS : FILE_URL_MAX_TTL_SECONDS;
+  const ttl = Math.min(requested, maxTtl);
   const now = opts.now ?? new Date();
   const payload = Buffer.from(
     JSON.stringify({ path, uid: actor.userId, exp: now.getTime() + ttl * 1000 }),
