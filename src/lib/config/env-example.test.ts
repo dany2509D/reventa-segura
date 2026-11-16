@@ -1,0 +1,38 @@
+import { readFileSync, readdirSync } from 'node:fs';
+import { join } from 'node:path';
+import { describe, expect, it } from 'vitest';
+import { REQUIRED_PRODUCTION_ENV } from './env';
+
+// Set by Node, Next.js or the platform, never by us.
+const PLATFORM = new Set(['NODE_ENV', 'NEXT_RUNTIME', 'NEXT_PHASE']);
+
+function sources(dir: string): string[] {
+  return readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
+    const full = join(dir, e.name);
+    if (e.isDirectory()) return e.name === 'node_modules' ? [] : sources(full);
+    return /\.(ts|tsx|mjs|js)$/.test(e.name) && !/\.test\.ts$/.test(e.name) ? [full] : [];
+  });
+}
+
+const root = process.cwd();
+const files = [...sources(join(root, 'src')), ...sources(join(root, 'scripts')), join(root, 'next.config.ts'), join(root, 'vercel.ts')];
+const read = new Set(files.flatMap((f) => [...readFileSync(f, 'utf8').matchAll(/process\.env\.([A-Z][A-Z0-9_]*)/g)].map((m) => m[1])));
+const example = readFileSync(join(root, '.env.example'), 'utf8');
+const listed = new Set([...example.matchAll(/^([A-Z][A-Z0-9_]*)=/gm)].map((m) => m[1]));
+
+describe('.env.example', () => {
+  it('lists every environment variable the application reads', () => {
+    const missing = [...read].filter((v) => !PLATFORM.has(v) && !listed.has(v));
+    expect(missing).toEqual([]);
+  });
+
+  it('lists nothing the application no longer reads', () => {
+    expect([...listed].filter((v) => !read.has(v))).toEqual([]);
+  });
+
+  it('marks the variables production refuses to start without', () => {
+    for (const name of REQUIRED_PRODUCTION_ENV) {
+      expect(example).toMatch(new RegExp(`#[^\\n]*REQUIRED in production[^\\n]*\\n(#[^\\n]*\\n)*${name}=`));
+    }
+  });
+});
