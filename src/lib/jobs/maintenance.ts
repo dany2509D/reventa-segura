@@ -1,4 +1,4 @@
-import { and, eq, inArray, isNotNull, lt, lte, notExists, or, sql, type SQL } from 'drizzle-orm';
+import { and, eq, inArray, isNotNull, isNull, lt, lte, notExists, or, sql, type SQL } from 'drizzle-orm';
 import { audit } from '@/lib/audit/audit';
 import { appConfig, auditLog, disputes, events, listings, orders, users } from '@/lib/db/schema';
 import type { Db } from '@/lib/db/types';
@@ -123,9 +123,13 @@ export async function runMaintenance(db: Db, deps: MaintenanceDeps, now: Date): 
 
 // --- Transfers the seller did not complete in time -> full refund ---------------------------------
 
+/**
+ * A pending transfer expires when its deadline has passed or the event has started. A missing
+ * deadline counts as expired (fail closed), matching confirmReceived, which refuses it too.
+ */
 function transferExpired(o: OrderRow, ev: EventRow, now: Date): boolean {
-  const deadlinePassed = o.transferDeadline !== null && o.transferDeadline.getTime() < now.getTime();
-  return deadlinePassed || ev.startsAt.getTime() <= now.getTime();
+  if (o.transferDeadline === null) return true;
+  return o.transferDeadline.getTime() < now.getTime() || ev.startsAt.getTime() <= now.getTime();
 }
 
 async function expiredTransferIds(db: Db, now: Date): Promise<string[]> {
@@ -137,7 +141,7 @@ async function expiredTransferIds(db: Db, now: Date): Promise<string[]> {
     .where(
       and(
         eq(orders.state, 'transferencia_pendiente'),
-        or(lt(orders.transferDeadline, now), lte(events.startsAt, now)),
+        or(isNull(orders.transferDeadline), lt(orders.transferDeadline, now), lte(events.startsAt, now)),
       ),
     );
   return rows.map((r) => r.id);

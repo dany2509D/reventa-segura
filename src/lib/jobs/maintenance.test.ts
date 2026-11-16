@@ -83,9 +83,30 @@ describe('runMaintenance: expired transfers', () => {
     expect(audits.filter((a) => a.action === 'order.refunded')).toHaveLength(1);
   });
 
-  it('refunds a pending transfer once the event has started, even without a deadline', async () => {
+  it('treats a pending transfer with a NULL deadline as expired (fail closed) and refunds it once', async () => {
     const { order } = await seedTransfer();
     await db.update(orders).set({ transferDeadline: null }).where(eq(orders.id, order.id));
+    // Long before both the event and the would-be deadline.
+    const early = new Date(PAID_AT.getTime() + MIN);
+    expect(await runMaintenance(db, { gw }, early)).toEqual({ ...ZERO, expiredTransfers: 1 });
+    expect(await runMaintenance(db, { gw }, early)).toEqual(ZERO);
+    expect((await getOrder(db, order.id)).state).toBe('reembolsada');
+    expect(gw.refunds).toEqual([
+      { providerRef: `fake_${order.id}`, amountCents: 5000, refundRef: `fake_refund_fake_${order.id}` },
+    ]);
+    expect((await ledgerOf(db, order.id)).filter((e) => e.kind === 'refund')).toHaveLength(1);
+    expect((await auditOf(db, order.id)).filter((a) => a.action === 'order.transfer_expired')).toEqual([
+      expect.objectContaining({ actorId: null, detail: expect.objectContaining({ transferDeadline: null }) }),
+    ]);
+  });
+
+  it('refunds a pending transfer once the event has started, even if its deadline is later', async () => {
+    const { order } = await seedTransfer();
+    // Inconsistent on purpose (the deadline is normally capped at the event start).
+    await db
+      .update(orders)
+      .set({ transferDeadline: new Date(STARTS.getTime() + HOUR) })
+      .where(eq(orders.id, order.id));
     expect(await runMaintenance(db, { gw }, new Date(STARTS.getTime() - 1))).toEqual(ZERO);
     expect(await runMaintenance(db, { gw }, STARTS)).toEqual({ ...ZERO, expiredTransfers: 1 });
     expect((await getOrder(db, order.id)).state).toBe('reembolsada');
