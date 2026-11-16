@@ -17,7 +17,7 @@ export default async function DisputePage({ params }: { params: Promise<{ orderI
   if (!order) notFound();
   return (
     <main className="page">
-      <a href="/mis-ordenes" className="muted">← Mis órdenes</a>
+      <a href="/mis-ordenes" className="back-link">← Mis órdenes</a>
       <h1>Reportar un problema</h1>
       <p className="muted">{order.eventName} · {formatPanamaDateTime(order.startsAt)}</p>
       {DISPUTABLE.includes(order.state) ? (

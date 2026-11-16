@@ -24,8 +24,8 @@ export default async function IdentitiesPage({ searchParams }: { searchParams: P
                 <td>
                   <form action={reviewIdentityAction} className="admin-inline">
                     <input type="hidden" name="userId" value={r.userId} />
-                    <button name="decision" value="approved" type="submit">Aprobar</button>
-                    <button name="decision" value="rejected" type="submit">Rechazar</button>
+                    <button className="btn" name="decision" value="approved" type="submit">Aprobar</button>
+                    <button className="btn danger" name="decision" value="rejected" type="submit">Rechazar</button>
                   </form>
                 </td>
               </tr>

@@ -31,7 +31,7 @@ export default async function PayoutsPage({ searchParams }: { searchParams: Prom
                     <form action={markPayoutPaidAction} className="admin-inline">
                       <input type="hidden" name="payoutId" value={r.payoutId} />
                       <input name="bankRef" placeholder="Referencia del banco" maxLength={100} required aria-label="Referencia del banco" />
-                      <button type="submit">Marcar pagado</button>
+                      <button className="btn" type="submit">Marcar pagado</button>
                     </form>
                   ) : (
                     <span className="admin-muted">No se debe pagar</span>

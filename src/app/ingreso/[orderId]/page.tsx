@@ -15,7 +15,7 @@ export default async function EntryPage({ params }: { params: Promise<{ orderId:
   if (!order) notFound();
   return (
     <main className="page">
-      <a href="/mis-ordenes" className="muted">← Mis órdenes</a>
+      <a href="/mis-ordenes" className="back-link">← Mis órdenes</a>
       <h1>Confirmar mi ingreso</h1>
       <p className="muted">{order.eventName} · {formatPanamaDateTime(order.startsAt)}</p>
       {order.state === 'entrada_recibida' ? (

@@ -14,30 +14,35 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
   const offers = event.resaleProhibited ? [] : await listVerifiedListings(db, id);
   return (
     <main className="page">
-      <a href="/" className="muted">← Todos los eventos</a>
-      <h1>{event.name}</h1>
-      <p className="muted">{event.venue} · {formatPanamaDateTime(event.startsAt)}</p>
-      <p>Valor original de la entrada: <strong>{formatUsd(event.faceValueCents)}</strong></p>
+      <a href="/" className="back-link">← Todos los eventos</a>
+      <header className="page-head">
+        <h1>{event.name}</h1>
+        <div className="tags">
+          <span className="tag">{event.venue}</span>
+          <span className="tag">{formatPanamaDateTime(event.startsAt)}</span>
+        </div>
+      </header>
+      <p>Valor original de la entrada: <strong className="money">{formatUsd(event.faceValueCents)}</strong></p>
 
       {event.resaleProhibited ? (
-        <p className="notice">El organizador de este evento prohíbe la reventa de entradas, por eso no vendemos entradas de este evento.</p>
+        <p className="notice warning">El organizador de este evento prohíbe la reventa de entradas, por eso no vendemos entradas de este evento.</p>
       ) : (
         <>
           <p className="notice">
             Algunas boleteras o recintos pueden restringir las entradas revendidas. Si te rechazan en la puerta, abre una disputa y te reembolsamos.
           </p>
           <h2>Entradas disponibles</h2>
-          {offers.length === 0 ? <p>No hay entradas publicadas por ahora.</p> : null}
+          {offers.length === 0 ? <p className="empty">No hay entradas publicadas por ahora.</p> : null}
           <div className="stack">
             {offers.map((o) => (
-              <div key={o.id} className="card row">
+              <div key={o.id} className="card offer">
                 <div>
                   <div className="price">{formatUsd(o.askCents)}</div>
                   <div className="muted">
                     {o.deliveryMode === 'transfer' ? 'Te la transfieren en la boletera' : 'Recibes la entrada en la app'}
                   </div>
                 </div>
-                <a className="btn" href={`/comprar/${o.id}`}>Comprar</a>
+                <a className="btn accent" href={`/comprar/${o.id}`}>Comprar</a>
               </div>
             ))}
           </div>

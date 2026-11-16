@@ -10,8 +10,10 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   return (
     <main className="page">
       <h1>Ingresar</h1>
-      <p className="muted">Te enviamos un código por mensaje de texto. No necesitas contraseña.</p>
-      <LoginForm next={next} />
+      <p className="lead">Te enviamos un código por mensaje de texto. No necesitas contraseña.</p>
+      <div className="card auth-card">
+        <LoginForm next={next} />
+      </div>
     </main>
   );
 }

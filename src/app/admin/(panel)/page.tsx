@@ -18,10 +18,13 @@ export default async function AdminHome() {
   return (
     <main>
       <h1>Resumen</h1>
-      <ul>
+      <ul className="admin-stats">
         {rows.map(([label, n, href]) => (
           <li key={href}>
-            <a href={href}>{label}</a>: <strong>{n}</strong>
+            <a className="admin-stat" href={href}>
+              <span>{label}</span>
+              <strong>{n}</strong>
+            </a>
           </li>
         ))}
       </ul>

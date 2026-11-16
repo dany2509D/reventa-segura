@@ -23,7 +23,7 @@ export default function BuyButton({ listingId }: { listingId: string }) {
   return (
     <div className="stack">
       {error ? <p role="alert" className="error">{error}</p> : null}
-      <button className="btn" type="button" onClick={buy} disabled={busy}>
+      <button className="btn accent" type="button" onClick={buy} disabled={busy}>
         {busy ? 'Preparando el pago…' : 'Pagar de forma protegida'}
       </button>
     </div>
