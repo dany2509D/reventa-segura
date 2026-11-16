@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { getDb } from '@/lib/db/client';
 import { runMaintenance } from '@/lib/jobs/maintenance';
 import { getPaymentGateway } from '@/lib/payments';
+import { queuePayoutOnRelease } from '@/lib/payouts/payouts';
 import { getStore } from '@/lib/uploads/store';
 
 const json = (body: object, status: number) =>
@@ -29,11 +30,16 @@ export async function GET(req: Request) {
   if (!hasBearer(req, secret)) return json({ error: 'No autorizado' }, 401);
 
   try {
-    const store = getStore();
     const result = await runMaintenance(
       getDb(),
-      // onReleased (payout queueing) is wired by Task 10.
-      { gw: getPaymentGateway(), deleteBlob: (path) => store.del(path) },
+      {
+        gw: getPaymentGateway(),
+        // Queues the seller's manual payout inside the releasing transaction (Task 10).
+        onReleased: queuePayoutOnRelease,
+        // The store is resolved only when an identity document is actually purged, so a storage
+        // misconfiguration cannot block refunds, releases or abandoned-checkout expiry.
+        deleteBlob: (path) => getStore().del(path),
+      },
       new Date(),
     );
     return json(result, 200);

@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "payouts_order_uq" ON "payouts" USING btree ("order_id");

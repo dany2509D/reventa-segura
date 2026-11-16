@@ -126,15 +126,20 @@ export const disputes = pgTable('disputes', {
   resolvedAt: timestamp('resolved_at', { withTimezone: true }),
 });
 
-export const payouts = pgTable('payouts', {
-  id: id(),
-  orderId: uuid('order_id').notNull().references(() => orders.id),
-  sellerId: uuid('seller_id').notNull().references(() => users.id),
-  amountCents: integer('amount_cents').notNull(),
-  status: text('status', { enum: ['queued', 'paid'] }).notNull().default('queued'),
-  bankRef: text('bank_ref'),
-  paidAt: timestamp('paid_at', { withTimezone: true }),
-});
+export const payouts = pgTable(
+  'payouts',
+  {
+    id: id(),
+    orderId: uuid('order_id').notNull().references(() => orders.id),
+    sellerId: uuid('seller_id').notNull().references(() => users.id),
+    amountCents: integer('amount_cents').notNull(),
+    status: text('status', { enum: ['queued', 'paid'] }).notNull().default('queued'),
+    bankRef: text('bank_ref'),
+    paidAt: timestamp('paid_at', { withTimezone: true }),
+  },
+  // One payout per order, enforced by the database (the release hook may run more than once).
+  (t) => [uniqueIndex('payouts_order_uq').on(t.orderId)],
+);
 
 export const otpCodes = pgTable('otp_codes', {
   id: id(),
