@@ -163,7 +163,8 @@ resolverse o aceptarse por escrito antes de cobrar.
 - Al reenviar la identidad quedan blobs huérfanos del envío anterior; el token firmado viaja en la ruta de la URL
   (aparece en logs de acceso, dura 60 s).
 - Next.js registra por su cuenta los errores no capturados de las páginas con el mensaje completo de la consulta
-  (incluidos sus parámetros); las páginas no consultan por teléfono, pero el acceso a los logs debe restringirse.
+  (incluidos sus parámetros, p. ej. el hash SHA-256 del token de sesión, nunca el token); las páginas no consultan
+  por teléfono, pero el acceso a los logs debe restringirse.
 
 **Autorización y sesiones**
 - Algunas rutas de órdenes y publicaciones responden 403 en vez de 404 a un id ajeno (revela que el id existe; los
