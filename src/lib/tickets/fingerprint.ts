@@ -1,7 +1,4 @@
 import { createHash } from 'node:crypto';
-import { existsSync } from 'node:fs';
-import { join } from 'node:path';
-import { pathToFileURL } from 'node:url';
 import { Worker } from 'node:worker_threads';
 import sharp, { type Sharp } from 'sharp';
 import { InvalidUploadError } from '@/lib/uploads/errors';
@@ -46,7 +43,7 @@ function isImage(buf: Buffer): boolean {
 
 // --- scanner state -----------------------------------------------------------------------
 
-const config: { budgetMs: number; workerUrl?: URL } = { budgetMs: QR_SCAN_BUDGET_MS };
+const config: { budgetMs: number; createWorker?: () => Worker } = { budgetMs: QR_SCAN_BUDGET_MS };
 const stats = { active: 0, peakActive: 0, queued: 0, liveWorkers: 0, spawned: 0, timeouts: 0 };
 const waiting: Array<() => void> = [];
 
@@ -77,15 +74,12 @@ export class QrScannerUnavailableError extends Error {
   }
 }
 
-// Under Vitest/Node the worker sits next to this module. In a bundled server build the
-// bundler either rewrites this URL to an emitted copy or leaves it pointing at a chunk
-// directory; then the copy shipped via outputFileTracingIncludes (next.config.ts) is used.
-function workerUrl(): URL {
-  if (config.workerUrl) return config.workerUrl;
-  const local = new URL('./qr-worker.mjs', import.meta.url);
-  if (local.protocol === 'file:' && existsSync(local)) return local;
-  const shipped = pathToFileURL(join(process.cwd(), 'src', 'lib', 'tickets', 'qr-worker.mjs'));
-  return existsSync(shipped) ? shipped : local;
+function newWorker(): Worker {
+  if (config.createWorker) return config.createWorker();
+  // Keep this call literal: bundlers only recognise `new Worker(new URL('<literal>',
+  // import.meta.url))` and emit the worker file; a computed argument makes Turbopack treat
+  // every file in the project as a possible worker entry.
+  return new Worker(new URL('./qr-worker.mjs', import.meta.url));
 }
 
 // A worker plus whatever went wrong with it so far. The worker may fail or exit while sharp
@@ -95,7 +89,7 @@ type ScanWorker = { worker: Worker; failure?: QrScannerUnavailableError };
 function spawnWorker(): ScanWorker {
   let worker: Worker;
   try {
-    worker = new Worker(workerUrl());
+    worker = newWorker();
   } catch (e) {
     throw new QrScannerUnavailableError(e);
   }
@@ -257,8 +251,8 @@ export const qrScannerTestHooks = {
   setBudgetMs: (ms?: number) => {
     config.budgetMs = ms ?? QR_SCAN_BUDGET_MS;
   },
-  /** Overrides the worker file; no argument restores the default resolution. */
-  setWorkerUrl: (url?: URL) => {
-    config.workerUrl = url;
+  /** Overrides how scan workers are created; no argument restores qr-worker.mjs. */
+  setWorkerFactory: (create?: () => Worker) => {
+    config.createWorker = create;
   },
 };

@@ -1,4 +1,5 @@
 import { createHash, randomBytes } from 'node:crypto';
+import { Worker } from 'node:worker_threads';
 import sharp from 'sharp';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import { InvalidUploadError } from '@/lib/uploads/errors';
@@ -22,7 +23,7 @@ const PAYLOAD = 'TKT-2026-ATLAPA-SEC-B-FILA-12-ASIENTO-7-9f2c1e';
 
 afterEach(() => {
   hooks.setBudgetMs();
-  hooks.setWorkerUrl();
+  hooks.setWorkerFactory();
 });
 
 describe('QR scanner isolation (worker thread, budget, concurrency)', () => {
@@ -112,7 +113,7 @@ describe('QR scanner isolation (worker thread, budget, concurrency)', () => {
     });
 
     it('when the worker file cannot be loaded', async () => {
-      hooks.setWorkerUrl(new URL('./does-not-exist-qr-worker.mjs', import.meta.url));
+      hooks.setWorkerFactory(() => new Worker(new URL('./does-not-exist-qr-worker.mjs', import.meta.url)));
       await expect(extractQrPayload(await qrPng(PAYLOAD))).rejects.toThrow(/QR scanner/);
       await expect(extractQrPayload(slowDecode)).rejects.toThrow(/QR scanner/);
       await expect(computeFingerprint(slowDecode)).rejects.toThrow(/QR scanner/);
@@ -122,7 +123,7 @@ describe('QR scanner isolation (worker thread, budget, concurrency)', () => {
     });
 
     it('when the worker exits without answering', async () => {
-      hooks.setWorkerUrl(new URL('data:text/javascript,process.exit(0)'));
+      hooks.setWorkerFactory(() => new Worker(new URL('data:text/javascript,process.exit(0)')));
       await expect(extractQrPayload(await qrPng(PAYLOAD))).rejects.toThrow(/QR scanner/);
       await expect(extractQrPayload(slowDecode)).rejects.toThrow(/QR scanner/);
       expect(hooks.stats().liveWorkers).toBe(0);
