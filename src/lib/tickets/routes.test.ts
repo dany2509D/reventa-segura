@@ -42,7 +42,7 @@ beforeAll(async () => {
 async function newUser(identityStatus: (typeof users.$inferSelect)['identityStatus'] = 'approved') {
   const [u] = await db
     .insert(users)
-    .values({ phone: `+5076${String(++seq).padStart(7, '0')}`, identityStatus })
+    .values({ phone: `+5076${String(++seq).padStart(7, '0')}`, identityStatus, phoneVerifiedAt: new Date() })
     .returning();
   return u;
 }
@@ -233,8 +233,8 @@ describe('POST /api/listings', () => {
     expect(await errorOf(res)).toMatch(message);
   });
 
-  it('returns 422 when the seller reached the active listing limit', async () => {
-    for (let i = 0; i < 10; i++) {
+  it('returns 403 when the seller reached the active listing limit', async () => {
+    for (let i = 0; i < 3; i++) {
       await db.insert(listings).values({
         sellerId: seller.id,
         eventId: event.id,
@@ -245,8 +245,8 @@ describe('POST /api/listings', () => {
       });
     }
     const res = await POST(form(fields()));
-    expect(res.status).toBe(422);
-    expect(await errorOf(res)).toMatch(/máximo/i);
+    expect(res.status).toBe(403);
+    expect((await res.json()).error).toBe('ACTIVE_LISTINGS_LIMIT');
   });
 
   it('returns 413 when Content-Length exceeds the limit', async () => {

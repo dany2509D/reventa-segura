@@ -57,6 +57,14 @@ export class ListingLimitError extends Error {
   }
 }
 
+// The seller has not proven a phone number yet (users.phone_verified_at is null).
+export class PhoneNotVerifiedError extends Error {
+  constructor(message = 'Seller phone is not verified') {
+    super(message);
+    this.name = 'PhoneNotVerifiedError';
+  }
+}
+
 // The seller lost too many disputes recently (SEG-08): no new listings.
 export class SellerBlockedError extends Error {
   constructor(message = 'Seller blocked after repeated lost disputes') {

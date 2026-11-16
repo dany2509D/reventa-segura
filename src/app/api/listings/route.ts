@@ -10,12 +10,13 @@ import {
   DuplicateTicketError,
   EventClosedError,
   ListingLimitError,
+  PhoneNotVerifiedError,
   PriceCapError,
   ResaleProhibitedError,
   SellerBlockedError,
   TransferNotAllowedError,
 } from '@/lib/tickets/errors';
-import { assertSellerNotBlocked, createListing } from '@/lib/tickets/listings';
+import { MAX_ACTIVE_LISTINGS, assertPhoneVerified, assertSellerNotBlocked, createListing } from '@/lib/tickets/listings';
 import { InvalidUploadError } from '@/lib/uploads/errors';
 import { BodyTooLargeError, fileField, readMultipart, uploadErrorMessage } from '@/lib/uploads/http';
 import { getStore } from '@/lib/uploads/store';
@@ -67,8 +68,11 @@ function errorResponse(e: unknown): NextResponse {
   if (e instanceof PriceCapError) {
     return json({ error: `El precio supera el máximo permitido (${formatCents(e.maxCents)}).` }, 422);
   }
+  if (e instanceof PhoneNotVerifiedError) {
+    return json({ error: 'PHONE_NOT_VERIFIED', message: 'Debes verificar tu teléfono antes de publicar boletos.' }, 403);
+  }
   if (e instanceof ListingLimitError) {
-    return json({ error: `Alcanzaste el máximo de ${e.limit} publicaciones activas.` }, 422);
+    return json({ error: 'ACTIVE_LISTINGS_LIMIT', message: 'Máximo 3 publicaciones activas simultáneas por cuenta.' }, 403);
   }
   // Never log the message: it may carry bound query parameters.
   log('error', 'listings route error', { error: errorName(e) });
@@ -89,6 +93,7 @@ export async function POST(req: Request) {
     const limited = await limitOr429(db, LIMITS.listingCreate, actor.userId);
     if (limited) return limited;
     // Refuse unverified or blocked sellers before reading (and buffering) any upload.
+    await assertPhoneVerified(db, actor.userId);
     await assertCanSell(db, actor.userId);
     await assertSellerNotBlocked(db, actor.userId);
 
@@ -120,6 +125,7 @@ export async function POST(req: Request) {
       proofType: proof.type,
       file: ticket?.data,
       fileType: ticket?.type,
+      maxActive: MAX_ACTIVE_LISTINGS,
     });
     return json({ id: listing.id, status: listing.status }, 201);
   } catch (e) {

@@ -2,6 +2,9 @@ import { profileOf, upcomingEvents } from '@/lib/account/queries';
 import { getDb } from '@/lib/db/client';
 import { DEFAULT_PRICE_CAP_BPS } from '@/lib/pricing/pricing';
 import EmptyState from '../_components/empty-state';
+import { users } from '@/lib/db/schema';
+import { eq } from 'drizzle-orm';
+import { redirect } from 'next/navigation';
 import { requireUser } from '../session';
 import IdentityForm from './identity-form';
 import ListingForm from './listing-form';
@@ -12,6 +15,8 @@ export const dynamic = 'force-dynamic';
 export default async function SellPage() {
   const user = await requireUser('/vender');
   const db = getDb();
+  const [row] = await db.select({ at: users.phoneVerifiedAt }).from(users).where(eq(users.id, user.userId));
+  if (!row?.at) redirect('/ingresar?next=%2Fvender');
   const profile = await profileOf(db, user.userId);
   const status = profile?.identityStatus ?? 'none';
   const events = status === 'approved' ? (await upcomingEvents(db)).filter((e) => !e.resaleProhibited) : [];

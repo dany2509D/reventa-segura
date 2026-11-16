@@ -19,6 +19,7 @@ import {
   ListingBusyError,
   ListingLimitError,
   ListingStateError,
+  PhoneNotVerifiedError,
   PriceCapError,
   ResaleProhibitedError,
   SellerBlockedError,
@@ -45,10 +46,14 @@ export type NewListingInput = {
   /** Client-declared MIME types (multipart). Default to the type detected from the bytes. */
   proofType?: string;
   fileType?: string;
+  /** Extra cap on active listings; the effective limit is min(this, app_config limit). */
+  maxActive?: number;
   now?: Date;
 };
 
 export const DEFAULT_MAX_ACTIVE_LISTINGS = 10;
+/** Hard per-account cap on simultaneous active listings, enforced by the POST /api/listings route. */
+export const MAX_ACTIVE_LISTINGS = 3;
 /** app_config key and default: lost disputes within LOST_DISPUTE_WINDOW_DAYS that block selling. */
 export const MAX_LOST_DISPUTES_KEY = 'maxLostDisputes';
 export const DEFAULT_MAX_LOST_DISPUTES = 3;
@@ -83,6 +88,13 @@ function assertEventOpen(event: Event | undefined, now: Date): asserts event is 
   if (!event) throw new NotFoundError('Event not found');
   if (event.status !== 'active' || event.startsAt.getTime() <= now.getTime()) throw new EventClosedError();
   if (event.resaleProhibited) throw new ResaleProhibitedError();
+}
+
+/** Throws PhoneNotVerifiedError unless the user's phone was proven (Firebase / fake-SMS). */
+export async function assertPhoneVerified(db: Db, userId: string): Promise<void> {
+  if (!isUuid(userId)) throw new PhoneNotVerifiedError();
+  const [row] = await db.select({ at: users.phoneVerifiedAt }).from(users).where(eq(users.id, userId));
+  if (!row?.at) throw new PhoneNotVerifiedError();
 }
 
 async function activeListingCount(db: Db, sellerId: string): Promise<number> {
@@ -161,7 +173,8 @@ export async function createListing(db: Db, store: BlobStore, input: NewListingI
     throw new PriceCapError(Math.floor((event.faceValueCents * capBps) / 10000));
   }
 
-  const limit = await configInt(db, 'maxActiveListingsPerSeller', DEFAULT_MAX_ACTIVE_LISTINGS);
+  const configured = await configInt(db, 'maxActiveListingsPerSeller', DEFAULT_MAX_ACTIVE_LISTINGS);
+  const limit = input.maxActive === undefined ? configured : Math.min(configured, input.maxActive);
   if ((await activeListingCount(db, sellerId)) >= limit) throw new ListingLimitError(limit);
 
   const declared = (buf: Buffer, type?: string) => type ?? MIME_TYPES[detectType(buf)!];

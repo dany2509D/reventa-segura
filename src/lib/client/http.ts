@@ -21,5 +21,6 @@ const networkError = (): ApiResult => ({ ok: false, status: 0, data: { error: 'N
 
 /** The server's Spanish message when it sent one, otherwise a safe generic text. */
 export function errorText(r: ApiResult, fallback = 'No se pudo completar la acción. Inténtalo de nuevo.'): string {
+  if (typeof r.data.message === 'string' && r.data.message) return r.data.message;
   return typeof r.data.error === 'string' && r.data.error ? r.data.error : fallback;
 }
