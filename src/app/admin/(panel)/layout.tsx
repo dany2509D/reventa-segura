@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import '../admin.css';
 import { requireAdminPage } from '../session';
 
-export const metadata = { title: 'Administración · Reventa Segura' };
+export const metadata = { title: 'Administración' };
 // Admin data is per-request and private: never prerender or cache it.
 export const dynamic = 'force-dynamic';
 

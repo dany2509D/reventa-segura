@@ -1,7 +1,7 @@
 import { requireAdminNeedingMfa } from '../session';
 import MfaForm from './mfa-form';
 
-export const metadata = { title: 'Verificación en dos pasos · Reventa Segura' };
+export const metadata = { title: 'Verificación en dos pasos' };
 
 export default async function MfaPage() {
   await requireAdminNeedingMfa();

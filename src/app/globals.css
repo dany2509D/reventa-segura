@@ -54,11 +54,11 @@ h2 { font-size: 1.2rem; margin: 1.5rem 0 0.5rem; }
 img { max-width: 100%; height: auto; }
 
 .site-header {
-  display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  padding: 10px 16px; border-bottom: 1px solid var(--border); background: var(--card);
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0 12px;
+  padding: 6px 16px; border-bottom: 1px solid var(--border); background: var(--card);
   position: sticky; top: 0; z-index: 5;
 }
-.brand { font-weight: 800; text-decoration: none; color: var(--fg); letter-spacing: -0.01em; }
+.brand { white-space: nowrap; font-weight: 800; text-decoration: none; color: var(--fg); letter-spacing: -0.01em; }
 .site-nav { display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: center; }
 .site-nav a, .site-nav button {
   color: var(--fg); text-decoration: none; font: inherit; font-weight: 600; background: none; border: 0;
