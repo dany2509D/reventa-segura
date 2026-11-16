@@ -60,11 +60,11 @@ const FINAL_STATES: readonly OrderState[] = ['liquidada', 'reembolsada', 'cancel
 export async function runMaintenance(db: Db, deps: MaintenanceDeps, now: Date): Promise<MaintenanceResult> {
   const result: MaintenanceResult = { expiredTransfers: 0, released: 0, abandoned: 0, purgedIdentities: 0, failed: 0 };
 
-  const fail = (step: string, e: unknown) => {
+  const fail = (step: string, e: unknown, itemId?: string) => {
     result.failed++;
-    // A failed refund, release or purge needs a person (RNF-10). Name only: messages can carry
-    // ids, file paths or bound query parameters.
-    alert('maintenance_step_failed', { step, error: errorName(e) });
+    // A failed refund, release or purge needs a person (RNF-10). The error NAME plus the id of the
+    // order/identity so the operator knows which one: messages can carry file paths or bound parameters.
+    alert('maintenance_step_failed', { step, error: errorName(e), ...(itemId ? { itemId } : {}) });
   };
 
   const forEach = async (step: string, list: () => Promise<string[]>, run: (id: string) => Promise<boolean>) => {
@@ -80,7 +80,7 @@ export async function runMaintenance(db: Db, deps: MaintenanceDeps, now: Date): 
       try {
         if (await run(id)) done++;
       } catch (e) {
-        fail(step, e);
+        fail(step, e, id);
       }
     }
     return done;

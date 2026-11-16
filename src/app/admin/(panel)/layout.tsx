@@ -17,6 +17,7 @@ export default async function PanelLayout({ children }: { children: ReactNode })
         <a href="/admin/disputas">Disputas</a>
         <a href="/admin/pagos">Pagos</a>
         <a href="/admin/eventos">Eventos</a>
+        <a href="/admin/revision">Revisión manual</a>
       </nav>
       {children}
     </div>

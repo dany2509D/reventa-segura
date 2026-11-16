@@ -71,6 +71,30 @@ export async function queuedPayouts(db: Db, actor: Actor | null) {
     .orderBy(asc(orders.createdAt));
 }
 
+/** Orders a person must settle by hand (e.g. the event was cancelled after the seller was already paid). */
+export async function manualReviewOrders(db: Db, actor: Actor | null) {
+  requireAdminActor(actor);
+  const buyer = alias(users, 'buyer');
+  const seller = alias(users, 'seller');
+  return db
+    .select({
+      orderId: orders.id,
+      orderState: orders.state,
+      priceCents: orders.priceCents,
+      eventName: events.name,
+      buyerPhone: buyer.phone,
+      sellerPhone: seller.phone,
+      createdAt: orders.createdAt,
+    })
+    .from(orders)
+    .innerJoin(listings, eq(listings.id, orders.listingId))
+    .innerJoin(events, eq(events.id, listings.eventId))
+    .innerJoin(buyer, eq(buyer.id, orders.buyerId))
+    .innerJoin(seller, eq(seller.id, listings.sellerId))
+    .where(eq(orders.needsManualReview, true))
+    .orderBy(asc(orders.createdAt));
+}
+
 export async function allEvents(db: Db, actor: Actor | null) {
   requireAdminActor(actor);
   return db

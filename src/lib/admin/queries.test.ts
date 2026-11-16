@@ -7,7 +7,7 @@ import { openDispute } from '@/lib/disputes/disputes';
 import { seedPaidOrder } from '@/lib/orders/paid-order-fixture';
 import { newUser, seedListing } from '@/lib/orders/test-fixtures';
 import { FakeGateway } from '@/lib/payments/fake-gateway';
-import { allEvents, openDisputes, pendingIdentities, pendingListings, queuedPayouts } from './queries';
+import { allEvents, manualReviewOrders, openDisputes, pendingIdentities, pendingListings, queuedPayouts } from './queries';
 
 import type { Actor } from '@/lib/db/types';
 import { ForbiddenError } from '@/lib/errors';
@@ -77,6 +77,26 @@ describe('queuedPayouts', () => {
   });
 });
 
+describe('manualReviewOrders', () => {
+  it('lists orders flagged for manual review (e.g. refund owed after the seller was paid) with event and parties', async () => {
+    const a = await seedPaidOrder(db, gw, { deliveryMode: 'file' });
+    const b = await seedPaidOrder(db, gw, { deliveryMode: 'file' }); // not flagged
+    await db.update(orders).set({ state: 'liquidada', needsManualReview: true }).where(eq(orders.id, a.order.id));
+
+    const rows = await manualReviewOrders(db, ADMIN);
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({
+      orderId: a.order.id,
+      orderState: 'liquidada',
+      priceCents: a.order.priceCents,
+      eventName: 'Concierto',
+      buyerPhone: a.buyer.phone,
+      sellerPhone: a.seller.phone,
+    });
+    expect(rows.map((r) => r.orderId)).not.toContain(b.order.id);
+  });
+});
+
 describe('allEvents', () => {
   it('lists events newest-first with status', async () => {
     const a = await seedPaidOrder(db, gw, { deliveryMode: 'file', startsAt: new Date(Date.now() + 5 * 864e5) });
@@ -116,6 +136,7 @@ describe('every admin read requires an admin who passed 2FA (data-layer gate, no
     queuedPayouts,
     allEvents,
     pendingListings,
+    manualReviewOrders,
   } as const;
   const DENIED: [string, Actor | null][] = [
     ['no actor', null],

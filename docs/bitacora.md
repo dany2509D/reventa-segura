@@ -60,11 +60,11 @@ Importantes (revisión de seguridad T13), a cerrar antes de dinero real:
 1. ~~Tope diario de SMS agotable por un atacante anónimo.~~ **Hecho** (ver registro). Queda como mejora: límite por IP más estricto para teléfonos sin cuenta.
 2. ~~Bloqueo de vendedor con disputas perdidas: aplicar también al comprar y al aprobar publicaciones.~~ **Hecho** (ver registro).
 3. ~~Limitador de intentos: no registrar cada rechazo; purga por lotes.~~ **Hecho** (ver registro).
-4. Alertas sin id de orden/evento; falta lista de órdenes atascadas (`needsManualReview`).
-5. `docs/launch-checklist.md` aún dice Neon en algunos puntos; faltan riesgos con dinero en la sección 7.
-6. Pruebas de rutas solo recorren `src/app/api`; falta cubrir `route.tsx` y rutas fuera de `api`.
-7. Falta probar por ruta HTTP el límite de 5 códigos por teléfono.
-8. Consulta para localizar filas que bloqueen la migración 0004 en datos existentes.
+~~4. Alertas sin id de orden/evento; falta lista de órdenes atascadas (`needsManualReview`).~~ **Hecho**.
+~~5. `docs/launch-checklist.md` aún dice Neon en algunos puntos; faltan riesgos con dinero en la sección 7.~~ **Hecho**.
+~~6. Pruebas de rutas solo recorren `src/app/api`; falta cubrir `route.tsx` y rutas fuera de `api`.~~ **Hecho**.
+~~7. Falta probar por ruta HTTP el límite de 5 códigos por teléfono.~~ **Hecho**.
+~~8. Consulta para localizar filas que bloqueen la migración 0004 en datos existentes.~~ **Hecho**.
 
 Del dueño / externos: S.E. y cuenta comercial, abogado, pasarela de pago real, proveedor de SMS, términos y privacidad,
 fotos de eventos (requiere campo de imagen + subida), rediseño v3 por aprobar.
@@ -77,3 +77,4 @@ fotos de eventos (requiere campo de imagen + subida), rediseño v3 por aprobar.
 - 2026-11-16 — Bloqueo de vendedores (SEG-08) ahora también al comprar (la entrada ya verificada de un vendedor bloqueado aparece como no disponible, sin revelar el motivo) y al aprobar una publicación (rechazar sigue permitido). Por qué: antes un vendedor bloqueado podía seguir vendiendo hasta 10 entradas ya verificadas.
 - 2026-11-16 — Limitador de intentos: solo se guardan los intentos permitidos (un atacante ya no puede llenar la tabla con rechazos) y el bloqueo termina cuando sale de la ventana el intento permitido más antiguo; la purga diaria borra por lotes de 1000. Por qué: cada rechazo era una fila nueva y un borrado único podía ser enorme.
 - 2026-11-16 — Tope diario de SMS: los teléfonos sin cuenta pueden usar como máximo la mitad del tope (mínimo 1) en 24 h; la otra mitad queda para usuarios existentes. Por qué: un atacante anónimo con números inventados agotaba el tope y nadie podía entrar.
+- 2026-11-16 — Alertas con id (orden/evento/ítem), lista `/admin/revision` de órdenes a revisar a mano, descubrimiento de rutas más estricto (cualquier `route.*` en `src/app`), prueba HTTP del límite de 5 códigos por teléfono, y `docs/launch-checklist.md` migrado de Neon a Supabase con los riesgos de dinero en la sección 7.

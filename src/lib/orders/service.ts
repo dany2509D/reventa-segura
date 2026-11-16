@@ -31,6 +31,7 @@ export class AmountMismatchError extends Error {
   constructor(
     readonly expectedCents: number,
     readonly receivedCents: number,
+    readonly orderId?: string,
   ) {
     super(`Webhook amount ${receivedCents} does not match order price ${expectedCents}`);
     this.name = 'AmountMismatchError';
@@ -172,7 +173,7 @@ export async function handlePaymentWebhook(
     if (!listing) throw new Error(`Listing ${ref.listingId} of order ${order.id} not found`);
 
     if (evt.amountCents !== order.priceCents) {
-      mismatch = new AmountMismatchError(order.priceCents, evt.amountCents);
+      mismatch = new AmountMismatchError(order.priceCents, evt.amountCents, order.id);
       await audit(tx, {
         actorId: null,
         action: 'payment.amount_mismatch',

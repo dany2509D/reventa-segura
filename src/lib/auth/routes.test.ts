@@ -46,6 +46,17 @@ describe('auth routes', () => {
     expect((await requestPost(req('http://localhost/api/auth/request', { phone: PHONE }, h))).status).toBe(403);
   });
 
+  it('the sixth code request for one phone within the hour is a 429 over HTTP (per-phone budget)', async () => {
+    vi.spyOn(console, 'info').mockImplementation(() => {});
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    const statuses: number[] = [];
+    for (let i = 0; i < 6; i++) {
+      statuses.push((await requestPost(req('http://localhost/api/auth/request', { phone: PHONE }))).status);
+    }
+    expect(statuses.slice(0, 5)).toEqual([200, 200, 200, 200, 200]);
+    expect(statuses[5]).toBe(429);
+  });
+
   it('sets a hardened cookie and keeps the token out of the body', async () => {
     const f = new Fake();
     await requestOtp(db, PHONE, f);

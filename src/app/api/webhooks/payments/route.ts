@@ -20,7 +20,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'invalid webhook' }, { status: 400 });
     }
     if (e instanceof AmountMismatchError) {
-      alert('payment_webhook_amount_mismatch', { error: e.name });
+      alert('payment_webhook_amount_mismatch', { error: e.name, orderId: e.orderId });
       return NextResponse.json({ error: 'amount mismatch' }, { status: 422 });
     }
     if (e instanceof UnknownPaymentError) {
