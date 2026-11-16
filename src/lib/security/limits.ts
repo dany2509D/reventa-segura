@@ -9,7 +9,7 @@ const DAY = 24 * HOUR;
 
 /**
  * Request budgets per route (SEG-07). Keyed by user id where there is a session, else by client IP
- * (see getClientIp). Every attempt counts, allowed or not, so hammering keeps a client locked out.
+ * (see getClientIp). Only allowed attempts are stored; a denied client is let back in when its oldest allowed hit expires.
  * The OTP per-phone limit (5/hour) and the admin TOTP limit (5/15 min) live with their own code.
  */
 export const LIMITS = {

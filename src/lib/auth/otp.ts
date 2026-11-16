@@ -57,6 +57,22 @@ export async function requestOtp(
       .where(gt(otpCodes.createdAt, new Date(now.getTime() - DAY_MS)));
     if (sent >= cap) throw new SmsCapError(cap);
 
+    // Half the cap (at least 1) is the most that phones WITHOUT an account may use in 24 h, so an
+    // anonymous flood of made-up numbers cannot exhaust the budget that real users need to log in.
+    const [known] = await tx.select({ id: users.id }).from(users).where(eq(users.phone, phone)).limit(1);
+    if (!known) {
+      const [{ unknown }] = await tx
+        .select({ unknown: sql<number>`count(*)::int` })
+        .from(otpCodes)
+        .where(
+          and(
+            gt(otpCodes.createdAt, new Date(now.getTime() - DAY_MS)),
+            sql`not exists (select 1 from users u where u.phone = ${otpCodes.phone})`,
+          ),
+        );
+      if (unknown >= Math.max(1, Math.floor(cap / 2))) throw new SmsCapError(cap);
+    }
+
     await tx.insert(otpCodes).values({
       phone,
       salt,

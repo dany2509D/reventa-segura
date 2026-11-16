@@ -57,7 +57,7 @@ Detalle y solución de problemas: `docs/supabase-setup.md`.
 ## 5. Pendientes
 
 Importantes (revisión de seguridad T13), a cerrar antes de dinero real:
-1. Tope diario de SMS y presupuesto por teléfono agotables por un atacante anónimo.
+1. ~~Tope diario de SMS agotable por un atacante anónimo.~~ **Hecho** (ver registro). Queda como mejora: límite por IP más estricto para teléfonos sin cuenta.
 2. ~~Bloqueo de vendedor con disputas perdidas: aplicar también al comprar y al aprobar publicaciones.~~ **Hecho** (ver registro).
 3. ~~Limitador de intentos: no registrar cada rechazo; purga por lotes.~~ **Hecho** (ver registro).
 4. Alertas sin id de orden/evento; falta lista de órdenes atascadas (`needsManualReview`).
@@ -76,3 +76,4 @@ fotos de eventos (requiere campo de imagen + subida), rediseño v3 por aprobar.
 - 2026-11-15/16 — Supabase conectado; admin del dueño (66632666) creado; páginas de administración protegidas a nivel de datos; rotación TOTP cierra sesiones.
 - 2026-11-16 — Bloqueo de vendedores (SEG-08) ahora también al comprar (la entrada ya verificada de un vendedor bloqueado aparece como no disponible, sin revelar el motivo) y al aprobar una publicación (rechazar sigue permitido). Por qué: antes un vendedor bloqueado podía seguir vendiendo hasta 10 entradas ya verificadas.
 - 2026-11-16 — Limitador de intentos: solo se guardan los intentos permitidos (un atacante ya no puede llenar la tabla con rechazos) y el bloqueo termina cuando sale de la ventana el intento permitido más antiguo; la purga diaria borra por lotes de 1000. Por qué: cada rechazo era una fila nueva y un borrado único podía ser enorme.
+- 2026-11-16 — Tope diario de SMS: los teléfonos sin cuenta pueden usar como máximo la mitad del tope (mínimo 1) en 24 h; la otra mitad queda para usuarios existentes. Por qué: un atacante anónimo con números inventados agotaba el tope y nadie podía entrar.
