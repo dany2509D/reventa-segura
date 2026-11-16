@@ -1,4 +1,4 @@
-import { X509Certificate, createPublicKey, createVerify } from 'node:crypto';
+import { X509Certificate, createVerify } from 'node:crypto';
 
 /*
  * Verifies a Firebase ID token (RS256 JWT) against Google's public signing certificates, without
@@ -49,7 +49,7 @@ export async function verifyFirebaseIdToken(
   if (!pem) return null;
   const valid = createVerify('RSA-SHA256')
     .update(`${parts[0]}.${parts[1]}`)
-    .verify(createPublicKey(new X509Certificate(pem).publicKey), Buffer.from(parts[2], 'base64url'));
+    .verify(new X509Certificate(pem).publicKey, Buffer.from(parts[2], 'base64url'));
   if (!valid) return null;
 
   const nowS = Math.floor(now / 1000);
