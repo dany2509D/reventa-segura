@@ -1,6 +1,7 @@
 import sharp from 'sharp';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createSession } from '@/lib/auth/session';
+import { rateLimitHits } from '@/lib/db/schema';
 import { makeTestDb } from '@/lib/db/test-db';
 import type { Db } from '@/lib/db/types';
 import { HOUR, disputesOf, getOrder, seedPaidOrder } from '@/lib/orders/paid-order-fixture';
@@ -85,6 +86,7 @@ describe('POST /api/orders/[id]/dispute', () => {
     expect((await post([['reason', 'Motivo'], ...six])).status).toBe(400);
     expect((await post([['reason', 'Motivo'], ['evidence', 'not a file']])).status).toBe(400);
     expect(put).not.toHaveBeenCalled();
+    await h.db.delete(rateLimitHits); // a 6th dispute request today: the 5/day budget is not under test here
     expect((await post([['reason', 'Motivo'], ['evidence', blob(Buffer.from('MZ exe'), 'image/jpeg')]])).status).toBe(400);
     expect(await disputesOf(h.db, fx.order.id)).toHaveLength(0);
   });

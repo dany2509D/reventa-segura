@@ -12,7 +12,8 @@
     "db:migrate": "tsx scripts/db-migrate.ts",
     "admin:create": "tsx scripts/create-admin.ts",
     "seed:dev": "tsx scripts/seed-dev.ts",
-    "db:set-password": "tsx scripts/set-db-password.ts"
+    "db:set-password": "tsx scripts/set-db-password.ts",
+    "check:headers": "tsx scripts/check-headers.ts"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.5.16",
@@ -38,5 +39,10 @@
     "tsx": "^4.23.15",
     "typescript": "^7.0.2",
     "vitest": "^5.1.0"
+  },
+  "overrides": {
+    "@vercel/cli-config": {
+      "zod": "$zod"
+    }
   }
 }

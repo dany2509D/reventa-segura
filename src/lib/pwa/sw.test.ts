@@ -131,3 +131,17 @@ describe('public/sw.js', () => {
     expect([...sw.store.keys()]).not.toContain('rs-static-v0');
   });
 });
+
+describe('public/offline.html under the CSP (SEG-16)', () => {
+  const html = readFileSync(join(process.cwd(), 'public', 'offline.html'), 'utf8');
+
+  it('has no inline script or inline event handler (script-src has no unsafe-inline)', () => {
+    expect(html).not.toMatch(/<script\b/i);
+    expect(html).not.toMatch(/\son[a-z]+\s*=/i);
+    expect(html).not.toMatch(/javascript:/i);
+  });
+
+  it('still offers a retry that works without JavaScript', () => {
+    expect(html).toMatch(/<a\b[^>]*href=""[^>]*>\s*Reintentar\s*<\/a>/);
+  });
+});

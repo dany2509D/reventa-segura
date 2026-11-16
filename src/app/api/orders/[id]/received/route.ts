@@ -9,6 +9,8 @@ import { InvalidUploadError } from '@/lib/uploads/errors';
 import { BodyTooLargeError, fileField, readMultipart, uploadErrorMessage } from '@/lib/uploads/http';
 import { getStore } from '@/lib/uploads/store';
 import { MAX_UPLOAD_BYTES, storePrivate, validateUpload } from '@/lib/uploads/uploads';
+import { errorName, log } from '@/lib/observability/log';
+import { LIMITS, limitOr429 } from '@/lib/security/limits';
 
 // One file plus multipart overhead.
 const MAX_BODY_BYTES = MAX_UPLOAD_BYTES + 64 * 1024;
@@ -26,7 +28,7 @@ function errorResponse(e: unknown): NextResponse {
   }
   if (e instanceof InvalidTransitionError) return json({ error: 'Esta orden ya no admite esta acción.' }, 409);
   // Never log the message: it may carry bound query parameters (phone numbers).
-  console.error('received route error', e instanceof Error ? e.name : 'UnknownError');
+  log('error', 'received route error', { error: errorName(e) });
   return json({ error: 'Error interno. Intenta de nuevo.' }, 500);
 }
 
@@ -40,6 +42,8 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
     const db = getDb();
     const actor = await sessionFromRequest(db, req);
     if (!actor) return json({ error: 'Inicia sesión para continuar.' }, 401);
+    const limited = await limitOr429(db, LIMITS.orderReceived, actor.userId);
+    if (limited) return limited;
 
     // Refuse before reading or storing the upload; confirmReceived re-checks under the row lock.
     await checkCanConfirmReceived(db, actor.userId, id);

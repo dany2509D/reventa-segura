@@ -3,6 +3,8 @@ import { makeTestDb } from '@/lib/db/test-db';
 import type { Db } from '@/lib/db/types';
 import { HOUR, getOrder, seedPaidOrder } from '@/lib/orders/paid-order-fixture';
 import { FakeGateway } from '@/lib/payments/fake-gateway';
+import { rateLimitHits } from '@/lib/db/schema';
+import { rateLimit } from '@/lib/security/rate-limit';
 
 const h = vi.hoisted(() => ({ db: undefined as unknown as Db }));
 vi.mock('@/lib/db/client', () => ({ getDb: () => h.db }));
@@ -63,6 +65,14 @@ describe('GET /api/cron/maintenance', () => {
       failed: 0,
     });
     expect((await getOrder(h.db, order.id)).state).toBe('reembolsada');
+  });
+
+  it('also prunes rate-limit rows older than two days (the table grows with every API call)', async () => {
+    const old = new Date(Date.now() - 3 * 24 * HOUR);
+    await rateLimit(h.db, 'checkout:someone', 20, 3600, old);
+    await rateLimit(h.db, 'checkout:someone', 20, 3600);
+    expect((await call({ authorization: `Bearer ${SECRET}` })).status).toBe(200);
+    expect(await h.db.select().from(rateLimitHits)).toHaveLength(1);
   });
 
   it('401 when CRON_SECRET is not set outside production', async () => {

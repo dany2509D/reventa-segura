@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import { connection } from 'next/server';
 import type { ReactNode } from 'react';
 import './globals.css';
 import SiteHeader from './_components/site-header';
@@ -21,7 +22,10 @@ export const viewport: Viewport = {
   colorScheme: 'light',
 };
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default async function RootLayout({ children }: { children: ReactNode }) {
+  // Render every page per request: the CSP nonce (src/proxy.ts) is new on each response, and a
+  // page prerendered at build time would carry scripts without it, which the browser blocks.
+  await connection();
   return (
     <html lang="es">
       <body>

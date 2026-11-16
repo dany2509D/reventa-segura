@@ -57,6 +57,14 @@ export class ListingLimitError extends Error {
   }
 }
 
+// The seller lost too many disputes recently (SEG-08): no new listings.
+export class SellerBlockedError extends Error {
+  constructor(message = 'Seller blocked after repeated lost disputes') {
+    super(message);
+    this.name = 'SellerBlockedError';
+  }
+}
+
 // The listing status does not allow the requested transition.
 export class ListingStateError extends Error {
   constructor(message = 'Invalid listing status transition') {

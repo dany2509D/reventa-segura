@@ -17,9 +17,9 @@
     .ink { fill: none; stroke: #141416; stroke-width: 4.5; stroke-linecap: round; stroke-linejoin: round; }
     h1 { font-size: 2.125rem; line-height: 1.08; letter-spacing: -0.03em; font-weight: 800; margin: 24px 0 10px; }
     p { color: #5d606b; margin: 0 0 24px; }
-    button { width: 100%; font: inherit; font-weight: 700; min-height: 54px; padding: 0 28px; border-radius: 999px;
-             border: 0; background: #141416; color: #ffffff; cursor: pointer; }
-    button:focus-visible { outline: 3px solid #141416; outline-offset: 2px; }
+    .retry { display: flex; align-items: center; justify-content: center; width: 100%; box-sizing: border-box; font: inherit; font-weight: 700;
+             min-height: 54px; padding: 0 28px; border-radius: 999px; border: 0; background: #141416; color: #ffffff; text-decoration: none; }
+    .retry:focus-visible { outline: 3px solid #141416; outline-offset: 2px; }
   </style>
 </head>
 <body>
@@ -38,7 +38,8 @@
     </div>
     <h1>Sin conexión</h1>
     <p>No pudimos conectarnos. Revisa tu internet e inténtalo de nuevo.<br>Tu compra y tu dinero siguen protegidos.</p>
-    <button onclick="location.reload()">Reintentar</button>
+    <!-- A link to the current address, not an inline onclick: the CSP forbids inline scripts. -->
+    <a class="retry" href="">Reintentar</a>
   </main>
 </body>
 </html>

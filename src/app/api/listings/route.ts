@@ -12,13 +12,16 @@ import {
   ListingLimitError,
   PriceCapError,
   ResaleProhibitedError,
+  SellerBlockedError,
   TransferNotAllowedError,
 } from '@/lib/tickets/errors';
-import { createListing } from '@/lib/tickets/listings';
+import { assertSellerNotBlocked, createListing } from '@/lib/tickets/listings';
 import { InvalidUploadError } from '@/lib/uploads/errors';
 import { BodyTooLargeError, fileField, readMultipart, uploadErrorMessage } from '@/lib/uploads/http';
 import { getStore } from '@/lib/uploads/store';
 import { MAX_UPLOAD_BYTES } from '@/lib/uploads/uploads';
+import { errorName, log } from '@/lib/observability/log';
+import { LIMITS, limitOr429 } from '@/lib/security/limits';
 
 // Proof + optional ticket file plus multipart overhead.
 const MAX_BODY_BYTES = 2 * MAX_UPLOAD_BYTES + 64 * 1024;
@@ -27,6 +30,8 @@ const json = (body: object, status: number) =>
   NextResponse.json(body, { status, headers: { 'cache-control': 'no-store' } });
 
 const IDENTITY_REQUIRED = 'Verifica tu identidad antes de publicar entradas.';
+const SELLER_BLOCKED =
+  'Tu cuenta no puede publicar entradas por ahora: perdiste varias disputas recientes. Escríbenos si crees que es un error.';
 const INVALID = 'Revisa los datos de la publicación.';
 const IMAGES_ONLY = 'Formato no permitido. Usa una imagen JPG, PNG o WebP.';
 
@@ -46,6 +51,7 @@ function errorResponse(e: unknown): NextResponse {
     return json({ error: INVALID }, 400);
   }
   if (e instanceof IdentityRequiredError) return json({ error: IDENTITY_REQUIRED }, 403);
+  if (e instanceof SellerBlockedError) return json({ error: SELLER_BLOCKED }, 403);
   if (e instanceof NotFoundError) return json({ error: 'Evento no encontrado.' }, 404);
   if (e instanceof DuplicateTicketError) return json({ error: 'Esta entrada ya está publicada.' }, 409);
   if (e instanceof AmbiguousTicketError) {
@@ -65,7 +71,7 @@ function errorResponse(e: unknown): NextResponse {
     return json({ error: `Alcanzaste el máximo de ${e.limit} publicaciones activas.` }, 422);
   }
   // Never log the message: it may carry bound query parameters.
-  console.error('listings route error', e instanceof Error ? e.name : 'UnknownError');
+  log('error', 'listings route error', { error: errorName(e) });
   return json({ error: 'Error interno. Intenta de nuevo.' }, 500);
 }
 
@@ -79,8 +85,12 @@ export async function POST(req: Request) {
     const db = getDb();
     const actor = await sessionFromRequest(db, req);
     if (!actor) return json({ error: 'Inicia sesión para continuar.' }, 401);
-    // Refuse unverified sellers before reading (and buffering) any upload.
+    // Also bounds the CPU spent on QR scanning per seller.
+    const limited = await limitOr429(db, LIMITS.listingCreate, actor.userId);
+    if (limited) return limited;
+    // Refuse unverified or blocked sellers before reading (and buffering) any upload.
     await assertCanSell(db, actor.userId);
+    await assertSellerNotBlocked(db, actor.userId);
 
     const form = await readMultipart(req, MAX_BODY_BYTES);
     if (!form) return json({ error: INVALID }, 400);

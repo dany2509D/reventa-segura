@@ -62,3 +62,40 @@ describe('POST /api/webhooks/payments', () => {
     expect((await post(rawBody, headers)).status).toBe(404);
   });
 });
+
+describe('POST /api/webhooks/payments: alerts (RNF-10)', () => {
+  const lines = (spy: { mock: { calls: unknown[][] } }) =>
+    spy.mock.calls.map((c: unknown[]) => JSON.parse(String(c[0])) as Record<string, unknown>);
+
+  it('an amount mismatch raises an alert (money arrived that does not match the order)', async () => {
+    const errors = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const { rawBody, headers } = gw.buildWebhook({ providerRef: `fake_${orderId}`, status: 'paid', amountCents: 1 });
+    await post(rawBody, headers);
+    expect(lines(errors)).toContainEqual(expect.objectContaining({ alert: true, msg: 'payment_webhook_amount_mismatch' }));
+    errors.mockRestore();
+  });
+
+  it('an unexpected failure is a 500 (the provider retries) with an alert carrying the error name only', async () => {
+    const errors = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const realTx = h.db.transaction.bind(h.db);
+    vi.spyOn(h.db, 'transaction').mockImplementation((() => {
+      throw new Error('db down params +50761234567');
+    }) as unknown as typeof realTx);
+    const { rawBody, headers } = gw.buildWebhook({ providerRef: `fake_${orderId}`, status: 'paid', amountCents: 5000 });
+    const res = await post(rawBody, headers);
+    expect(res.status).toBe(500);
+    expect(lines(errors)).toContainEqual(
+      expect.objectContaining({ alert: true, msg: 'payment_webhook_failed', ctx: { error: 'Error' } }),
+    );
+    expect(JSON.stringify(errors.mock.calls)).not.toContain('61234567');
+    vi.restoreAllMocks();
+  });
+
+  it('a bad signature is logged as a warning, not an alert (anyone can post junk)', async () => {
+    const warns = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const { rawBody } = gw.buildWebhook({ providerRef: `fake_${orderId}`, status: 'paid', amountCents: 5000 });
+    await post(rawBody, { 'x-fake-signature': 'nope' });
+    expect(lines(warns)).toContainEqual(expect.objectContaining({ level: 'warn', msg: 'payment webhook rejected' }));
+    warns.mockRestore();
+  });
+});

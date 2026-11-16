@@ -12,6 +12,8 @@ import { InvalidUploadError } from '@/lib/uploads/errors';
 import { BodyTooLargeError, fileField, readMultipart, uploadErrorMessage } from '@/lib/uploads/http';
 import { getStore } from '@/lib/uploads/store';
 import { MAX_UPLOAD_BYTES, storePrivate, validateUpload } from '@/lib/uploads/uploads';
+import { errorName, log } from '@/lib/observability/log';
+import { LIMITS, limitOr429 } from '@/lib/security/limits';
 
 // One photo plus multipart overhead.
 const MAX_BODY_BYTES = MAX_UPLOAD_BYTES + 64 * 1024;
@@ -37,6 +39,8 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
     const db = getDb();
     const actor = await sessionFromRequest(db, req);
     if (!actor) return json({ error: 'Inicia sesión para continuar.' }, 401);
+    const limited = await limitOr429(db, LIMITS.orderEntry, actor.userId);
+    if (limited) return limited;
 
     // Cheap ownership check before reading, decoding or storing any upload.
     if (!isUuid(id)) return json({ error: NOT_FOUND }, 404);
@@ -79,7 +83,7 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
       return json({ error: 'Esta compra no está esperando la confirmación de ingreso.' }, 409);
     }
     // Never log the message: it may carry bound query parameters.
-    console.error('entry route error', e instanceof Error ? e.name : 'UnknownError');
+    log('error', 'entry route error', { error: errorName(e) });
     return json({ error: 'Error interno. Intenta de nuevo.' }, 500);
   }
 }

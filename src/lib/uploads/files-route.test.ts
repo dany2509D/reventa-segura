@@ -6,6 +6,7 @@ import { makeTestDb } from '@/lib/db/test-db';
 import { auditLog, sessions, users } from '@/lib/db/schema';
 import type { Actor, Db } from '@/lib/db/types';
 import { createSession, hashToken } from '@/lib/auth/session';
+import { PRIVATE_FILE_CSP } from '@/lib/security/headers';
 import { getStore } from './store';
 import { signedUrl, storePrivate } from './uploads';
 
@@ -179,7 +180,7 @@ describe('GET /api/files/[token]', () => {
     expect(res.status).toBe(200);
     expect(res.headers.get('content-type')).toBe('application/pdf');
     expect(res.headers.get('content-disposition')).toBe('attachment; filename="documento.pdf"');
-    expect(res.headers.get('content-security-policy')).toBe("default-src 'none'; sandbox");
+    expect(res.headers.get('content-security-policy')).toBe(PRIVATE_FILE_CSP);
   });
 
   it('sends a sandboxing CSP on image and error responses too', async () => {
@@ -187,9 +188,9 @@ describe('GET /api/files/[token]', () => {
     const ok = await fetchFile(signedUrl(path, owner.actor), owner.cookie);
     expect(ok.status).toBe(200);
     expect(ok.headers.get('content-disposition')).toBe('inline');
-    expect(ok.headers.get('content-security-policy')).toBe("default-src 'none'; sandbox");
+    expect(ok.headers.get('content-security-policy')).toBe(PRIVATE_FILE_CSP);
     const denied = await fetchFile(signedUrl(path, owner.actor), other.cookie);
     expect(denied.status).toBe(403);
-    expect(denied.headers.get('content-security-policy')).toBe("default-src 'none'; sandbox");
+    expect(denied.headers.get('content-security-policy')).toBe(PRIVATE_FILE_CSP);
   });
 });

@@ -2,10 +2,17 @@ import { NextResponse } from 'next/server';
 import { sessionFromRequest } from '@/lib/auth/request-session';
 import { getDb } from '@/lib/db/client';
 import { ForbiddenError, NotFoundError } from '@/lib/errors';
+import { errorName, log } from '@/lib/observability/log';
 import { UnsupportedDeliveryError, getDeliveredFile } from '@/lib/orders/delivery';
+import { PRIVATE_FILE_CSP } from '@/lib/security/headers';
 import { getStore } from '@/lib/uploads/store';
 
-const PRIVATE = { 'cache-control': 'private, no-store', 'x-content-type-options': 'nosniff' };
+// Same values as next.config.ts declares for this path (which wins under Next).
+const PRIVATE = {
+  'cache-control': 'private, no-store',
+  'x-content-type-options': 'nosniff',
+  'content-security-policy': PRIVATE_FILE_CSP,
+};
 
 const json = (error: string, status: number) => NextResponse.json({ error }, { status, headers: PRIVATE });
 
@@ -36,7 +43,7 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
       return json('No podemos mostrar esta entrada. Contacta a soporte.', 409);
     }
     // Never log the message: it may carry bound query parameters (phone numbers).
-    console.error('ticket route error', e instanceof Error ? e.name : 'UnknownError');
+    log('error', 'ticket route error', { error: errorName(e) });
     return json('Error interno. Intenta de nuevo.', 500);
   }
 }

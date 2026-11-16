@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { makeTestDb } from '@/lib/db/test-db';
 import type { Db } from '@/lib/db/types';
-import { rateLimit } from './rate-limit';
+import { rateLimitHits } from '@/lib/db/schema';
+import { purgeRateLimitHits, rateLimit } from './rate-limit';
 
 let db: Db;
 const T0 = new Date('2027-01-01T12:00:00Z');
@@ -46,5 +47,15 @@ describe('rateLimit', () => {
   });
   it('rejects an empty key', async () => {
     await expect(rateLimit(db, '', 3, 60, T0)).rejects.toThrow(RangeError);
+  });
+});
+
+describe('purgeRateLimitHits', () => {
+  it('deletes hits older than the longest window (2 days) and keeps recent ones', async () => {
+    await rateLimit(db, 'old', 5, 60, at(-3 * 24 * 3600));
+    await rateLimit(db, 'recent', 5, 86400, at(-23 * 3600));
+    expect(await purgeRateLimitHits(db, T0)).toBe(1);
+    const keys = (await db.select().from(rateLimitHits)).map((r) => r.key);
+    expect(keys).toEqual(['recent']);
   });
 });

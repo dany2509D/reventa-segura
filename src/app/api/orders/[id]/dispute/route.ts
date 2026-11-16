@@ -18,6 +18,8 @@ import { InvalidUploadError } from '@/lib/uploads/errors';
 import { BodyTooLargeError, readMultipart, uploadErrorMessage } from '@/lib/uploads/http';
 import { getStore } from '@/lib/uploads/store';
 import { MAX_UPLOAD_BYTES, storePrivate, validateUpload } from '@/lib/uploads/uploads';
+import { errorName, log } from '@/lib/observability/log';
+import { LIMITS, limitOr429 } from '@/lib/security/limits';
 
 // Up to five files plus multipart overhead.
 const MAX_BODY_BYTES = MAX_EVIDENCE_FILES * MAX_UPLOAD_BYTES + 64 * 1024;
@@ -38,6 +40,8 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
     const db = getDb();
     const actor = await sessionFromRequest(db, req);
     if (!actor) return json({ error: 'Inicia sesión para continuar.' }, 401);
+    const limited = await limitOr429(db, LIMITS.orderDispute, actor.userId);
+    if (limited) return limited;
 
     // Cheap ownership check before reading, decoding or storing any upload.
     if (!isUuid(id)) return json({ error: NOT_FOUND }, 404);
@@ -87,7 +91,7 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
     }
     if (e instanceof InvalidTransitionError) return json({ error: 'Esta compra ya no admite disputas.' }, 409);
     // Never log the message: it may carry bound query parameters.
-    console.error('dispute route error', e instanceof Error ? e.name : 'UnknownError');
+    log('error', 'dispute route error', { error: errorName(e) });
     return json({ error: 'Error interno. Intenta de nuevo.' }, 500);
   }
 }

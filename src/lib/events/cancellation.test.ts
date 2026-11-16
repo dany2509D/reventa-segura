@@ -350,6 +350,10 @@ describe('cancelEvent: idempotency, failures and concurrency', () => {
       expect(await cancelEvent(db, flaky, admin, event.id, CANCEL_AT)).toEqual({ ...ZERO, refunded: 2, failed: 1 });
       const logged = JSON.stringify(errors.mock.calls);
       expect(logged).toContain('GatewayDownError');
+      // A refund that could not be made pages an operator (RNF-10).
+      expect(errors.mock.calls.map((c) => JSON.parse(String(c[0])))).toContainEqual(
+        expect.objectContaining({ alert: true, msg: 'event_cancel_order_failed', ctx: { error: 'GatewayDownError' } }),
+      );
       expect(logged).not.toContain(badRef);
       expect(logged).not.toContain('+507');
     } finally {

@@ -2,7 +2,8 @@
 // Deliberately tiny and private-by-default: it never stores API responses, tickets, documents,
 // pages or anything tied to a person. It caches only the static build assets and icons, and shows
 // an offline page when a navigation cannot reach the network.
-const CACHE = 'rs-static-v1';
+// Bump on every change to a precached file (v2: offline page without inline script, for the CSP).
+const CACHE = 'rs-static-v2';
 const OFFLINE_URL = '/offline.html';
 const PRECACHE = [OFFLINE_URL, '/icons/icon-192.png'];
 

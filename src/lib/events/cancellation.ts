@@ -4,6 +4,7 @@ import { assertAdmin } from '@/lib/authz';
 import { disputes, events, listings, orders } from '@/lib/db/schema';
 import type { Actor, Db, Tx } from '@/lib/db/types';
 import { NotFoundError } from '@/lib/errors';
+import { alert, errorName } from '@/lib/observability/log';
 import { applyTransition } from '@/lib/orders/service';
 import { isUuid, lockOrderForUpdate, refundPaidOrder, type OrderRow } from '@/lib/orders/settlement';
 import type { OrderState } from '@/lib/orders/state-machine';
@@ -99,8 +100,9 @@ export async function cancelEvent(
       if (outcome !== 'skipped') result[outcome]++;
     } catch (e) {
       result.failed++;
-      // Name only: messages can carry ids, provider references or bound query parameters.
-      console.error('cancelEvent: order failed', e instanceof Error ? e.name : 'UnknownError');
+      // A buyer is still owed a refund: page an operator (RNF-10). Name only: messages can carry
+      // ids, provider references or bound query parameters.
+      alert('event_cancel_order_failed', { error: errorName(e) });
     }
   }
   return result;

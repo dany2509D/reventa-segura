@@ -1,32 +1,38 @@
-import { NextResponse, type NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { getSession } from '@/lib/auth/session';
+import { rejectUnsafeRequest } from '@/lib/auth/http';
+import { sessionFromRequest } from '@/lib/auth/request-session';
 import { getDb } from '@/lib/db/client';
+import { errorName, log } from '@/lib/observability/log';
 import { ListingUnavailableError, SelfPurchaseError, startCheckout } from '@/lib/orders/service';
 import { getPaymentGateway } from '@/lib/payments';
+import { LIMITS, limitOr429 } from '@/lib/security/limits';
 
 const body = z.object({ listingId: z.uuid() });
 
-export async function POST(req: NextRequest) {
-  const db = getDb();
-  const session = await getSession(db, req.cookies.get('session')?.value ?? '');
-  if (!session) {
-    return NextResponse.json({ error: 'Inicia sesión para comprar' }, { status: 401 });
-  }
-  const parsed = body.safeParse(await req.json().catch(() => null));
-  if (!parsed.success) {
-    return NextResponse.json({ error: 'Solicitud inválida' }, { status: 400 });
-  }
+const json = (b: object, status: number) => NextResponse.json(b, { status, headers: { 'cache-control': 'no-store' } });
+
+// Buyer starts a checkout: holds the listing for 15 minutes and returns the gateway URL.
+export async function POST(req: Request) {
+  const blocked = rejectUnsafeRequest(req);
+  if (blocked) return blocked;
   try {
-    const result = await startCheckout(db, getPaymentGateway(), session.userId, parsed.data.listingId);
-    return NextResponse.json(result);
+    const db = getDb();
+    const actor = await sessionFromRequest(db, req);
+    if (!actor) return json({ error: 'Inicia sesión para comprar' }, 401);
+    // Each checkout holds a listing: the budget also limits how much stock one buyer can lock.
+    const limited = await limitOr429(db, LIMITS.checkout, actor.userId);
+    if (limited) return limited;
+    const parsed = body.safeParse(await req.json().catch(() => null));
+    if (!parsed.success) return json({ error: 'Solicitud inválida' }, 400);
+
+    const result = await startCheckout(db, getPaymentGateway(), actor.userId, parsed.data.listingId);
+    return json(result, 200);
   } catch (e) {
-    if (e instanceof ListingUnavailableError) {
-      return NextResponse.json({ error: 'Esta entrada ya no está disponible' }, { status: 409 });
-    }
-    if (e instanceof SelfPurchaseError) {
-      return NextResponse.json({ error: 'No puedes comprar tu propia entrada' }, { status: 422 });
-    }
-    throw e;
+    if (e instanceof ListingUnavailableError) return json({ error: 'Esta entrada ya no está disponible' }, 409);
+    if (e instanceof SelfPurchaseError) return json({ error: 'No puedes comprar tu propia entrada' }, 422);
+    // Never log the message: it may carry bound query parameters.
+    log('error', 'checkout route error', { error: errorName(e) });
+    return json({ error: 'Error interno. Intenta de nuevo.' }, 500);
   }
 }

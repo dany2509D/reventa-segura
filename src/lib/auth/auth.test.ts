@@ -246,8 +246,10 @@ describe('admin TOTP (SEG-04)', () => {
     const { db, admin } = await setup();
     const { secret } = await enrollTotp(db, admin.id);
     const t = now.getTime();
-    expect(await verifyTotp(db, admin.id, totpAt(secret, t), now)).toBe(true);
+    // Previous window first: once a step is accepted, older steps are refused (replay protection,
+    // see totp-hardening.test.ts).
     expect(await verifyTotp(db, admin.id, totpAt(secret, t - 30_000), now)).toBe(true);
+    expect(await verifyTotp(db, admin.id, totpAt(secret, t), now)).toBe(true);
     expect(await verifyTotp(db, admin.id, totpAt(secret, t - 90_000), now)).toBe(false);
     expect(await verifyTotp(db, admin.id, totpAt(secret, t + 90_000), now)).toBe(false);
     expect(await verifyTotp(db, admin.id, 'abc', now)).toBe(false);
