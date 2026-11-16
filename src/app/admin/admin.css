@@ -1,0 +1,20 @@
+.admin-shell { max-width: 1100px; margin: 0 auto; padding: 16px; font-family: system-ui, sans-serif; }
+.admin-narrow { max-width: 420px; margin: 48px auto; padding: 0 16px; font-family: system-ui, sans-serif; }
+.admin-nav { display: flex; flex-wrap: wrap; gap: 8px 16px; padding: 12px 0; border-bottom: 1px solid #ccc; margin-bottom: 16px; }
+.admin-nav a { color: inherit; font-weight: 600; text-decoration: none; padding: 8px 4px; min-height: 44px; display: inline-flex; align-items: center; }
+.admin-table-wrap { overflow-x: auto; }
+.admin-table { border-collapse: collapse; width: 100%; font-size: 14px; }
+.admin-table th, .admin-table td { border-bottom: 1px solid #ddd; padding: 8px; text-align: left; vertical-align: top; }
+.admin-form { display: grid; gap: 8px; max-width: 420px; }
+.admin-form input, .admin-form select, .admin-form textarea, .admin-form button { font: inherit; padding: 10px; min-height: 44px; }
+.admin-inline { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.admin-inline input, .admin-inline button { font: inherit; padding: 8px 10px; min-height: 44px; }
+.admin-error { color: #b00020; }
+.admin-ok { color: #1b5e20; }
+.admin-muted { color: #666; font-size: 13px; }
+@media (prefers-color-scheme: dark) {
+  .admin-nav, .admin-table th, .admin-table td { border-color: #444; }
+  .admin-error { color: #ff8a80; }
+  .admin-ok { color: #81c784; }
+  .admin-muted { color: #aaa; }
+}

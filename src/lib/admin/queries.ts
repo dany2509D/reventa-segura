@@ -75,3 +75,22 @@ export async function allEvents(db: Db) {
     .from(events)
     .orderBy(desc(events.startsAt));
 }
+
+export async function pendingListings(db: Db) {
+  return db
+    .select({
+      listingId: listings.id,
+      askCents: listings.askCents,
+      faceValueCents: events.faceValueCents,
+      deliveryMode: listings.deliveryMode,
+      eventName: events.name,
+      sellerPhone: users.phone,
+      proofPath: listings.proofPath,
+      filePath: listings.filePath,
+    })
+    .from(listings)
+    .innerJoin(events, eq(events.id, listings.eventId))
+    .innerJoin(users, eq(users.id, listings.sellerId))
+    .where(eq(listings.status, 'pending'))
+    .orderBy(asc(listings.createdAt));
+}

@@ -1,13 +1,13 @@
 import { eq } from 'drizzle-orm';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { disputes, orders, payouts, users } from '@/lib/db/schema';
+import { disputes, listings, orders, payouts, users } from '@/lib/db/schema';
 import { makeTestDb } from '@/lib/db/test-db';
 import type { Db } from '@/lib/db/types';
 import { openDispute } from '@/lib/disputes/disputes';
 import { seedPaidOrder } from '@/lib/orders/paid-order-fixture';
-import { newUser } from '@/lib/orders/test-fixtures';
+import { newUser, seedListing } from '@/lib/orders/test-fixtures';
 import { FakeGateway } from '@/lib/payments/fake-gateway';
-import { allEvents, openDisputes, pendingIdentities, queuedPayouts } from './queries';
+import { allEvents, openDisputes, pendingIdentities, pendingListings, queuedPayouts } from './queries';
 
 let db: Db;
 const gw = new FakeGateway('admin-q-secret');
@@ -79,5 +79,28 @@ describe('allEvents', () => {
     const rows = await allEvents(db);
     expect(rows).toHaveLength(1);
     expect(rows[0]).toMatchObject({ id: a.event.id, name: 'Concierto', status: 'active', faceValueCents: 5000 });
+  });
+});
+
+describe('pendingListings', () => {
+  it('lists pending listings with event, face value, seller and file paths; hides the rest', async () => {
+    const p = await seedListing(db, { status: 'pending', askCents: 7000 });
+    await seedListing(db, { status: 'verified' });
+    await seedListing(db, { status: 'rejected' });
+    await db.update(listings).set({ proofPath: `proof/${p.seller.id}/x`, filePath: `ticket/${p.seller.id}/y` }).where(eq(listings.id, p.listing.id));
+
+    const rows = await pendingListings(db);
+    expect(rows).toEqual([
+      {
+        listingId: p.listing.id,
+        askCents: 7000,
+        faceValueCents: 5000,
+        deliveryMode: 'transfer',
+        eventName: 'Concierto',
+        sellerPhone: p.seller.phone,
+        proofPath: `proof/${p.seller.id}/x`,
+        filePath: `ticket/${p.seller.id}/y`,
+      },
+    ]);
   });
 });
