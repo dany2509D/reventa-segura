@@ -1,19 +1,28 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getDb } from '@/lib/db/client';
+import { users } from '@/lib/db/schema';
 import { verifyOtp } from '@/lib/auth/otp';
-import { getSession, sessionTtlMs } from '@/lib/auth/session';
+import { normalizePanamaPhone } from '@/lib/auth/phone';
+import { createSession, getSession, sessionTtlMs } from '@/lib/auth/session';
 import { internalError, rejectUnsafeRequest } from '@/lib/auth/http';
+import { verifyFirebaseIdToken } from '@/lib/firebase/verify-id-token';
 import { getClientIp } from '@/lib/security/client-ip';
 import { LIMITS, limitOr429 } from '@/lib/security/limits';
 
-const body = z.object({
+const legacyBody = z.object({
   phone: z.string().min(1).max(32),
   code: z.string().regex(/^\d{6}$/),
 });
+const firebaseBody = z.object({ idToken: z.string().min(20).max(4096) });
 
-// Verifies a login code. Each code allows 5 attempts (verifyOtp); this route also caps attempts
-// per client IP, so one client cannot spray guesses over many phones (SEG-07).
+const fakeSmsEnabled = () => process.env.ALLOW_FAKE_SMS === 'true';
+
+// Verifies a login code.
+//  - ALLOW_FAKE_SMS=true: legacy flow { phone, code }. Each code allows 5 attempts (verifyOtp).
+//  - otherwise: { idToken } from Firebase Phone Auth, verified server-side (aud = FIREBASE_PROJECT_ID);
+//    the user is found or created by the token's phone number.
+// Both paths cap attempts per client IP, so one client cannot spray guesses (SEG-07).
 export async function POST(req: Request) {
   const blocked = rejectUnsafeRequest(req);
   if (blocked) return blocked;
@@ -21,21 +30,49 @@ export async function POST(req: Request) {
     const db = getDb();
     const limited = await limitOr429(db, LIMITS.otpVerifyIp, getClientIp(req));
     if (limited) return limited;
-    const parsed = body.safeParse(await req.json().catch(() => null));
-    if (!parsed.success) {
-      return NextResponse.json({ error: 'Código inválido' }, { status: 400 });
+    const raw = await req.json().catch(() => null);
+
+    let sessionToken: string;
+    if (fakeSmsEnabled()) {
+      const parsed = legacyBody.safeParse(raw);
+      if (!parsed.success) {
+        return NextResponse.json({ error: 'Código inválido' }, { status: 400 });
+      }
+      const result = await verifyOtp(db, parsed.data.phone, parsed.data.code);
+      if (!result) {
+        return NextResponse.json({ error: 'Código inválido o vencido' }, { status: 401 });
+      }
+      sessionToken = result.sessionToken;
+    } else {
+      const projectId = process.env.FIREBASE_PROJECT_ID;
+      if (!projectId) {
+        return NextResponse.json({ error: 'Verificación de teléfono no configurada' }, { status: 503 });
+      }
+      const parsed = firebaseBody.safeParse(raw);
+      if (!parsed.success) {
+        return NextResponse.json({ error: 'Código inválido' }, { status: 400 });
+      }
+      const token = await verifyFirebaseIdToken(parsed.data.idToken, projectId);
+      const phone = token?.phoneNumber ? normalizePanamaPhone(token.phoneNumber) : null;
+      if (!phone) {
+        return NextResponse.json({ error: 'Código inválido o vencido' }, { status: 401 });
+      }
+      const now = new Date();
+      const [user] = await db
+        .insert(users)
+        .values({ phone, phoneVerifiedAt: now })
+        .onConflictDoUpdate({ target: users.phone, set: { phoneVerifiedAt: now } })
+        .returning();
+      sessionToken = await createSession(db, user.id, user.role, now);
     }
-    const result = await verifyOtp(db, parsed.data.phone, parsed.data.code);
-    if (!result) {
-      return NextResponse.json({ error: 'Código inválido o vencido' }, { status: 401 });
-    }
-    const session = await getSession(db, result.sessionToken);
+
+    const session = await getSession(db, sessionToken);
     const role = session?.role ?? 'user';
 
     // The token travels only in the httpOnly cookie, never in the JSON body.
     const res = NextResponse.json({ ok: true, role, mfaRequired: role === 'admin' });
     const env = process.env.NODE_ENV;
-    res.cookies.set('session', result.sessionToken, {
+    res.cookies.set('session', sessionToken, {
       httpOnly: true,
       secure: env !== 'development' && env !== 'test',
       sameSite: 'lax',
