@@ -177,3 +177,22 @@ describe('reviewIdentity', () => {
     await expect(assertCanSell(db, id)).resolves.toBeUndefined();
   });
 });
+
+describe('reviewIdentity id normalisation', () => {
+  it('an uppercase spelling of the admin\'s own id is still a self-review', async () => {
+    const mine = admin.userId;
+    await db.update(users).set({ identityStatus: 'pending' }).where(eq(users.id, mine));
+    await expect(reviewIdentity(db, admin, mine.toUpperCase(), 'approved')).rejects.toBeInstanceOf(ForbiddenError);
+    expect((await statusOf(mine)).s).toBe('pending');
+  });
+
+  it('an uppercase uuid of another user is accepted and decided on that user', async () => {
+    const id = await insertUser('user', 'pending');
+    await reviewIdentity(db, admin, id.toUpperCase(), 'approved');
+    expect((await statusOf(id)).s).toBe('approved');
+  });
+
+  it.each(['', 'not-a-uuid', "1' or '1'='1"])('a malformed id %j is a ValidationError, not a database error', async (bad) => {
+    await expect(reviewIdentity(db, admin, bad, 'approved')).rejects.toMatchObject({ name: 'ValidationError' });
+  });
+});

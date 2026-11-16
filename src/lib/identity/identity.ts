@@ -51,8 +51,11 @@ export async function reviewIdentity(
   decision: IdentityDecision,
 ): Promise<void> {
   assertAdmin(admin);
-  // Separation of duties: an admin never decides on their own identity.
-  if (admin.userId === userId) throw new ForbiddenError();
+  // Canonical (lowercase) spelling first: Postgres treats uppercase uuids as equal, so a plain
+  // string comparison would let an admin dodge the self-review rule with different casing.
+  userId = typeof userId === 'string' ? userId.toLowerCase() : userId;
+  if (!isUuid(userId)) throw new ValidationError('Invalid user id', [{ path: 'userId', message: 'not a uuid' }]);
+  if (admin.userId.toLowerCase() === userId) throw new ForbiddenError();
   if (decision !== 'approved' && decision !== 'rejected') {
     throw new ValidationError('Invalid decision');
   }
