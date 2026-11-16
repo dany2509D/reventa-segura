@@ -22,7 +22,7 @@ hasta que exista una pasarela real y visto bueno legal.
 | Tarea 11 | Panel de administración (identidades, publicaciones, disputas, pagos, eventos) con 2FA y límite de intentos. |
 | Tarea 12 | Interfaz móvil (PWA instalable), conexión real a base de datos, comandos de administración, verificación en navegador. |
 | Tarea 13 | Endurecimiento: CSP con nonce, protección CSRF en todas las rutas, límites de intentos, restricciones de base de datos, repetición de TOTP, registros con redacción de datos personales, lista de pendientes antes de lanzar. Revisión multi-enfoque con escépticos. |
-| Rediseño | v1 sobrio, v2 según imagen de referencia, v3 editorial con movimiento (en curso, sin commits hasta aprobación del dueño). |
+| Rediseño | v1 sobrio, v2 según imagen de referencia, v3 editorial (aprobado por el dueño y unido a `build/v1` el 2026-11-16). |
 | Supabase | Proyecto `reventa-segura` creado por el dueño (región East US Ohio, API pública desactivada, RLS automático activado). Conexión TLS verificada con la CA raíz de Supabase. 12 tablas migradas. |
 | Administrador | Entrada de administrador sin SMS solo desde la PC del dueño (llave local `TEST_MODE_ADMIN_KEY`, comando `npm run admin:code`), más 2FA (TOTP). |
 | Seguridad (revisión T13) | Corregido el hallazgo crítico (páginas de admin saltables) y la rotación de TOTP que no cerraba sesiones. Pendientes importantes: ver sección 5. |
@@ -67,7 +67,7 @@ Importantes (revisión de seguridad T13), a cerrar antes de dinero real:
 ~~8. Consulta para localizar filas que bloqueen la migración 0004 en datos existentes.~~ **Hecho**.
 
 Del dueño / externos: S.E. y cuenta comercial, abogado, pasarela de pago real, proveedor de SMS, términos y privacidad,
-fotos de eventos (requiere campo de imagen + subida), rediseño v3 por aprobar.
+fotos de eventos (requiere campo de imagen + subida), fotos de eventos requieren campo de imagen + subida.
 
 ## 6. Registro de cambios recientes
 
@@ -78,3 +78,4 @@ fotos de eventos (requiere campo de imagen + subida), rediseño v3 por aprobar.
 - 2026-11-16 — Limitador de intentos: solo se guardan los intentos permitidos (un atacante ya no puede llenar la tabla con rechazos) y el bloqueo termina cuando sale de la ventana el intento permitido más antiguo; la purga diaria borra por lotes de 1000. Por qué: cada rechazo era una fila nueva y un borrado único podía ser enorme.
 - 2026-11-16 — Tope diario de SMS: los teléfonos sin cuenta pueden usar como máximo la mitad del tope (mínimo 1) en 24 h; la otra mitad queda para usuarios existentes. Por qué: un atacante anónimo con números inventados agotaba el tope y nadie podía entrar.
 - 2026-11-16 — Alertas con id (orden/evento/ítem), lista `/admin/revision` de órdenes a revisar a mano, descubrimiento de rutas más estricto (cualquier `route.*` en `src/app`), prueba HTTP del límite de 5 códigos por teléfono, y `docs/launch-checklist.md` migrado de Neon a Supabase con los riesgos de dinero en la sección 7.
+- 2026-11-16 — Rediseño v3 aprobado por el dueño y unido a `build/v1` (póster oscuro, entrada blanca con muescas, barra flotante, tema claro/oscuro). Pendiente: revisar admin/disputa/entrada/pago de prueba con el nuevo estilo, textos «pago protegido»/«te reembolsamos» (`src/lib/account/labels.ts`, `buy-button.tsx`) con el abogado, y fotos de eventos.
