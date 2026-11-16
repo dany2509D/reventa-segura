@@ -30,7 +30,9 @@ export function buildCsp({ nonce, dev = false }: { nonce?: string; dev?: boolean
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob:",
     "font-src 'self'",
-    "connect-src 'self'",
+    // Firebase Phone Auth: Identity Toolkit/Secure Token APIs and the reCAPTCHA widget (iframe + XHR).
+    "connect-src 'self' https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.google.com https://www.gstatic.com",
+    "frame-src https://www.google.com https://recaptcha.google.com https://*.firebaseapp.com",
     "worker-src 'self'",
     "manifest-src 'self'",
     "object-src 'none'",
