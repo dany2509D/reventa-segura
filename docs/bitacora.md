@@ -58,7 +58,7 @@ Detalle y solución de problemas: `docs/supabase-setup.md`.
 
 Importantes (revisión de seguridad T13), a cerrar antes de dinero real:
 1. Tope diario de SMS y presupuesto por teléfono agotables por un atacante anónimo.
-2. Bloqueo de vendedor con disputas perdidas: aplicar también al comprar y al aprobar publicaciones.
+2. ~~Bloqueo de vendedor con disputas perdidas: aplicar también al comprar y al aprobar publicaciones.~~ **Hecho** (ver registro).
 3. Limitador de intentos: no registrar cada rechazo; purga por lotes.
 4. Alertas sin id de orden/evento; falta lista de órdenes atascadas (`needsManualReview`).
 5. `docs/launch-checklist.md` aún dice Neon en algunos puntos; faltan riesgos con dinero en la sección 7.
@@ -74,3 +74,4 @@ fotos de eventos (requiere campo de imagen + subida), rediseño v3 por aprobar.
 (Cada entrada: fecha, qué, por qué.)
 
 - 2026-11-15/16 — Supabase conectado; admin del dueño (66632666) creado; páginas de administración protegidas a nivel de datos; rotación TOTP cierra sesiones.
+- 2026-11-16 — Bloqueo de vendedores (SEG-08) ahora también al comprar (la entrada ya verificada de un vendedor bloqueado aparece como no disponible, sin revelar el motivo) y al aprobar una publicación (rechazar sigue permitido). Por qué: antes un vendedor bloqueado podía seguir vendiendo hasta 10 entradas ya verificadas.

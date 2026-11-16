@@ -4,6 +4,7 @@ import { events, ledgerEntries, listings, orders } from '@/lib/db/schema';
 import type { Db, Tx } from '@/lib/db/types';
 import type { PaymentGateway } from '@/lib/payments/gateway';
 import { computeFees, DEFAULT_FEE_BPS } from '@/lib/pricing/pricing';
+import { isSellerBlocked } from '@/lib/tickets/listings';
 import { appendEntry } from './ledger';
 import { transition, type OrderEvent, type OrderState } from './state-machine';
 
@@ -62,6 +63,11 @@ export async function startCheckout(
   listingId: string,
   now: Date = new Date(),
 ): Promise<{ orderId: string; checkoutUrl: string }> {
+  // SEG-08: a seller who lost too many disputes stops selling, including listings that were already
+  // verified. Reported as 'unavailable' so a buyer learns nothing about the seller.
+  const [preview] = await db.select({ sellerId: listings.sellerId }).from(listings).where(eq(listings.id, listingId));
+  if (preview && (await isSellerBlocked(db, preview.sellerId, now))) throw new ListingUnavailableError();
+
   let order: Order;
   try {
     order = await db.transaction(async (tx) => {

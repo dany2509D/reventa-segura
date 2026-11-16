@@ -1,10 +1,13 @@
+import { eq } from 'drizzle-orm';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { appConfig, disputes, events, listings, orders, users } from '@/lib/db/schema';
 import { makeTestDb } from '@/lib/db/test-db';
 import type { Db } from '@/lib/db/types';
 import { MemoryBlobStore } from '@/lib/uploads/store';
+import { ListingUnavailableError, startCheckout } from '@/lib/orders/service';
+import { FakeGateway } from '@/lib/payments/fake-gateway';
 import { SellerBlockedError } from './errors';
-import { DEFAULT_MAX_LOST_DISPUTES, assertSellerNotBlocked, createListing } from './listings';
+import { DEFAULT_MAX_LOST_DISPUTES, assertSellerNotBlocked, createListing, reviewListing } from './listings';
 
 const NOW = new Date('2027-05-01T12:00:00Z');
 const DAY = 24 * 3600_000;
@@ -103,5 +106,48 @@ describe('seller block after repeated lost disputes (SEG-08)', () => {
     await expect(assertSellerNotBlocked(db, s.id, NOW)).resolves.toBeUndefined();
     await db.insert(appConfig).values({ key: 'maxLostDisputes', value: '1' });
     await expect(assertSellerNotBlocked(db, s.id, NOW)).rejects.toBeInstanceOf(SellerBlockedError);
+  });
+});
+
+describe('the block also applies at the point of sale and on approval (SEG-08)', () => {
+  const ADMIN = { userId: '00000000-0000-4000-8000-0000000000bb', role: 'admin' as const, mfa: true };
+
+  async function verifiedListing(sellerId: string) {
+    const ev = await event();
+    const [l] = await db
+      .insert(listings)
+      .values({ sellerId, eventId: ev.id, askCents: 5000, deliveryMode: 'transfer', status: 'verified', fingerprint: `fp-${++seq}`, proofPath: 'p' })
+      .returning();
+    return l;
+  }
+
+  it('a blocked seller’s already-verified listing cannot be bought (reported as unavailable, no reason leaked)', async () => {
+    const s = await user();
+    const l = await verifiedListing(s.id);
+    for (let i = 0; i < 3; i++) await lostDispute(s.id);
+    const buyer = await user('none');
+    await expect(startCheckout(db, new FakeGateway('sb-secret'), buyer.id, l.id, NOW)).rejects.toBeInstanceOf(ListingUnavailableError);
+    expect(await db.select().from(orders).where(eq(orders.listingId, l.id))).toHaveLength(0);
+  });
+
+  it('an unblocked seller’s listing can still be bought', async () => {
+    const s = await user();
+    await lostDispute(s.id); // only one lost dispute
+    const l = await verifiedListing(s.id);
+    const buyer = await user('none');
+    await expect(startCheckout(db, new FakeGateway('sb-secret'), buyer.id, l.id, NOW)).resolves.toMatchObject({ orderId: expect.any(String) });
+  });
+
+  it('an admin cannot approve a pending listing of a blocked seller, but can still reject it', async () => {
+    const s = await user();
+    for (let i = 0; i < 3; i++) await lostDispute(s.id);
+    const ev = await event();
+    const mk = async () =>
+      (await db.insert(listings).values({ sellerId: s.id, eventId: ev.id, askCents: 5000, deliveryMode: 'transfer', status: 'pending', fingerprint: `fp-${++seq}`, proofPath: 'p' }).returning())[0];
+    const a = await mk();
+    const b = await mk();
+    await expect(reviewListing(db, ADMIN, a.id, 'verified')).rejects.toBeInstanceOf(SellerBlockedError);
+    expect((await db.select().from(listings).where(eq(listings.id, a.id)))[0].status).toBe('pending');
+    await expect(reviewListing(db, ADMIN, b.id, 'rejected')).resolves.toBeUndefined();
   });
 });
