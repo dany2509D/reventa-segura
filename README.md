@@ -7,3 +7,6 @@ Estado: diseño y plan (aún sin código).
 - Diseño: `docs/superpowers/specs/2026-11-15-reventa-segura-design.md`
 - Requisitos (RF, RNF, delimitantes, seguridad): `docs/superpowers/specs/2026-11-15-reventa-segura-requisitos.md`
 - Plan de implementación: `docs/superpowers/plans/2026-11-15-reventa-segura-v1.md`
+- Bitácora del proyecto (qué se hizo, decisiones, pendientes, cómo ejecutar): `docs/bitacora.md`
+- Guía de Supabase y modo de prueba: `docs/supabase-setup.md`
+- Lista antes de cobrar dinero real: `docs/launch-checklist.md`
