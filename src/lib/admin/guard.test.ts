@@ -5,7 +5,7 @@ import { sessions, users } from '@/lib/db/schema';
 import { makeTestDb } from '@/lib/db/test-db';
 import type { Db } from '@/lib/db/types';
 import { ForbiddenError } from '@/lib/errors';
-import { requireAdmin } from './guard';
+import { adminAccess, requireAdmin } from './guard';
 
 let db: Db;
 let n = 0;
@@ -64,5 +64,36 @@ describe('requireAdmin', () => {
     await withMfa(token);
     await db.update(users).set({ role: 'user' }).where(eq(users.id, a.id));
     await expect(requireAdmin(db, token)).rejects.toBeInstanceOf(ForbiddenError);
+  });
+});
+
+describe('adminAccess (where should a page send this visitor?)', () => {
+  it.each([null, undefined, '', 'bogus'])('no session (%j) → denied', async (t) => {
+    await expect(adminAccess(db, t)).resolves.toEqual({ state: 'denied' });
+  });
+
+  it('a normal user → denied (never revealed the admin area exists)', async () => {
+    const u = await mk('user');
+    const token = await createSession(db, u.id, 'user');
+    await expect(adminAccess(db, token)).resolves.toEqual({ state: 'denied' });
+  });
+
+  it('an admin who passed the SMS code but not TOTP → needs_mfa', async () => {
+    const a = await mk('admin');
+    const token = await createSession(db, a.id, 'admin');
+    await expect(adminAccess(db, token)).resolves.toEqual({ state: 'needs_mfa' });
+  });
+
+  it('an admin with TOTP done → ok with the actor', async () => {
+    const a = await mk('admin');
+    const token = await createSession(db, a.id, 'admin');
+    await withMfa(token);
+    await expect(adminAccess(db, token)).resolves.toEqual({ state: 'ok', actor: { userId: a.id, role: 'admin', mfa: true } });
+  });
+
+  it('an expired admin session → denied', async () => {
+    const a = await mk('admin');
+    const token = await createSession(db, a.id, 'admin', new Date(Date.now() - ADMIN_SESSION_MS - 1000));
+    await expect(adminAccess(db, token)).resolves.toEqual({ state: 'denied' });
   });
 });
