@@ -1,10 +1,14 @@
 import { notFound } from 'next/navigation';
 import { eventDetail } from '@/lib/account/queries';
 import { getDb } from '@/lib/db/client';
-import { formatPanamaDateTime, formatUsd } from '@/lib/format';
+import { formatUsd } from '@/lib/format';
 import { listVerifiedListings } from '@/lib/tickets/listings';
+import { longDateLabel, panamaDateParts } from '@/lib/ui/dates';
 import BackLink from '../../_components/back-link';
-import { DoodlePanel, TicketDoodle, toneFor } from '../../_components/doodle';
+import EmptyState from '../../_components/empty-state';
+import EventPoster from '../../_components/event-poster';
+import { IconArrowRight } from '../../_components/icons';
+import { TestModeNotice } from '../../_components/test-mode';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,51 +18,87 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
   const event = await eventDetail(db, id);
   if (!event || event.status !== 'active') notFound();
   const offers = event.resaleProhibited ? [] : await listVerifiedListings(db, id);
-  const tone = toneFor(event.id);
+  const date = panamaDateParts(event.startsAt);
   return (
-    <main className="page">
+    <main className="page wide">
       <BackLink href="/">Todos los eventos</BackLink>
-      <DoodlePanel tone={tone} />
-      <header className="page-head">
-        <h1>{event.name}</h1>
-        <div className="tags">
-          <span className="tag">{event.venue}</span>
-          <span className="tag">{formatPanamaDateTime(event.startsAt)}</span>
+      <div className="event-layout">
+        {/* Same generative poster as the event's cards; `poster-hero` is the shared element of the page transition. */}
+        <div className="event-art">
+          <EventPoster seed={event.id} title={event.name} size="hero" className="poster-hero" />
         </div>
-      </header>
-      <p>Valor original de la entrada: <strong className="money">{formatUsd(event.faceValueCents)}</strong></p>
-
-      {event.resaleProhibited ? (
-        <p className="notice warning">El organizador de este evento prohíbe la reventa de entradas, por eso no vendemos entradas de este evento.</p>
-      ) : (
-        <>
-          <p className="notice">
-            Algunas boleteras o recintos pueden restringir las entradas revendidas. Si te rechazan en la puerta, abre una disputa y te reembolsamos.
+        <div className="event-main">
+          <p className="eyebrow">
+            <span className="dot" aria-hidden="true" />
+            <time dateTime={date.iso}>
+              {date.weekday} {Number(date.day)} {date.month} {date.year} · {date.time}
+            </time>
           </p>
-          <h2>Entradas disponibles</h2>
-          {offers.length === 0 ? (
-            <div className={`empty tone-${tone}`}>
-              <TicketDoodle />
-              <p>No hay entradas publicadas por ahora.</p>
+          <h1>{event.name}</h1>
+          <dl className="facts">
+            <div>
+              <dt>Lugar</dt>
+              <dd>{event.venue}</dd>
             </div>
-          ) : null}
-          <div className="stack">
-            {offers.map((o) => (
-              <div key={o.id} className="card offer">
-                <div>
-                  <div className="price">{formatUsd(o.askCents)}</div>
-                  <div className="tags">
-                    <span className="tag">
-                      {o.deliveryMode === 'transfer' ? 'Te la transfieren en la boletera' : 'Recibes la entrada en la app'}
-                    </span>
+            <div>
+              <dt>Fecha</dt>
+              <dd>{longDateLabel(date)}</dd>
+            </div>
+            <div>
+              <dt>Valor original</dt>
+              <dd className="money">{formatUsd(event.faceValueCents)}</dd>
+            </div>
+          </dl>
+
+          {event.resaleProhibited ? (
+            <p className="notice warning">El organizador de este evento prohíbe la reventa de entradas, por eso no vendemos entradas de este evento.</p>
+          ) : (
+            <>
+              <p className="notice">
+                Algunas boleteras o recintos pueden restringir las entradas revendidas. Si te rechazan en la puerta, abre una disputa: el
+                equipo la revisa y, si procede, te devuelve el dinero.
+              </p>
+              <h2 className="section-title">
+                Entradas disponibles
+                {offers.length > 0 ? <span className="count">{String(offers.length).padStart(2, '0')}</span> : null}
+              </h2>
+              {offers.length === 0 ? (
+                <EmptyState>
+                  <p>No hay entradas publicadas por ahora.</p>
+                  <p className="muted">
+                    ¿Tienes una que no vas a usar? <a href="/vender">Véndela aquí</a>.
+                  </p>
+                </EmptyState>
+              ) : (
+                <>
+                  <ul className="offers">
+                    {offers.map((o) => (
+                      <li key={o.id} className="card offer">
+                        <div>
+                          <span className="price-label">Precio</span>
+                          <div className="price">{formatUsd(o.askCents)}</div>
+                          <div className="tags">
+                            <span className="tag">
+                              {o.deliveryMode === 'transfer' ? 'Te la transfieren en la boletera' : 'Recibes la entrada en la app'}
+                            </span>
+                          </div>
+                        </div>
+                        <a className="btn" href={`/comprar/${o.id}`}>
+                          Comprar
+                          <IconArrowRight />
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="offers-foot">
+                    <TestModeNotice />
                   </div>
-                </div>
-                <a className="btn accent" href={`/comprar/${o.id}`}>Comprar</a>
-              </div>
-            ))}
-          </div>
-        </>
-      )}
+                </>
+              )}
+            </>
+          )}
+        </div>
+      </div>
     </main>
   );
 }

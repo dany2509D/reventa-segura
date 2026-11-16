@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { IconLogout } from './icons';
 
-export default function LogoutButton() {
+export default function LogoutButton({ className = 'nav-item' }: { className?: string }) {
   const [busy, setBusy] = useState(false);
   async function logout() {
     setBusy(true);
@@ -14,7 +14,7 @@ export default function LogoutButton() {
     }
   }
   return (
-    <button type="button" className="nav-item" onClick={logout} disabled={busy}>
+    <button type="button" className={className} onClick={logout} disabled={busy}>
       <IconLogout />
       <span>Salir</span>
     </button>

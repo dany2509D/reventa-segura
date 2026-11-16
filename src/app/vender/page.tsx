@@ -1,7 +1,7 @@
 import { profileOf, upcomingEvents } from '@/lib/account/queries';
 import { getDb } from '@/lib/db/client';
 import { DEFAULT_PRICE_CAP_BPS } from '@/lib/pricing/pricing';
-import { DoodlePanel, TicketDoodle } from '../_components/doodle';
+import EmptyState from '../_components/empty-state';
 import { requireUser } from '../session';
 import IdentityForm from './identity-form';
 import ListingForm from './listing-form';
@@ -17,33 +17,37 @@ export default async function SellPage() {
   const events = status === 'approved' ? (await upcomingEvents(db)).filter((e) => !e.resaleProhibited) : [];
   return (
     <main className="page">
-      <DoodlePanel tone="mint" compact />
-      <h1>Vender una entrada</h1>
+      <header className="page-head">
+        <p className="eyebrow">
+          {status === 'approved' ? 'Paso 2 de 2 · Publica' : 'Paso 1 de 2 · Verifica tu identidad'}
+        </p>
+        <h1>Vender una entrada</h1>
+        {status === 'none' ? (
+          <p className="lead">Para vender necesitamos verificar quién eres. Así protegemos a los compradores de estafas.</p>
+        ) : null}
+      </header>
 
       {status === 'none' || status === 'rejected' ? (
         <>
           {status === 'rejected' ? (
             <p className="notice warning">No pudimos verificar tu identidad. Vuelve a enviar tus documentos con fotos más claras.</p>
-          ) : (
-            <p className="lead">Para vender necesitamos verificar quién eres. Así protegemos a los compradores de estafas.</p>
-          )}
+          ) : null}
           <IdentityForm />
         </>
       ) : null}
 
       {status === 'pending' ? (
-        <div className="empty tone-sky">
-          <TicketDoodle />
-          <p>Estamos revisando tu identidad. Te avisaremos aquí cuando puedas publicar entradas.</p>
-        </div>
+        <EmptyState>
+          <p>Estamos revisando tu identidad.</p>
+          <p className="muted">Te avisaremos aquí cuando puedas publicar entradas.</p>
+        </EmptyState>
       ) : null}
 
       {status === 'approved' ? (
         events.length === 0 ? (
-          <div className="empty tone-mint">
-            <TicketDoodle />
+          <EmptyState>
             <p>No hay eventos disponibles para publicar por ahora.</p>
-          </div>
+          </EmptyState>
         ) : (
           <ListingForm
             capBps={DEFAULT_PRICE_CAP_BPS}

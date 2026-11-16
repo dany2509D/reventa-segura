@@ -1,13 +1,21 @@
 import type { Metadata, Viewport } from 'next';
 import { connection } from 'next/server';
+import { GeistMono } from 'geist/font/mono';
+import { GeistSans } from 'geist/font/sans';
 import type { ReactNode } from 'react';
 import './globals.css';
-import SiteHeader from './_components/site-header';
+import { THEME_COLORS } from '@/lib/ui/theme';
+import LinkEnhancer from './_components/link-enhancer';
 import RegisterSw from './_components/register-sw';
+import RevealObserver from './_components/reveal-observer';
+import SiteFooter from './_components/site-footer';
+import SiteHeader, { TabBar } from './_components/site-header';
+import ThemeScript from './_components/theme-script';
 
 export const metadata: Metadata = {
-  title: { default: 'Reventa Segura', template: '%s · Reventa Segura' },
-  description: 'Reventa de entradas en Panamá con pago protegido: el vendedor cobra cuando tú entras al evento.',
+  title: { default: 'Reventa Segura · Entradas de reventa en Panamá', template: '%s · Reventa Segura' },
+  description:
+    'Reventa de entradas entre personas en Panamá. El pago se retiene y el vendedor cobra después del evento.',
   manifest: '/manifest.webmanifest',
   applicationName: 'Reventa Segura',
   appleWebApp: { capable: true, title: 'Reventa Segura', statusBarStyle: 'default' },
@@ -18,8 +26,8 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
-  themeColor: '#ffffff',
-  colorScheme: 'light',
+  // Light by default; the pre-paint bootstrap and the theme selector update it for the dark theme.
+  themeColor: THEME_COLORS.light,
 };
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
@@ -27,10 +35,21 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   // page prerendered at build time would carry scripts without it, which the browser blocks.
   await connection();
   return (
-    <html lang="es">
+    // data-theme is rewritten before the first paint by <ThemeScript /> (stored preference), hence
+    // suppressHydrationWarning on this one element. Fonts: Geist Sans and Geist Mono, self-hosted
+    // by next/font from the `geist` package (no request to a font CDN; font-src stays 'self').
+    <html lang="es" data-theme="light" className={`${GeistSans.variable} ${GeistMono.variable}`} suppressHydrationWarning>
+      <head>
+        <ThemeScript />
+      </head>
       <body>
         <SiteHeader />
+        <div id="contenido" tabIndex={-1} />
         {children}
+        <SiteFooter />
+        <TabBar />
+        <RevealObserver />
+        <LinkEnhancer />
         <RegisterSw />
       </body>
     </html>

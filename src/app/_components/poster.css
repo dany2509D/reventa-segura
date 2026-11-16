@@ -1,0 +1,102 @@
+/* Generative event posters (event-poster.tsx): owned, clearly illustrative artwork that stands in
+   for photography until events carry a real image. A poster is a palette (5), a geometric motif (6)
+   and a typographic crop of the event's own name, all chosen deterministically from the event id
+   (src/lib/ui/poster.ts). Artwork colours are theme-independent, like a photograph would be.
+
+   Colour roles of a palette: --p-bg the field, --p-a the large shape, --p-b the second shape,
+   --p-line a quiet tone of the field, --p-ink the type. RULE (enforced in design-tokens.test.ts):
+   neither --p-a nor --p-b may equal --p-ink. A shape in the colour of the type swallows the
+   letters it sits under (the "black disc over the title" bug of the paper palette). */
+
+.poster {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background: var(--p-bg);
+  color: var(--p-ink);
+  container-type: inline-size;
+  --p-bg: var(--art-ink);
+  --p-a: var(--art-sky);
+  --p-b: var(--art-mint);
+  --p-ink: var(--art-white);
+  --p-line: var(--art-line);
+}
+.poster--noche { --p-bg: var(--art-ink); --p-a: var(--art-sky); --p-b: var(--art-mint); --p-ink: var(--art-white); --p-line: var(--art-line); }
+.poster--marea { --p-bg: var(--art-deep); --p-a: var(--art-mint); --p-b: var(--art-sky); --p-ink: var(--art-white); --p-line: #1c4a58; }
+.poster--cielo { --p-bg: var(--art-sky); --p-a: var(--art-white); --p-b: #3fbfe0; --p-ink: var(--art-ink); --p-line: #5fc8e3; }
+.poster--menta { --p-bg: var(--art-mint); --p-a: var(--art-white); --p-b: #4fd3a4; --p-ink: var(--art-ink); --p-line: #6fd9b3; }
+.poster--papel { --p-bg: var(--art-paper); --p-a: var(--art-sky); --p-b: var(--art-mint); --p-ink: var(--art-ink); --p-line: #d3d7df; }
+
+/* Hairline that separates light posters from a light page */
+.poster::after { content: ''; position: absolute; inset: 0; z-index: 3; border-radius: inherit; box-shadow: inset 0 0 0 1px rgb(17 19 24 / 0.07); pointer-events: none; }
+
+.poster-motif { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; display: block; }
+.poster.is-flipped .poster-motif { transform: scaleX(-1); }
+.pm-a { fill: var(--p-a); }
+.pm-b { fill: var(--p-b); }
+.pm-ink { fill: var(--p-ink); }
+.pm-line { fill: var(--p-line); }
+.pm-ring { fill: none; }
+.pm-s-a { stroke: var(--p-a); }
+.pm-s-b { stroke: var(--p-b); }
+.pm-s-ink { stroke: var(--p-ink); }
+.pm-s-line { stroke: var(--p-line); }
+.pm-round { stroke-linecap: round; stroke-linejoin: round; }
+
+/* Halftone field of the "trama" motif: a CSS dot grid behind the shapes */
+.poster--trama { background-image: radial-gradient(circle, var(--p-line) 2.4px, transparent 2.9px); background-size: 20px 20px; background-position: 4px 6px; }
+
+/* Typographic crop: the event's own name, huge, bleeding off the edge. Decorative (the name is
+   always printed as real text beside the poster). Sized from the poster's own width. */
+.poster-type {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding: 1.25rem 1rem;
+  padding: 7cqw 6cqw;
+  font-size: 4.5rem;
+  font-size: 26cqw;
+  font-weight: 800;
+  line-height: 0.8;
+  letter-spacing: -0.065em;
+  white-space: nowrap;
+  color: var(--p-ink);
+  pointer-events: none;
+  user-select: none;
+}
+.poster-word { display: block; }
+.poster-word--1 { margin-left: 0.36em; color: transparent; -webkit-text-stroke: 0.016em var(--p-ink); }
+.poster-word--2 { margin-left: 0.12em; }
+.poster--hero .poster-type { justify-content: flex-end; font-size: 5rem; font-size: 28cqw; }
+.poster--hero.is-flipped .poster-type { justify-content: flex-start; }
+.poster--card .poster-type { font-size: 3rem; font-size: 30cqw; }
+.poster--thumb .poster-type { display: none; }
+
+/* Printed spine: says plainly that this is an illustration, plus a reference derived from the id */
+.poster-marks {
+  position: absolute;
+  z-index: 2;
+  right: 0.75rem;
+  right: 3.5cqw;
+  top: 50%;
+  display: flex;
+  gap: 1.25em;
+  writing-mode: vertical-rl;
+  transform: translate3d(0, -50%, 0) rotate(180deg);
+  color: var(--p-ink);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0.72;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Photograph variant (when an event has a real image) */
+.poster--photo { background: var(--art-ink-2); }
+.poster-img { object-fit: cover; }

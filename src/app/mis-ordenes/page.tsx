@@ -3,7 +3,7 @@ import { buyerNextStep, listingStatusLabel, orderStatusLabel, sellerNextStep, ty
 import { getDb } from '@/lib/db/client';
 import { formatPanamaDateTime, formatUsd } from '@/lib/format';
 import type { OrderState } from '@/lib/orders/state-machine';
-import { TicketDoodle } from '../_components/doodle';
+import EmptyState from '../_components/empty-state';
 import { IconChevronRight, IconOrders, IconSell, IconWallet } from '../_components/icons';
 import { requireUser } from '../session';
 import UploadReceived from './upload-received';
@@ -12,15 +12,15 @@ import WithdrawButton from './withdraw-button';
 export const metadata = { title: 'Mis órdenes' };
 export const dynamic = 'force-dynamic';
 
-// Presentation only. Card colour by state, from the buyer's and the seller's point of view:
-// sky = in progress, mint = completed, pink = needs attention, white = closed/neutral.
+// Presentation only. Card tint by state, from the buyer's and the seller's point of view:
+// sky = in progress, mint = completed, sun = needs attention, plain = closed/neutral.
 // The state is always also written in the chip.
 const BUYER_TONE: Record<OrderState, string> = {
-  creada: 'pastel tone-pink',
+  creada: 'pastel tone-sun',
   transferencia_pendiente: 'pastel tone-sky',
   entrada_recibida: 'pastel tone-sky',
   ingreso_confirmado: 'pastel tone-sky',
-  disputada: 'pastel tone-pink',
+  disputada: 'pastel tone-sun',
   liberada: 'pastel tone-mint',
   liquidada: 'pastel tone-mint',
   reembolsada: '',
@@ -28,10 +28,10 @@ const BUYER_TONE: Record<OrderState, string> = {
 };
 const SELLER_TONE: Record<OrderState, string> = {
   creada: '',
-  transferencia_pendiente: 'pastel tone-pink',
+  transferencia_pendiente: 'pastel tone-sun',
   entrada_recibida: 'pastel tone-sky',
   ingreso_confirmado: 'pastel tone-sky',
-  disputada: 'pastel tone-pink',
+  disputada: 'pastel tone-sun',
   liberada: 'pastel tone-mint',
   liquidada: 'pastel tone-mint',
   reembolsada: '',
@@ -56,8 +56,11 @@ export default async function MyOrdersPage({ searchParams }: { searchParams: Pro
   ]);
   return (
     <main className="page">
-      <h1>Mis órdenes</h1>
-      {q.pago === 'ok' ? <p role="status" className="ok">¡Pago recibido! Tu dinero está protegido.</p> : null}
+      <header className="page-head">
+        <p className="eyebrow">Tu cuenta</p>
+        <h1>Mis órdenes</h1>
+      </header>
+      {q.pago === 'ok' ? <p role="status" className="ok">¡Pago recibido! Queda retenido hasta después del evento.</p> : null}
       {q.pago === 'rechazado' ? <p role="alert" className="error">El pago fue rechazado. No se te cobró.</p> : null}
 
       <nav className="list-group" aria-label="Secciones">
@@ -83,10 +86,10 @@ export default async function MyOrdersPage({ searchParams }: { searchParams: Pro
 
       <h2 id="compras" className="section-title">Mis compras</h2>
       {orders.length === 0 ? (
-        <div className="empty tone-sky">
-          <TicketDoodle />
-          <p>Todavía no has comprado entradas. <a href="/">Ver eventos</a></p>
-        </div>
+        <EmptyState>
+          <p>Todavía no has comprado entradas.</p>
+          <a className="btn sm secondary" href="/">Ver eventos</a>
+        </EmptyState>
       ) : null}
       <div className="stack">
         {orders.map((o) => {
@@ -121,10 +124,9 @@ export default async function MyOrdersPage({ searchParams }: { searchParams: Pro
 
       <h2 id="ventas" className="section-title">Mis ventas</h2>
       {sales.length === 0 ? (
-        <div className="empty tone-mint">
-          <TicketDoodle />
+        <EmptyState>
           <p>Aún no tienes ventas.</p>
-        </div>
+        </EmptyState>
       ) : null}
       <div className="stack">
         {sales.map((s) => (
@@ -144,10 +146,10 @@ export default async function MyOrdersPage({ searchParams }: { searchParams: Pro
 
       <h2 id="publicaciones" className="section-title">Mis publicaciones</h2>
       {mine.length === 0 ? (
-        <div className="empty tone-pink">
-          <TicketDoodle />
-          <p>No has publicado entradas. <a href="/vender">Vender una entrada</a></p>
-        </div>
+        <EmptyState>
+          <p>No has publicado entradas.</p>
+          <a className="btn sm secondary" href="/vender">Vender una entrada</a>
+        </EmptyState>
       ) : (
         <div className="list-group">
           {mine.map((l) => (

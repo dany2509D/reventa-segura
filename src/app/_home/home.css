@@ -1,0 +1,692 @@
+/* Home page: hero, search, featured cards, agenda, "how it works", sell band.
+   Tokens and shared components come from globals.css. Entrance animations use
+   animation-fill-mode: backwards, so once they end the elements are back on their normal styles
+   (hover and scroll-linked transforms keep working, and nothing depends on the animation to be
+   visible). */
+
+.home { overflow-x: clip; }
+
+/* ---------- Sections ---------- */
+.section { padding-top: var(--section-gap); scroll-margin-top: 0; }
+.section-head { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-3); margin-bottom: clamp(24px, 4vw, 48px); }
+.idx { padding: 2px 8px; border: 1px solid var(--border-strong); border-radius: var(--radius-pill); color: var(--text); letter-spacing: 0.04em; }
+.section-title-xl {
+  margin: 0;
+  max-width: 18ch;
+  font-size: var(--fs-title);
+  font-weight: 650;
+  line-height: 1.02;
+  letter-spacing: var(--tracking-display);
+}
+.section-title-xl:focus { outline: none; }
+.section-title-xl:focus-visible { outline: 2px solid var(--focus); outline-offset: 6px; }
+.section-desc { margin: 0; max-width: 34rem; color: var(--text-muted); font-size: var(--fs-lead); line-height: 1.5; }
+.section-link {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: linear-gradient(currentColor, currentColor) no-repeat 0 calc(100% - 10px) / 100% 1px;
+  color: var(--text);
+  font: inherit;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  cursor: pointer;
+}
+.section-link .icon { width: 18px; height: 18px; transition: transform var(--dur-short) var(--ease-out); }
+.section-link:hover .icon { transform: translate3d(3px, 0, 0); }
+a.section-link:hover .icon { transform: translate3d(0, 3px, 0); }
+@media (min-width: 768px) {
+  .section-head { grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--space-8); }
+  .section-head > * { grid-column: 1; }
+  .section-head > .section-link { grid-column: 2; grid-row: 1 / span 3; align-self: end; }
+}
+
+/* ---------- Hero ---------- */
+.hero { display: grid; gap: clamp(28px, 5vw, 56px); padding-top: clamp(16px, 3vw, 40px); }
+.hero-copy { min-width: 0; display: grid; gap: var(--space-5); align-content: center; justify-items: start; }
+.hero-title {
+  margin: 0;
+  font-size: var(--fs-display);
+  font-weight: 650;
+  line-height: 0.96;
+  letter-spacing: -0.05em;
+  text-wrap: initial;
+}
+/* Each line is a mask; its text rises into it. The padding keeps accents and descenders inside. */
+.hero-title .line { display: block; overflow: hidden; padding: 0.08em 0.08em 0.14em 0; margin: -0.08em -0.08em -0.14em 0; }
+.hero-title .line-in { display: inline-block; animation: line-up var(--dur-complex) var(--ease-out) backwards; }
+.hero-title .line-in-1 { animation-delay: 90ms; }
+.hero-title .line-in-2 { animation-delay: 180ms; }
+.hero-title mark {
+  display: inline-block;
+  padding: 0 0.14em 0.05em;
+  border-radius: 0.14em;
+  background: var(--accent);
+  color: var(--accent-contrast);
+}
+@keyframes line-up { from { transform: translate3d(0, 115%, 0); } }
+
+.hero-in { animation: fade-up var(--dur-enter) var(--ease-out) backwards; animation-delay: calc(260ms + var(--hi, 0) * 90ms); }
+.hero-in-0 { --hi: 0; animation-delay: 0ms; }
+.hero-in-1 { --hi: 1; }
+.hero-in-2 { --hi: 2; }
+.hero-in-3 { --hi: 3; }
+
+.hero-sub { margin: 0; max-width: 31rem; color: var(--text-muted); font-size: var(--fs-lead); line-height: 1.5; }
+.hero-search { position: relative; z-index: 5; width: 100%; max-width: 560px; }
+.hero-foot { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-6); width: 100%; max-width: 560px; }
+.hero-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+  margin: 0;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.hero-stats b { color: var(--text); font-weight: 600; }
+.hero-how {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  margin-left: auto;
+  color: var(--text);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+.hero-how .icon { width: 18px; height: 18px; transition: transform var(--dur-short) var(--ease-out); }
+.hero-how:hover .icon { transform: translate3d(0, 3px, 0); }
+
+/* ---------- Search (combobox) ---------- */
+.search { position: relative; width: 100%; }
+.search-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 64px;
+  padding: 0 12px 0 20px;
+  border: 1px solid var(--border-strong);
+  border-radius: 20px;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  transition: border-color var(--ease), box-shadow var(--dur-short) var(--ease-standard);
+}
+.search-field > .icon { width: 22px; height: 22px; color: var(--text-muted); transition: color var(--ease), transform var(--dur-short) var(--ease-out); }
+.search-field:hover { border-color: var(--text-muted); }
+.search-field:focus-within { border-color: var(--text); box-shadow: 0 0 0 4px var(--accent), var(--shadow-md); }
+.search-field:focus-within > .icon { color: var(--text); transform: scale(1.08) rotate(-8deg); }
+.search-input {
+  flex: 1;
+  min-width: 0;
+  height: 62px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 1.0625rem;
+  letter-spacing: -0.01em;
+  text-overflow: ellipsis;
+}
+.search-input:focus { outline: none; }
+.search-input::placeholder { color: var(--text-muted); opacity: 1; }
+.search-kbd {
+  width: 28px;
+  height: 28px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  transition: opacity var(--ease);
+}
+.search-field:focus-within .search-kbd { opacity: 0; }
+@media (hover: none) {
+  .search-kbd { display: none; }
+}
+.search-clear {
+  width: 40px;
+  height: 40px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: var(--surface-2);
+  color: var(--text);
+  cursor: pointer;
+  transition: background-color var(--ease), transform var(--ease);
+  animation: fade-in var(--dur-micro) linear backwards;
+}
+.search-clear .icon { width: 16px; height: 16px; }
+.search-clear:hover { background: var(--surface-3); }
+.search-clear:active { transform: scale(0.9); }
+.search-field.is-skeleton { pointer-events: none; }
+
+.search-panel {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  max-height: min(60vh, 440px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+  transform-origin: top center;
+  animation: panel-in 200ms var(--ease-out) backwards;
+}
+@keyframes panel-in { from { opacity: 0; transform: translate3d(0, -6px, 0) scale(0.985); } }
+.search-label { padding: 8px 12px 6px; }
+.search-options { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.search-option {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 14px 8px 8px;
+  border-radius: 14px;
+  color: var(--text);
+  text-decoration: none;
+  transition: background-color var(--ease);
+}
+.search-option[aria-selected='true'] { background: var(--surface-2); }
+.search-option-art { position: relative; width: 44px; height: 44px; border-radius: 10px; overflow: hidden; }
+.search-option-art .poster { position: absolute; inset: 0; }
+.search-option-main { min-width: 0; display: grid; gap: 1px; }
+.search-option-name { font-weight: 600; letter-spacing: -0.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.search-option-meta { color: var(--text-muted); font-size: 0.8125rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.search-option-price { font-family: var(--font-mono); font-size: 0.8125rem; font-weight: 500; white-space: nowrap; }
+.search-all {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 46px;
+  margin-top: 6px;
+  padding: 0 14px;
+  border: 0;
+  border-top: 1px solid var(--border);
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+.search-all .icon { width: 18px; height: 18px; transition: transform var(--dur-short) var(--ease-out); }
+.search-all:hover .icon { transform: translate3d(0, 3px, 0); }
+.search-empty { display: grid; justify-items: start; gap: 6px; padding: 16px 12px; }
+.search-empty p { margin: 0; }
+.search-empty-title { font-weight: 600; overflow-wrap: anywhere; }
+.search-empty .btn { margin-top: 8px; }
+@media (max-width: 419.98px) {
+  .search-option { grid-template-columns: 44px minmax(0, 1fr); }
+  .search-option-price { display: none; }
+}
+
+/* ---------- Hero visual: the poster and the ticket, one composition ----------
+   Phones (this block): the poster is a tall panel; its upper part shows the artwork and the
+   ticket sits INSIDE its lower part, --inset from the left, right and bottom edges. So:
+     - the ticket never hangs over the poster's lower edge, and the notches of its perforation
+       open onto the artwork on both sides (never onto a poster edge);
+     - the ticket is exactly as wide as the poster minus the insets: no empty strip beside it;
+     - the corners are concentric (poster radius − inset = ticket radius);
+     - the poster's height follows the ticket's content (padding, not a fixed aspect ratio).
+   The crowd layer of the drawing is not shown at this size: behind the ticket it would only
+   leak stray heads around its corners. */
+.hero-visual {
+  --scene: 0;
+  --inset: 12px;
+  --far-shift: -112px;
+  position: relative;
+  min-width: 0;
+  padding: clamp(168px, 54vw, 320px) var(--inset) var(--inset);
+}
+.hero-art-frame {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: var(--radius-xl);
+  background: var(--art-ink);
+  animation: visual-in var(--dur-complex) var(--ease-out) 120ms backwards;
+}
+@keyframes visual-in { from { opacity: 0; transform: translate3d(0, 24px, 0) scale(0.975); } }
+.hero-art { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+/* Reveal: an ink shutter lifts off the artwork. Its resting state is "open". */
+.hero-art-cover { position: absolute; inset: 0; background: var(--art-ink); transform: scaleY(0); transform-origin: top; animation: cover-open 900ms var(--ease-in-out) 220ms backwards; }
+@keyframes cover-open { from { transform: scaleY(1); } }
+
+.hv-sky { fill: var(--art-sky); }
+.hv-mint { fill: var(--art-mint); }
+.hv-line { fill: none; stroke: var(--art-line); stroke-width: 1.5; }
+.hv-ink-ring { fill: none; stroke: var(--art-ink); stroke-width: 24; }
+.hv-beam { fill: var(--art-white); opacity: 0.07; }
+.hv-mast { fill: none; stroke: var(--art-line); stroke-width: 7; stroke-linecap: round; }
+.hv-lamp-box { fill: var(--art-ink-2); stroke: var(--art-line); stroke-width: 2; }
+.hv-lamp { fill: none; stroke: var(--art-white); stroke-width: 12; stroke-linecap: round; }
+.hv-confetti-sky { fill: var(--art-sky); }
+.hv-confetti-mint { fill: var(--art-mint); }
+.hv-confetti-white { fill: var(--art-white); }
+.hv-crowd { fill: var(--art-shadow); }
+.hv-crowd-back { fill: var(--art-ink-2); }
+.hv-arm { fill: none; stroke: var(--art-shadow); stroke-width: 16; stroke-linecap: round; }
+.hv-phone { stroke: var(--art-shadow); stroke-width: 3; }
+.hv-phone-mint { fill: var(--art-mint); }
+.hv-phone-white { fill: var(--art-white); }
+.hv-near { display: none; }
+/* On phones the stage arch is raised so its rings read above the ticket. */
+.hv-far { transform: translate(0, var(--far-shift)); }
+/* The tall phone panel crops the sides of the drawing: on the narrowest screens the two
+   floodlights step inwards so neither lamp box is cut. */
+@media (max-width: 479.98px) {
+  .hv-mast-l { transform: translate(20px, 0); }
+  .hv-mast-r { transform: translate(-20px, 0); }
+}
+@media (max-width: 359.98px) {
+  .hv-mast-l { transform: translate(52px, 0); }
+  .hv-mast-r { transform: translate(-52px, 0); }
+}
+
+/* Light parallax (scroll-scene.tsx writes --scene; desktop pointers only, never with reduced motion) */
+.hero-visual[data-scene] .hv-far { transform: translate(0, calc(var(--far-shift) + var(--scene) * -16px)); }
+.hero-visual[data-scene] .hv-mid { transform: translate(0, calc(var(--scene) * 6px)); }
+.hero-visual[data-scene] .hv-near { transform: translate(0, calc(var(--scene) * 22px)); }
+
+/* The ticket. Its notches are real cut-outs (mask), so the artwork shows through them; the
+   shadow therefore comes from a drop-shadow on the slot. */
+.hero-ticket-slot { position: relative; z-index: 2; filter: drop-shadow(0 14px 24px rgb(0 0 0 / 0.28)); }
+.hero-ticket {
+  --stub-h: 76px;
+  --notch: 10px;
+  display: block;
+  border: 0;
+  border-radius: calc(var(--radius-xl) - var(--inset));
+  box-shadow: none;
+  color: var(--text);
+  text-decoration: none;
+  -webkit-mask:
+    radial-gradient(circle var(--notch) at 0 calc(100% - var(--stub-h)), transparent calc(var(--notch) - 0.6px), #000 var(--notch)),
+    radial-gradient(circle var(--notch) at 100% calc(100% - var(--stub-h)), transparent calc(var(--notch) - 0.6px), #000 var(--notch));
+  -webkit-mask-composite: source-in;
+  mask:
+    radial-gradient(circle var(--notch) at 0 calc(100% - var(--stub-h)), transparent calc(var(--notch) - 0.6px), #000 var(--notch)),
+    radial-gradient(circle var(--notch) at 100% calc(100% - var(--stub-h)), transparent calc(var(--notch) - 0.6px), #000 var(--notch));
+  mask-composite: intersect;
+  animation: ticket-in var(--dur-complex) var(--ease-out) 560ms backwards;
+  transition: transform var(--dur-short) var(--ease-out);
+}
+.hero-ticket.is-skeleton { animation: none; }
+@keyframes ticket-in { from { opacity: 0; transform: translate3d(0, 26px, 0) rotate(-2.5deg); } }
+.hero-ticket .ticket-main { display: grid; gap: 6px; padding: 18px 20px 18px; }
+.hero-ticket-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 6px; }
+.hero-ticket-top .eyebrow { flex-wrap: nowrap; white-space: nowrap; }
+@media (max-width: 359.98px) {
+  /* No room for the printed reference beside the label on the narrowest screens */
+  .hero-ticket-serial { display: none; }
+}
+.hero-ticket-serial { color: var(--text-muted); font-family: var(--font-mono); font-size: 0.6875rem; letter-spacing: 0.12em; white-space: nowrap; }
+.hero-ticket-name { margin: 0; font-size: clamp(1.375rem, 1.2rem + 0.8vw, 1.625rem); font-weight: 650; line-height: 1.05; letter-spacing: -0.035em; text-wrap: balance; }
+.hero-ticket-meta { color: var(--text-muted); font-size: 0.9375rem; }
+.hero-ticket-meta.mono { color: var(--text); font-size: 0.8125rem; letter-spacing: 0.06em; text-transform: uppercase; }
+.hero-ticket .ticket-stub { display: flex; align-items: center; justify-content: space-between; gap: 12px; height: var(--stub-h); padding: 0 20px; }
+.hero-ticket .ticket-stub::before,
+.hero-ticket .ticket-stub::after { display: none; }
+.hero-ticket-price { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; margin: 0; font-weight: 500; }
+.hero-ticket-price b { font-size: 1.375rem; font-weight: 650; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+.hero-ticket-count { color: var(--text-muted); font-size: 0.8125rem; }
+@media (hover: hover) {
+  a.hero-ticket:hover { transform: translate3d(0, -4px, 0) rotate(-1deg); }
+  a.hero-ticket:hover .round-arrow { background: var(--brand); border-color: var(--brand); color: var(--brand-contrast); }
+  a.hero-ticket:hover .round-arrow .icon { transform: translate3d(2px, -2px, 0); }
+}
+a.hero-ticket:focus-visible { outline: 2px solid var(--art-sky); outline-offset: 4px; }
+
+/* Tablet: a wide poster with the ticket pinned inside its bottom-left corner; the rest of the
+   poster is the scene. */
+@media (min-width: 768px) {
+  .hero-visual { --inset: 28px; --far-shift: 0px; padding: 0; aspect-ratio: 16 / 9; }
+  /* From here on the drawing is 8 % taller than its frame, so the parallax never uncovers an edge. */
+  .hero-art { inset: auto; left: 0; top: -4%; height: 108%; }
+  .hv-near { display: inline; }
+  .hero-ticket-slot { position: absolute; left: var(--inset); bottom: var(--inset); width: min(400px, 60%); }
+  .hero-ticket { border-radius: var(--radius-lg); }
+  .hero-ticket .ticket-main { padding: 18px 22px 18px; }
+  .hero-ticket .ticket-stub { padding: 0 22px; }
+  .hero-visual[data-scene] .hero-ticket-slot { transform: translate3d(0, calc(var(--scene) * -30px), 0); }
+}
+/* Desktop: the poster stands beside the copy and the ticket deliberately hangs over its left edge. */
+@media (min-width: 1024px) {
+  .hero { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); align-items: center; column-gap: clamp(40px, 5vw, 72px); min-height: min(720px, calc(100dvh - var(--header-h) - 48px)); }
+  .hero-title { font-size: clamp(3.5rem, 5.6vw, 5.5rem); }
+  .hero-visual { justify-self: stretch; width: 100%; aspect-ratio: 5 / 6; max-height: min(680px, calc(100dvh - var(--header-h) - 72px)); }
+  .hero-ticket-slot { left: -56px; bottom: 44px; width: min(380px, 92%); }
+}
+
+/* ---------- Featured cards ---------- */
+.feature-grid { display: grid; gap: var(--space-4); }
+.feature-card {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 440px;
+  overflow: hidden;
+  border: 1px solid var(--scrim-border);
+  border-radius: var(--radius-xl);
+  background: var(--scrim);
+  color: var(--on-scrim);
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform var(--dur-short) var(--ease-out);
+}
+.feature-card.is-skeleton { border-color: transparent; background: var(--surface-3); }
+.feature-art { position: absolute; inset: 0 0 128px 0; z-index: -1; overflow: hidden; }
+.feature-art .poster { position: absolute; inset: 0; transition: transform var(--dur-complex) var(--ease-out); }
+.feature-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 16px; }
+.date-badge {
+  width: 60px;
+  height: 64px;
+  flex: none;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  border-radius: 16px;
+  background: var(--art-white);
+  color: var(--art-ink);
+  font-family: var(--font-mono);
+  line-height: 1;
+  transition: transform var(--dur-enter) var(--ease-out);
+}
+.date-badge b { font-size: 1.5rem; font-weight: 600; letter-spacing: -0.03em; }
+.date-badge span { margin-top: 5px; font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; }
+.art-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: var(--radius-pill);
+  background: var(--art-white);
+  color: var(--art-ink);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+/* The text block is solid: the 64 px feather above it is the only part that blends with the art. */
+.feature-body {
+  display: grid;
+  gap: 10px;
+  padding: 64px 20px 20px;
+  background: linear-gradient(to bottom, transparent, var(--scrim) 64px);
+  transition: transform var(--dur-enter) var(--ease-out);
+}
+.feature-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 14px;
+  margin: 0;
+  color: var(--on-scrim-muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+}
+.feature-name { margin: 0; font-size: clamp(1.625rem, 1.25rem + 1.7vw, 2.75rem); font-weight: 650; line-height: 1; letter-spacing: -0.04em; text-wrap: balance; }
+.feature-foot { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin-top: 6px; padding-top: 14px; border-top: 1.5px dashed var(--scrim-border); }
+.feature-price { display: grid; gap: 4px; margin: 0; }
+.feature-price .price-label { color: var(--on-scrim-muted); }
+.feature-price strong { font-size: 1.625rem; font-weight: 650; line-height: 1; letter-spacing: -0.035em; font-variant-numeric: tabular-nums; }
+.feature-none { color: var(--on-scrim-muted); font-size: 0.9375rem; }
+.cta-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 16px 0 18px;
+  border-radius: var(--radius-pill);
+  background: var(--art-white);
+  color: var(--art-ink);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background-color var(--dur-short) var(--ease-standard);
+}
+.cta-pill span { transition: transform var(--dur-short) var(--ease-out); }
+.cta-pill .icon { width: 18px; height: 18px; transition: transform var(--dur-short) var(--ease-out); }
+.feature-card:active { transform: scale(0.992); }
+.feature-card:focus-visible { outline: 2px solid var(--focus); outline-offset: 4px; border-radius: var(--radius-xl); }
+/* Hover choreography: the art zooms, the text block rises, the date tilts, the CTA fills.
+   Keyboard focus gets exactly the same; touch devices get the resting state (no hover-only UI). */
+@media (hover: hover) {
+  .feature-card:hover .poster { transform: scale(1.06); }
+  .feature-card:hover .feature-body { transform: translate3d(0, -6px, 0); }
+  .feature-card:hover .date-badge { transform: translate3d(0, -2px, 0) rotate(-4deg); }
+  .feature-card:hover .cta-pill { background: var(--art-sky); }
+  .feature-card:hover .cta-pill span { transform: translate3d(-2px, 0, 0); }
+  .feature-card:hover .cta-pill .icon { transform: translate3d(4px, 0, 0); }
+}
+.feature-card:focus-visible .poster { transform: scale(1.06); }
+.feature-card:focus-visible .feature-body { transform: translate3d(0, -6px, 0); }
+.feature-card:focus-visible .cta-pill { background: var(--art-sky); }
+.feature-card:focus-visible .cta-pill .icon { transform: translate3d(4px, 0, 0); }
+
+@media (min-width: 768px) {
+  .feature-grid--2,
+  .feature-grid--3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .feature-grid--3 .is-lead { grid-column: 1 / -1; }
+  .feature-card { min-height: 480px; }
+  .feature-body { padding: 64px 24px 24px; }
+  .feature-top { padding: 20px; }
+}
+@media (min-width: 1024px) {
+  .feature-grid--2,
+  .feature-grid--3 { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); }
+  .feature-grid--2 .feature-card { min-height: 560px; }
+  .feature-grid--3 { grid-template-rows: repeat(2, minmax(0, 1fr)); }
+  .feature-grid--3 .is-lead { grid-column: 1; grid-row: 1 / span 2; min-height: 640px; }
+  .feature-grid--3 .feature-card:not(.is-lead) { min-height: 312px; }
+  .feature-grid--3 .feature-card:not(.is-lead) .feature-name { font-size: 1.625rem; }
+  .feature-grid--3 .feature-card:not(.is-lead) .feature-art { bottom: 112px; }
+  .feature-card:not(.is-lead) .feature-name { font-size: clamp(1.625rem, 1.2rem + 1vw, 2.125rem); }
+  .feature-grid--1 .feature-card { min-height: 520px; }
+}
+
+/* ---------- Agenda ---------- */
+.agenda { list-style: none; margin: 0; padding: 0; border-top: 1.5px solid var(--text); }
+.agenda-item { border-bottom: 1px solid var(--border); animation: fade-up 420ms var(--ease-out) backwards; }
+.agenda-item:nth-child(2) { animation-delay: 40ms; }
+.agenda-item:nth-child(3) { animation-delay: 80ms; }
+.agenda-item:nth-child(4) { animation-delay: 120ms; }
+.agenda-item:nth-child(n + 5) { animation-delay: 160ms; }
+.agenda-row {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) 40px;
+  align-items: center;
+  gap: 10px 14px;
+  padding: 14px 0;
+  color: var(--text);
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.agenda-row.is-skeleton { display: block; padding: 12px 0; border-bottom: 1px solid var(--border); }
+/* Hover plate */
+.agenda-row::before {
+  content: '';
+  position: absolute;
+  inset: 0 -12px;
+  z-index: -1;
+  border-radius: 18px;
+  background: var(--surface);
+  box-shadow: var(--shadow-md);
+  opacity: 0;
+  transform: scale(0.985);
+  transition: opacity var(--dur-short) var(--ease-standard), transform var(--dur-short) var(--ease-out);
+}
+.agenda-row.is-skeleton::before { display: none; }
+.agenda-date { display: none; }
+.agenda-art { position: relative; grid-row: 1 / span 2; align-self: start; width: 64px; height: 64px; border-radius: 14px; overflow: hidden; }
+.agenda-art .poster { position: absolute; inset: 0; transition: transform var(--dur-enter) var(--ease-out); }
+.agenda-main { min-width: 0; display: grid; gap: 2px; transition: transform var(--dur-short) var(--ease-out); }
+.agenda-when { color: var(--text-muted); font-family: var(--font-mono); font-size: var(--fs-caption); letter-spacing: var(--tracking-label); text-transform: uppercase; }
+.agenda-name { font-size: 1.125rem; font-weight: 600; line-height: 1.15; letter-spacing: -0.02em; text-wrap: balance; }
+.agenda-venue { color: var(--text-muted); font-size: var(--fs-small); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.agenda-tags { grid-column: 2 / -1; display: flex; flex-wrap: wrap; gap: 6px; }
+.agenda-price { background: var(--text); color: var(--bg); font-weight: 600; }
+.agenda-row .round-arrow { grid-column: 3; grid-row: 1; width: 40px; height: 40px; }
+.agenda-row .round-arrow .icon { transform: rotate(-45deg); }
+.agenda-row:active::before { opacity: 1; transform: none; }
+.agenda-row:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 16px; }
+@media (hover: hover) {
+  .agenda-row:hover::before { opacity: 1; transform: none; }
+  .agenda-row:hover .agenda-main { transform: translate3d(6px, 0, 0); }
+  .agenda-row:hover .poster { transform: scale(1.12); }
+  .agenda-row:hover .round-arrow { background: var(--brand); border-color: var(--brand); color: var(--brand-contrast); }
+  .agenda-row:hover .round-arrow .icon { transform: none; }
+}
+.agenda-row:focus-visible .round-arrow { background: var(--brand); border-color: var(--brand); color: var(--brand-contrast); }
+.agenda-row:focus-visible .round-arrow .icon { transform: none; }
+.agenda-more { display: flex; justify-content: center; margin-top: var(--space-8); }
+@media (min-width: 768px) {
+  .agenda-row { grid-template-columns: 72px 76px minmax(0, 1fr) auto 48px; gap: 24px; padding: 18px 0; }
+  .agenda-date { display: grid; justify-items: start; font-family: var(--font-mono); line-height: 1; }
+  .agenda-date b { font-size: 2.25rem; font-weight: 500; letter-spacing: -0.05em; }
+  .agenda-date span { margin-top: 6px; color: var(--text-muted); font-size: var(--fs-caption); letter-spacing: 0.1em; text-transform: uppercase; }
+  .agenda-when-date { display: none; }
+  .agenda-art { grid-row: auto; align-self: center; width: 76px; height: 76px; border-radius: 16px; }
+  .agenda-name { font-size: clamp(1.25rem, 0.9rem + 1.1vw, 1.75rem); letter-spacing: -0.03em; }
+  .agenda-tags { grid-column: auto; justify-content: flex-end; max-width: 300px; }
+  .agenda-row .round-arrow { grid-column: auto; grid-row: auto; width: 48px; height: 48px; }
+}
+
+/* ---------- How it works ---------- */
+.how { margin-top: var(--section-gap); padding: var(--section-gap) 0; }
+.how .section-head { margin-bottom: 0; }
+.how .section-title-xl { max-width: 20ch; }
+.how .section-desc { color: var(--on-scrim-muted); }
+.how .idx { border-color: var(--on-scrim-muted); color: var(--on-scrim); }
+.how-track { position: relative; --scene: 1; --how-gap: var(--space-8); margin-top: clamp(36px, 5vw, 64px); }
+/* The connecting line: a track and a fill that scroll-scene.tsx scales through --scene (0 → 1).
+   Default --scene: 1, so it is complete without JavaScript and with reduced motion. */
+.how-line { position: absolute; left: 21px; top: 22px; bottom: 22px; width: 2px; background: var(--scrim-border); }
+.how-line-fill { position: absolute; inset: 0; background: var(--art-sky); transform-origin: top left; transform: scaleY(var(--scene)); }
+.how-steps { position: relative; list-style: none; margin: 0; padding: 0; display: grid; gap: var(--how-gap); }
+.how-step { position: relative; padding-left: 68px; --at: 0; --lit: clamp(0, calc((var(--scene) - var(--at)) * 14), 1); }
+.how-step-1 { --at: 0.3; }
+.how-step-2 { --at: 0.6; }
+.how-step-3 { --at: 0.9; }
+.how-node {
+  position: absolute;
+  left: 0;
+  top: 0;
+  isolation: isolate;
+  overflow: hidden;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: 1.5px solid var(--scrim-border);
+  border-radius: 50%;
+  background: var(--scrim);
+  color: var(--on-scrim);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+.how-node-fill { position: absolute; inset: 0; z-index: -1; background: var(--art-sky); opacity: 0; }
+/* A node lights up when the line reaches it. Needs color-mix for the number's colour; without
+   it the nodes simply stay outlined. */
+@supports (color: color-mix(in srgb, red 50%, blue)) {
+  .how-node-fill { opacity: var(--lit); }
+  .how-node-num { color: color-mix(in srgb, var(--accent-contrast) calc(var(--lit) * 100%), var(--on-scrim)); }
+}
+.how-step h3 { margin: 8px 0 8px; font-size: 1.25rem; letter-spacing: -0.025em; }
+.how-step p { margin: 0; max-width: 30rem; color: var(--on-scrim-muted); font-size: 0.9375rem; line-height: 1.55; }
+.how-notes { display: grid; gap: var(--space-6); margin-top: clamp(40px, 6vw, 72px); padding-top: var(--space-8); border-top: 1px solid var(--scrim-border); }
+.how-note h3 { margin: 0 0 6px; font-size: 1rem; letter-spacing: -0.01em; }
+.how-note p { margin: 0; color: var(--on-scrim-muted); font-size: 0.9375rem; line-height: 1.55; }
+.how-note.is-status { padding: 16px 18px; border: 1px dashed var(--on-scrim-muted); border-radius: var(--radius-md); }
+.how-note.is-status h3 { display: flex; align-items: center; gap: 8px; }
+.how-note.is-status h3::before { content: ''; width: 8px; height: 8px; flex: none; border-radius: 50%; background: var(--art-mint); }
+@media (min-width: 768px) {
+  .how-notes { grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: var(--space-8); align-items: start; }
+}
+@media (min-width: 960px) {
+  .how-steps { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .how-step { padding-left: 0; padding-top: 68px; }
+  .how-step-1 { --at: 0.3; }
+  .how-step-2 { --at: 0.62; }
+  .how-step-3 { --at: 0.92; }
+  .how-step h3 { margin-top: 0; }
+  .how-line { left: 22px; right: calc((100% - 3 * var(--how-gap)) / 4 - 22px); top: 21px; bottom: auto; width: auto; height: 2px; }
+  .how-line-fill { transform: scaleX(var(--scene)); }
+}
+
+/* ---------- Sell band ---------- */
+.sell-band {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: grid;
+  gap: var(--space-8);
+  justify-items: start;
+  padding: clamp(28px, 5vw, 64px);
+  border-radius: var(--radius-xl);
+  background: var(--accent);
+  color: var(--accent-contrast);
+}
+.sell-copy { display: grid; gap: var(--space-4); min-width: 0; }
+.sell-band .eyebrow { color: var(--accent-contrast); }
+.sell-band .idx { border-color: var(--accent-contrast); color: var(--accent-contrast); }
+.sell-band .section-title-xl { max-width: 15ch; }
+.sell-text { margin: 0; max-width: 33rem; font-size: var(--fs-lead); line-height: 1.5; }
+.sell-band .btn { background: var(--art-ink); color: var(--art-white); }
+.sell-band .btn:hover { background: var(--art-ink-2); }
+.sell-band :focus-visible { outline-color: var(--art-ink); }
+.sell-art { position: absolute; z-index: -1; right: -56px; bottom: -64px; width: min(64%, 440px); transform: rotate(-12deg); opacity: 0.55; }
+.sell-art path { fill: none; stroke: var(--art-white); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.sell-art .perf { stroke-dasharray: 2 9; }
+@media (min-width: 960px) {
+  .sell-band { grid-template-columns: minmax(0, 1fr) auto; align-items: end; }
+  .sell-art { right: 12%; bottom: -84px; width: 420px; }
+}
+
+/* ---------- Skeleton sizes (same boxes as the content they stand in for) ---------- */
+.sk-line { display: block; height: 12px; }
+.sk-title { display: block; height: 26px; }
+.sk-heading { display: block; height: 44px; width: min(360px, 72%); }
+.sk-round { display: block; width: 44px; height: 44px; border-radius: 50%; }
+.sk-row { display: block; height: 68px; border-radius: 14px; }
+.sk-w-40 { width: 40%; }
+.sk-w-50 { width: 50%; }
+.sk-w-60 { width: 60%; }
+.sk-w-80 { width: 80%; }
+.sk-w-stat { width: 172px; }
+.sk-w-stat + .sk-w-stat { width: 180px; }
+.sk-w-eyebrow { width: 120px; }
+.sk-w-desc { width: min(420px, 88%); }
+/* Same line box as the text they stand in for, so the row wraps (and measures) the same */
+.hero-stats .skeleton { display: inline-block; margin: 3px 0; }
+.hero-ticket.is-skeleton .ticket-main { min-height: 146px; align-content: start; }

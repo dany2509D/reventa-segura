@@ -19,6 +19,7 @@
     "@electric-sql/pglite": "^0.5.16",
     "@vercel/blob": "^2.9.0",
     "drizzle-orm": "^0.45.4",
+    "geist": "^1.9.2",
     "jsqr": "^1.4.0",
     "next": "^16.4.6",
     "pg": "^8.23.1",
