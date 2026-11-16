@@ -39,6 +39,25 @@ describe('getDb / migrateDb', () => {
     expect(() => getDb()).toThrow(/DATABASE_URL/);
   });
 
+  it('with a remote DATABASE_URL builds the pool from buildPgConfig (verified TLS, no network until a query)', async () => {
+    vi.stubEnv('DATABASE_URL', 'postgresql://postgres.ref:pw@aws-0-sa-east-1.pooler.supabase.com:5432/postgres?sslmode=require');
+    vi.stubEnv('DATABASE_CA_CERT', '-----BEGIN CERTIFICATE-----\\nAAAA\\n-----END CERTIFICATE-----');
+    const { getDb } = await import('./client');
+    const db = getDb() as unknown as { $client: { options: Record<string, unknown> } };
+    expect(db.$client.options.ssl).toEqual({ ca: '-----BEGIN CERTIFICATE-----\nAAAA\n-----END CERTIFICATE-----', rejectUnauthorized: true });
+    expect(db.$client.options.max).toBe(5);
+    expect(db.$client.options.connectionString).not.toContain('sslmode');
+  });
+
+  it('refuses a remote DATABASE_URL in production without DATABASE_CA_CERT, even with DATABASE_SSL_INSECURE=1', async () => {
+    vi.stubEnv('NODE_ENV', 'production');
+    vi.stubEnv('DATABASE_URL', 'postgresql://postgres.ref:pw@aws-0-sa-east-1.pooler.supabase.com:5432/postgres');
+    vi.stubEnv('DATABASE_CA_CERT', '');
+    vi.stubEnv('DATABASE_SSL_INSECURE', '1');
+    const { getDb } = await import('./client');
+    expect(() => getDb()).toThrow(/DATABASE_CA_CERT/);
+  });
+
   it('migrateDb applies the append-only triggers (the ledger cannot be edited)', async () => {
     vi.stubEnv('DATABASE_URL', '');
     const { getDb, migrateDb } = await import('./client');
