@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getDb } from '@/lib/db/client';
 import { AmountMismatchError, UnknownPaymentError, handlePaymentWebhook } from '@/lib/orders/service';
-import { FakeGateway } from '@/lib/payments/fake-gateway';
+import { getPaymentGateway } from '@/lib/payments';
 import { InvalidWebhookError } from '@/lib/payments/gateway';
 
 export async function POST(req: Request) {
@@ -9,8 +9,7 @@ export async function POST(req: Request) {
   const rawBody = await req.text();
   const headers = Object.fromEntries(req.headers);
   try {
-    // Test-mode gateway until a real adapter is configured.
-    await handlePaymentWebhook(getDb(), new FakeGateway(), rawBody, headers);
+    await handlePaymentWebhook(getDb(), getPaymentGateway(), rawBody, headers);
     return NextResponse.json({ ok: true });
   } catch (e) {
     if (e instanceof InvalidWebhookError) {
