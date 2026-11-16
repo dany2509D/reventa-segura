@@ -30,11 +30,13 @@ function toE164(input: string): string | null {
 }
 
 function firebaseErrorText(err: unknown): string {
-  const c = (err as { code?: string })?.code ?? '';
-  if (c.includes('too-many-requests')) return 'Demasiados intentos. Espera un rato e inténtalo de nuevo.';
-  if (c.includes('invalid-phone-number')) return 'Escribe un celular panameño válido, por ejemplo 6123-4567.';
-  if (c.includes('invalid-verification-code') || c.includes('code-expired')) return 'Código incorrecto o vencido.';
-  return 'No pudimos completar la verificación. Inténtalo de nuevo.';
+  const { code: c = '', message = '' } = (err ?? {}) as { code?: string; message?: string };
+  let text = 'No pudimos completar la verificación. Inténtalo de nuevo.';
+  if (c.includes('too-many-requests')) text = 'Demasiados intentos. Espera un rato e inténtalo de nuevo.';
+  else if (c.includes('invalid-phone-number')) text = 'Escribe un celular panameño válido, por ejemplo 6123-4567.';
+  else if (c.includes('invalid-verification-code') || c.includes('code-expired')) text = 'Código incorrecto o vencido.';
+  // Diagnostics only outside production.
+  return process.env.NODE_ENV !== 'production' ? `${text} [${c || 'sin-código'}] ${message}` : text;
 }
 
 export default function LoginForm({ next }: { next: string }) {

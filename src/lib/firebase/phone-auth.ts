@@ -37,7 +37,11 @@ function recaptcha(containerId: string): RecaptchaVerifier {
 }
 
 function resetRecaptcha(): void {
-  verifier?.clear();
+  try {
+    verifier?.clear();
+  } catch {
+    // the widget's container may already be gone from the DOM
+  }
   verifier = null;
 }
 
@@ -47,9 +51,16 @@ export async function sendPhoneOtp(
   containerId = 'recaptcha-container',
 ): Promise<ConfirmationResult | null> {
   if (FAKE_SMS) return null;
+  // A retry always starts from a fresh verifier, so a stale widget never blocks the resend.
+  resetRecaptcha();
   try {
+    if (typeof document === 'undefined' || !document.getElementById(containerId)) {
+      throw new Error(`Falta el contenedor #${containerId} para reCAPTCHA`);
+    }
     return await signInWithPhoneNumber(firebaseAuth(), phone, recaptcha(containerId));
   } catch (e) {
+    const err = e as { code?: string; message?: string };
+    console.error('[firebase-phone]', err.code, err.message);
     resetRecaptcha(); // a failed reCAPTCHA cannot be reused
     throw e;
   }
