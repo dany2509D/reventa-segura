@@ -3,6 +3,8 @@ import { buyerNextStep, listingStatusLabel, orderStatusLabel, sellerNextStep, ty
 import { getDb } from '@/lib/db/client';
 import { formatPanamaDateTime, formatUsd } from '@/lib/format';
 import type { OrderState } from '@/lib/orders/state-machine';
+import { TicketDoodle } from '../_components/doodle';
+import { IconChevronRight, IconOrders, IconSell, IconWallet } from '../_components/icons';
 import { requireUser } from '../session';
 import UploadReceived from './upload-received';
 import WithdrawButton from './withdraw-button';
@@ -10,17 +12,30 @@ import WithdrawButton from './withdraw-button';
 export const metadata = { title: 'Mis órdenes' };
 export const dynamic = 'force-dynamic';
 
-// Presentation only: the colour tone of each status chip (the chip always shows the status text too).
-const ORDER_TONE: Record<OrderState, string> = {
-  creada: 'chip warning',
-  transferencia_pendiente: 'chip info',
-  entrada_recibida: 'chip info',
-  ingreso_confirmado: 'chip success',
-  disputada: 'chip warning',
-  liberada: 'chip success',
-  liquidada: 'chip success',
-  reembolsada: 'chip neutral',
-  cancelada: 'chip neutral',
+// Presentation only. Card colour by state, from the buyer's and the seller's point of view:
+// sky = in progress, mint = completed, pink = needs attention, white = closed/neutral.
+// The state is always also written in the chip.
+const BUYER_TONE: Record<OrderState, string> = {
+  creada: 'pastel tone-pink',
+  transferencia_pendiente: 'pastel tone-sky',
+  entrada_recibida: 'pastel tone-sky',
+  ingreso_confirmado: 'pastel tone-sky',
+  disputada: 'pastel tone-pink',
+  liberada: 'pastel tone-mint',
+  liquidada: 'pastel tone-mint',
+  reembolsada: '',
+  cancelada: '',
+};
+const SELLER_TONE: Record<OrderState, string> = {
+  creada: '',
+  transferencia_pendiente: 'pastel tone-pink',
+  entrada_recibida: 'pastel tone-sky',
+  ingreso_confirmado: 'pastel tone-sky',
+  disputada: 'pastel tone-pink',
+  liberada: 'pastel tone-mint',
+  liquidada: 'pastel tone-mint',
+  reembolsada: '',
+  cancelada: '',
 };
 const LISTING_TONE: Record<ListingStatus, string> = {
   pending: 'chip warning',
@@ -45,16 +60,42 @@ export default async function MyOrdersPage({ searchParams }: { searchParams: Pro
       {q.pago === 'ok' ? <p role="status" className="ok">¡Pago recibido! Tu dinero está protegido.</p> : null}
       {q.pago === 'rechazado' ? <p role="alert" className="error">El pago fue rechazado. No se te cobró.</p> : null}
 
-      <h2>Mis compras</h2>
-      {orders.length === 0 ? <p className="empty">Todavía no has comprado entradas. <a href="/">Ver eventos</a></p> : null}
+      <nav className="list-group" aria-label="Secciones">
+        <a className="list-row" href="#compras">
+          <IconOrders />
+          <span className="list-label">Mis compras</span>
+          <span className="list-count">{orders.length}</span>
+          <span className="list-chevron" aria-hidden="true"><IconChevronRight /></span>
+        </a>
+        <a className="list-row" href="#ventas">
+          <IconWallet />
+          <span className="list-label">Mis ventas</span>
+          <span className="list-count">{sales.length}</span>
+          <span className="list-chevron" aria-hidden="true"><IconChevronRight /></span>
+        </a>
+        <a className="list-row" href="#publicaciones">
+          <IconSell />
+          <span className="list-label">Mis publicaciones</span>
+          <span className="list-count">{mine.length}</span>
+          <span className="list-chevron" aria-hidden="true"><IconChevronRight /></span>
+        </a>
+      </nav>
+
+      <h2 id="compras" className="section-title">Mis compras</h2>
+      {orders.length === 0 ? (
+        <div className="empty tone-sky">
+          <TicketDoodle />
+          <p>Todavía no has comprado entradas. <a href="/">Ver eventos</a></p>
+        </div>
+      ) : null}
       <div className="stack">
         {orders.map((o) => {
           const step = buyerNextStep({ state: o.state, deliveryMode: o.deliveryMode, hasOpenDispute: o.hasOpenDispute });
           return (
-            <div key={o.orderId} className="card">
+            <div key={o.orderId} className={`card ${BUYER_TONE[o.state]}`}>
               <div className="card-head">
                 <h3>{o.eventName}</h3>
-                <span className={ORDER_TONE[o.state]}>{orderStatusLabel(o.state)}</span>
+                <span className="chip">{orderStatusLabel(o.state)}</span>
               </div>
               <div className="muted money">{formatPanamaDateTime(o.startsAt)} · {formatUsd(o.priceCents)}</div>
               {o.state === 'transferencia_pendiente' && o.transferDeadline ? (
@@ -66,7 +107,7 @@ export default async function MyOrdersPage({ searchParams }: { searchParams: Pro
                   <a className="btn" href={`/api/orders/${o.orderId}/ticket`} target="_blank" rel="noopener noreferrer">Ver mi entrada</a>
                 ) : null}
                 {step.actions.includes('confirm_entry') ? (
-                  <a className="btn accent" href={`/ingreso/${o.orderId}`}>Confirmar mi ingreso</a>
+                  <a className="btn" href={`/ingreso/${o.orderId}`}>Confirmar mi ingreso</a>
                 ) : null}
                 {step.actions.includes('dispute') ? (
                   <a className="btn secondary" href={`/disputa/${o.orderId}`}>Tengo un problema</a>
@@ -78,14 +119,19 @@ export default async function MyOrdersPage({ searchParams }: { searchParams: Pro
         })}
       </div>
 
-      <h2>Mis ventas</h2>
-      {sales.length === 0 ? <p className="empty">Aún no tienes ventas.</p> : null}
+      <h2 id="ventas" className="section-title">Mis ventas</h2>
+      {sales.length === 0 ? (
+        <div className="empty tone-mint">
+          <TicketDoodle />
+          <p>Aún no tienes ventas.</p>
+        </div>
+      ) : null}
       <div className="stack">
         {sales.map((s) => (
-          <div key={s.orderId} className="card">
+          <div key={s.orderId} className={`card ${SELLER_TONE[s.state]}`}>
             <div className="card-head">
               <h3>{s.eventName}</h3>
-              <span className={ORDER_TONE[s.state]}>{orderStatusLabel(s.state)}</span>
+              <span className="chip">{orderStatusLabel(s.state)}</span>
             </div>
             <div className="muted money">Recibirás {formatUsd(s.netCents)} (después de la comisión)</div>
             <p>{sellerNextStep({ state: s.state, deliveryMode: s.deliveryMode, payoutStatus: s.payoutStatus })}</p>
@@ -96,22 +142,29 @@ export default async function MyOrdersPage({ searchParams }: { searchParams: Pro
         ))}
       </div>
 
-      <h2>Mis publicaciones</h2>
-      {mine.length === 0 ? <p className="empty">No has publicado entradas. <a href="/vender">Vender una entrada</a></p> : null}
-      <div className="stack">
-        {mine.map((l) => (
-          <div key={l.listingId} className="card offer">
-            <div>
-              <h3>{l.eventName}</h3>
-              <div className="listing-meta">
-                <span className="muted money">{formatUsd(l.askCents)}</span>
-                <span className={LISTING_TONE[l.status]}>{listingStatusLabel(l.status)}</span>
+      <h2 id="publicaciones" className="section-title">Mis publicaciones</h2>
+      {mine.length === 0 ? (
+        <div className="empty tone-pink">
+          <TicketDoodle />
+          <p>No has publicado entradas. <a href="/vender">Vender una entrada</a></p>
+        </div>
+      ) : (
+        <div className="list-group">
+          {mine.map((l) => (
+            <div key={l.listingId} className="list-row">
+              <IconSell />
+              <div className="list-label">
+                {l.eventName}
+                <div className="list-sub">
+                  <span className="muted money">{formatUsd(l.askCents)}</span>
+                  <span className={LISTING_TONE[l.status]}>{listingStatusLabel(l.status)}</span>
+                </div>
               </div>
+              {l.status === 'pending' || l.status === 'verified' ? <WithdrawButton listingId={l.listingId} /> : null}
             </div>
-            {l.status === 'pending' || l.status === 'verified' ? <WithdrawButton listingId={l.listingId} /> : null}
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </main>
   );
 }

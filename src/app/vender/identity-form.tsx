@@ -45,9 +45,12 @@ export default function IdentityForm() {
       </label>
       <p className="muted">Guardamos tus documentos de forma privada y solo el equipo de verificación los ve.</p>
       {error ? <p role="alert" className="error">{error}</p> : null}
-      <button className="btn" type="submit" disabled={busy || !doc || !selfie}>
-        {busy ? 'Enviando…' : 'Enviar para verificación'}
-      </button>
+      <div className="cta-row">
+        <a className="btn text" href="/">Cancelar</a>
+        <button className="btn" type="submit" disabled={busy || !doc || !selfie}>
+          {busy ? 'Enviando…' : 'Enviar para verificación'}
+        </button>
+      </div>
     </form>
   );
 }

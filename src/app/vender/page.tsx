@@ -1,6 +1,7 @@
 import { profileOf, upcomingEvents } from '@/lib/account/queries';
 import { getDb } from '@/lib/db/client';
 import { DEFAULT_PRICE_CAP_BPS } from '@/lib/pricing/pricing';
+import { DoodlePanel, TicketDoodle } from '../_components/doodle';
 import { requireUser } from '../session';
 import IdentityForm from './identity-form';
 import ListingForm from './listing-form';
@@ -16,6 +17,7 @@ export default async function SellPage() {
   const events = status === 'approved' ? (await upcomingEvents(db)).filter((e) => !e.resaleProhibited) : [];
   return (
     <main className="page">
+      <DoodlePanel tone="mint" compact />
       <h1>Vender una entrada</h1>
 
       {status === 'none' || status === 'rejected' ? (
@@ -30,12 +32,18 @@ export default async function SellPage() {
       ) : null}
 
       {status === 'pending' ? (
-        <p className="notice">Estamos revisando tu identidad. Te avisaremos aquí cuando puedas publicar entradas.</p>
+        <div className="empty tone-sky">
+          <TicketDoodle />
+          <p>Estamos revisando tu identidad. Te avisaremos aquí cuando puedas publicar entradas.</p>
+        </div>
       ) : null}
 
       {status === 'approved' ? (
         events.length === 0 ? (
-          <p className="empty">No hay eventos disponibles para publicar por ahora.</p>
+          <div className="empty tone-mint">
+            <TicketDoodle />
+            <p>No hay eventos disponibles para publicar por ahora.</p>
+          </div>
         ) : (
           <ListingForm
             capBps={DEFAULT_PRICE_CAP_BPS}

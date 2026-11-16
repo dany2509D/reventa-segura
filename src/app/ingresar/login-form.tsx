@@ -73,12 +73,14 @@ export default function LoginForm({ next }: { next: string }) {
         />
       </label>
       {error ? <p role="alert" className="error">{error}</p> : null}
-      <button className="btn" type="submit" disabled={busy || code.length !== 6}>
-        {busy ? 'Verificando…' : 'Entrar'}
-      </button>
-      <button className="btn secondary" type="button" onClick={() => { setStep('phone'); setCode(''); setError(null); }}>
-        Cambiar número
-      </button>
+      <div className="cta-row">
+        <button className="btn text" type="button" onClick={() => { setStep('phone'); setCode(''); setError(null); }}>
+          Cambiar número
+        </button>
+        <button className="btn" type="submit" disabled={busy || code.length !== 6}>
+          {busy ? 'Verificando…' : 'Entrar'}
+        </button>
+      </div>
     </form>
   );
 }

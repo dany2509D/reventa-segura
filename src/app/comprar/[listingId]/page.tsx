@@ -2,6 +2,8 @@ import { notFound } from 'next/navigation';
 import { listingOffer } from '@/lib/account/queries';
 import { getDb } from '@/lib/db/client';
 import { formatPanamaDateTime, formatUsd } from '@/lib/format';
+import BackLink from '../../_components/back-link';
+import { toneFor } from '../../_components/doodle';
 import { IconShieldCheck } from '../../_components/icons';
 import { requireUser } from '../../session';
 import BuyButton from './buy-button';
@@ -16,11 +18,11 @@ export default async function BuyPage({ params }: { params: Promise<{ listingId:
   if (!offer || offer.resaleProhibited) notFound();
   const own = offer.sellerId === user.userId;
   return (
-    <main className="page">
-      <a href={`/eventos/${offer.eventId}`} className="back-link">← {offer.eventName}</a>
+    <main className="page buy-page">
+      <BackLink href={`/eventos/${offer.eventId}`}>{offer.eventName}</BackLink>
       <h1>Confirmar compra</h1>
       <div className="stack">
-        <div className="card summary">
+        <div className={`card pastel summary tone-${toneFor(offer.eventId)}`}>
           <h3>{offer.eventName}</h3>
           <div className="tags">
             <span className="tag">{offer.venue}</span>
@@ -49,7 +51,13 @@ export default async function BuyPage({ params }: { params: Promise<{ listingId:
             Una boletera o recinto puede restringir entradas revendidas. Si te rechazan en la puerta, abre una disputa.
           </p>
         </div>
-        {own ? <p className="notice">Esta es tu propia publicación: no puedes comprarla.</p> : <BuyButton listingId={listingId} />}
+        {own ? (
+          <p className="notice">Esta es tu propia publicación: no puedes comprarla.</p>
+        ) : (
+          <div className="sticky-cta">
+            <BuyButton listingId={listingId} />
+          </div>
+        )}
       </div>
     </main>
   );

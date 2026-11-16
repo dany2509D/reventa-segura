@@ -49,7 +49,7 @@ export default function EntryForm({ orderId }: { orderId: string }) {
 
   if (done) {
     return (
-      <div className="card">
+      <div className="card pastel tone-mint">
         <h3>¡Ingreso confirmado!</h3>
         <p>Gracias. Si hubo algún problema con la entrada, puedes avisarnos desde Mis órdenes hasta que cierre la ventana de disputas.</p>
         {!done.geoOk ? <p className="muted">No pudimos verificar tu ubicación, pero tu confirmación quedó registrada.</p> : null}
@@ -66,9 +66,12 @@ export default function EntryForm({ orderId }: { orderId: string }) {
       </label>
       <p className="muted">Te pediremos tu ubicación solo para comprobar que estás en el recinto. Si no la compartes, igual puedes confirmar.</p>
       {error ? <p role="alert" className="error">{error}</p> : null}
-      <button className="btn" type="submit" disabled={busy || !photo}>
-        {busy ? 'Confirmando…' : 'Confirmar que entré'}
-      </button>
+      <div className="cta-row">
+        <a className="btn text" href="/mis-ordenes">Cancelar</a>
+        <button className="btn" type="submit" disabled={busy || !photo}>
+          {busy ? 'Confirmando…' : 'Confirmar que entré'}
+        </button>
+      </div>
     </form>
   );
 }
