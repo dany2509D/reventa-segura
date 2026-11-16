@@ -1,20 +1,127 @@
-.admin-shell { max-width: 1100px; margin: 0 auto; padding: 16px; font-family: system-ui, sans-serif; }
-.admin-narrow { max-width: 420px; margin: 48px auto; padding: 0 16px; font-family: system-ui, sans-serif; }
-.admin-nav { display: flex; flex-wrap: wrap; gap: 8px 16px; padding: 12px 0; border-bottom: 1px solid #ccc; margin-bottom: 16px; }
-.admin-nav a { color: inherit; font-weight: 600; text-decoration: none; padding: 8px 4px; min-height: 44px; display: inline-flex; align-items: center; }
-.admin-table-wrap { overflow-x: auto; }
-.admin-table { border-collapse: collapse; width: 100%; font-size: 14px; }
-.admin-table th, .admin-table td { border-bottom: 1px solid #ddd; padding: 8px; text-align: left; vertical-align: top; }
-.admin-form { display: grid; gap: 8px; max-width: 420px; }
-.admin-form input, .admin-form select, .admin-form textarea, .admin-form button { font: inherit; padding: 10px; min-height: 44px; }
-.admin-inline { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-.admin-inline input, .admin-inline button { font: inherit; padding: 8px 10px; min-height: 44px; }
-.admin-error { color: #b00020; }
-.admin-ok { color: #1b5e20; }
-.admin-muted { color: #666; font-size: 13px; }
-@media (prefers-color-scheme: dark) {
-  .admin-nav, .admin-table th, .admin-table td { border-color: #444; }
-  .admin-error { color: #ff8a80; }
-  .admin-ok { color: #81c784; }
-  .admin-muted { color: #aaa; }
+/* Admin panel: same tokens and rounded language as the member app, but dense and utilitarian.
+   Colours come from globals.css tokens, so dark mode needs no overrides here. */
+
+.admin-shell { max-width: 1100px; margin: 0 auto; padding: var(--space-4) var(--space-4) var(--space-10); }
+.admin-narrow { max-width: 420px; margin: var(--space-10) auto; padding: 0 var(--space-4); }
+.admin-shell h1,
+.admin-narrow h1 { font-size: 1.75rem; }
+.admin-shell h2 { font-size: 1.125rem; margin-top: var(--space-6); }
+
+.admin-nav {
+  display: flex;
+  gap: var(--space-1);
+  overflow-x: auto;
+  scrollbar-width: thin;
+  padding: var(--space-1);
+  margin-bottom: var(--space-5);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
 }
+.admin-nav a {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-pill);
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: var(--fs-small);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.admin-nav a:hover { background: var(--surface-2); color: var(--text); }
+
+/* Summary tiles */
+.admin-stats { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-3); grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+.admin-stat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-height: 112px;
+  padding: var(--space-5);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  color: var(--text);
+  font-weight: 600;
+  text-decoration: none;
+}
+.admin-stat:hover { border-color: var(--border-strong); }
+.admin-stat strong { font-size: 2rem; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
+
+/* Tables (the wrapper scrolls horizontally on small screens) */
+.admin-table-wrap {
+  overflow-x: auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+.admin-table { border-collapse: separate; border-spacing: 0; width: 100%; font-size: var(--fs-small); font-variant-numeric: tabular-nums; }
+.admin-table th,
+.admin-table td { border-bottom: 1px solid var(--border); padding: 12px 14px; text-align: left; vertical-align: top; }
+.admin-table th {
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.admin-table tbody tr:last-child td { border-bottom: 0; }
+.admin-table td a { font-weight: 600; }
+
+/* Forms */
+.admin-form { display: grid; gap: var(--space-3); max-width: 420px; }
+.admin-form label { display: grid; gap: 6px; font-weight: 600; font-size: 0.9375rem; }
+.admin-form label:has(> input[type='checkbox']) { display: flex; align-items: center; gap: 10px; font-weight: 500; min-height: 44px; }
+.admin-inline { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; }
+.admin-inline label { display: flex; align-items: center; gap: var(--space-2); font-size: var(--fs-small); min-height: 44px; }
+
+.admin-form input:not([type='checkbox']):not([type='hidden']),
+.admin-form select,
+.admin-form textarea,
+.admin-inline input:not([type='checkbox']):not([type='hidden']) {
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1.5px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+}
+.admin-form input:focus,
+.admin-inline input:focus { border-color: var(--focus); }
+.admin-shell input[type='checkbox'] { width: 20px; height: 20px; margin: 0; accent-color: var(--brand); }
+
+/* Buttons without a variant class render as secondary pills */
+.admin-shell button:not(.btn),
+.admin-narrow button:not(.btn) {
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1.5px solid transparent;
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
+  color: var(--text);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.admin-shell button:not(.btn):hover,
+.admin-narrow button:not(.btn):hover { border-color: var(--border-strong); }
+.admin-shell .btn,
+.admin-narrow .btn { min-height: 44px; padding: 0 18px; }
+.admin-form > .btn { justify-self: start; }
+
+/* Messages */
+.admin-error,
+.admin-ok { padding: 12px 16px; border-radius: var(--radius-md); font-weight: 600; margin: 0 0 var(--space-3); }
+.admin-error { background: var(--danger-soft); color: var(--danger); }
+.admin-ok { background: var(--success-soft); color: var(--success); }
+.admin-muted { color: var(--text-muted); font-size: 0.8125rem; }
+.admin-table .admin-muted { display: block; }
+p.admin-muted { margin-top: var(--space-3); }
