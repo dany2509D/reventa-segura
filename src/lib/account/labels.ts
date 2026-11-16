@@ -4,11 +4,12 @@ import type { OrderState } from '@/lib/orders/state-machine';
 
 export type ListingStatus = 'pending' | 'verified' | 'rejected' | 'sold' | 'withdrawn';
 export type DeliveryMode = 'transfer' | 'file';
-export type BuyerAction = 'upload_received' | 'view_ticket' | 'confirm_entry' | 'dispute';
+export type BuyerAction = 'upload_received' | 'view_ticket' | 'confirm_entry' | 'dispute' | 'pay_manual';
 
 const ORDER_LABELS: Record<OrderState, string> = {
   creada: 'Pago pendiente',
   transferencia_pendiente: 'Esperando la entrada',
+  comprobante_en_revision: 'Comprobante en revisión',
   entrada_recibida: 'Entrada recibida',
   ingreso_confirmado: 'Ingreso confirmado',
   disputada: 'En disputa',
@@ -24,8 +25,21 @@ export function buyerNextStep(o: {
   state: OrderState;
   deliveryMode: DeliveryMode;
   hasOpenDispute: boolean;
+  /** Set for manual (Yappy / ACH) orders; they are paid off-platform. */
+  paymentMethod?: 'yappy' | 'ach' | null;
 }): { text: string; actions: BuyerAction[] } {
+  if (o.paymentMethod && o.state === 'transferencia_pendiente') {
+    return {
+      text: 'Haz la transferencia con tu código de referencia y sube el comprobante antes de que termine el plazo, o la reserva se libera.',
+      actions: ['pay_manual'],
+    };
+  }
   switch (o.state) {
+    case 'comprobante_en_revision':
+      return {
+        text: 'Recibimos tu comprobante. Estamos verificando el pago; puedes reemplazarlo mientras tanto si te equivocaste.',
+        actions: ['pay_manual'],
+      };
     case 'creada':
       return { text: 'Aún no recibimos tu pago. Si no se completa, la reserva se libera sola.', actions: [] };
     case 'transferencia_pendiente':
@@ -72,6 +86,7 @@ export function sellerNextStep(o: {
 }): string {
   switch (o.state) {
     case 'creada':
+    case 'comprobante_en_revision':
       return 'El comprador aún no completa el pago.';
     case 'transferencia_pendiente':
       return 'Vendida. Transfiere la entrada al comprador en la boletera antes del plazo, o se reembolsa.';

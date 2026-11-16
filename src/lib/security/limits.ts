@@ -21,6 +21,7 @@ export const LIMITS = {
   identity: { name: 'identity-submit', limit: 5, windowSeconds: DAY },
   orderReceived: { name: 'order-received', limit: 20, windowSeconds: HOUR },
   orderEntry: { name: 'order-entry', limit: 20, windowSeconds: HOUR },
+  orderProof: { name: 'order-proof', limit: 20, windowSeconds: HOUR },
   orderDispute: { name: 'order-dispute', limit: 5, windowSeconds: DAY },
 } as const satisfies Record<string, LimitRule>;
 

@@ -18,6 +18,7 @@ export const dynamic = 'force-dynamic';
 const BUYER_TONE: Record<OrderState, string> = {
   creada: 'pastel tone-sun',
   transferencia_pendiente: 'pastel tone-sky',
+  comprobante_en_revision: 'pastel tone-sky',
   entrada_recibida: 'pastel tone-sky',
   ingreso_confirmado: 'pastel tone-sky',
   disputada: 'pastel tone-sun',
@@ -28,6 +29,7 @@ const BUYER_TONE: Record<OrderState, string> = {
 };
 const SELLER_TONE: Record<OrderState, string> = {
   creada: '',
+  comprobante_en_revision: '',
   transferencia_pendiente: 'pastel tone-sun',
   entrada_recibida: 'pastel tone-sky',
   ingreso_confirmado: 'pastel tone-sky',
@@ -93,7 +95,7 @@ export default async function MyOrdersPage({ searchParams }: { searchParams: Pro
       ) : null}
       <div className="stack">
         {orders.map((o) => {
-          const step = buyerNextStep({ state: o.state, deliveryMode: o.deliveryMode, hasOpenDispute: o.hasOpenDispute });
+          const step = buyerNextStep({ state: o.state, deliveryMode: o.deliveryMode, hasOpenDispute: o.hasOpenDispute, paymentMethod: o.paymentMethod });
           return (
             <div key={o.orderId} className={`card ${BUYER_TONE[o.state]}`}>
               <div className="card-head">
@@ -101,11 +103,16 @@ export default async function MyOrdersPage({ searchParams }: { searchParams: Pro
                 <span className="chip">{orderStatusLabel(o.state)}</span>
               </div>
               <div className="muted money">{formatPanamaDateTime(o.startsAt)} · {formatUsd(o.priceCents)}</div>
-              {o.state === 'transferencia_pendiente' && o.transferDeadline ? (
+              {o.state === 'transferencia_pendiente' && o.transferDeadline && !o.paymentMethod ? (
                 <p className="notice">El vendedor tiene hasta {formatPanamaDateTime(o.transferDeadline)} para transferirte la entrada.</p>
               ) : null}
               <p>{step.text}</p>
               <div className="actions">
+                {step.actions.includes('pay_manual') ? (
+                  <a className="btn" href={`/pago-manual/${o.orderId}`}>
+                    {o.state === 'comprobante_en_revision' ? 'Ver o reemplazar comprobante' : 'Pagar y subir comprobante'}
+                  </a>
+                ) : null}
                 {step.actions.includes('view_ticket') ? (
                   <a className="btn" href={`/api/orders/${o.orderId}/ticket`} target="_blank" rel="noopener noreferrer">Ver mi entrada</a>
                 ) : null}

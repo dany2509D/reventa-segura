@@ -228,6 +228,25 @@ const MATRIX: Record<string, Row> = {
     call: (f, { cookie }) =>
       upload('POST /api/orders/[id]/entry', `/api/orders/${f.fileOrder.id}/entry`, { photo: blob(jpg, 'image/jpeg') }, cookie, { id: f.fileOrder.id }),
   },
+  'POST /api/orders/manual': {
+    access: 'member',
+    why: 'any member may reserve a verified listing to pay by Yappy/ACH (409 if another checkout already holds it)',
+    owner: (f) => f.stranger,
+    expect: { anon: [401], owner: [200, 409] },
+    call: (f, { cookie }) =>
+      json('POST /api/orders/manual', '/api/orders/manual', { listingId: f.listing.id, paymentMethod: 'yappy' }, cookie),
+  },
+  'POST /api/orders/[id]/proof': {
+    access: 'owner',
+    why: 'only the order’s buyer uploads a payment receipt (and only for manual orders: gateway orders get 409)',
+    owner: (f) => f.transferOrder.buyer,
+    seller: (f) => f.transferOrder.seller,
+    expect: { anon: [401], other: DENIED, seller: DENIED, admin: DENIED, owner: [409] },
+    call: (f, { cookie }) =>
+      upload('POST /api/orders/[id]/proof', `/api/orders/${f.transferOrder.id}/proof`, { proof: blob(png, 'image/png') }, cookie, {
+        id: f.transferOrder.id,
+      }),
+  },
   'POST /api/orders/[id]/received': {
     access: 'owner',
     why: 'only the order’s buyer confirms the transfer arrived',

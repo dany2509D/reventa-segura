@@ -6,6 +6,7 @@ export type OrderState = (typeof orders.$inferSelect)['state'];
 export const ORDER_STATES = [
   'creada',
   'transferencia_pendiente',
+  'comprobante_en_revision',
   'entrada_recibida',
   'ingreso_confirmado',
   'disputada',
@@ -16,6 +17,9 @@ export const ORDER_STATES = [
 ] as const satisfies readonly OrderState[];
 
 export const ORDER_EVENTS = [
+  'MANUAL_PENDING',
+  'PROOF_SUBMITTED',
+  'MANUAL_EXPIRED',
   'PAID_TRANSFER',
   'PAID_FILE',
   'TRANSFER_EXPIRED',
@@ -51,10 +55,19 @@ const TRANSITIONS: Record<OrderState, Partial<Record<OrderEvent, OrderState>>> =
   creada: {
     PAID_TRANSFER: 'transferencia_pendiente',
     PAID_FILE: 'entrada_recibida',
+    // Manual (Yappy / ACH) checkout: the listing is held while the buyer transfers; no money yet.
+    MANUAL_PENDING: 'transferencia_pendiente',
     CHECKOUT_ABANDONED: 'cancelada',
     EVENT_CANCELLED: 'cancelada',
   },
+  // Manual payment whose receipt an admin has yet to review. Holds no confirmed money either.
+  comprobante_en_revision: {
+    PROOF_SUBMITTED: 'comprobante_en_revision',
+    EVENT_CANCELLED: 'cancelada',
+  },
   transferencia_pendiente: {
+    PROOF_SUBMITTED: 'comprobante_en_revision',
+    MANUAL_EXPIRED: 'cancelada',
     RECEIVED_CONFIRMED: 'entrada_recibida',
     TRANSFER_EXPIRED: 'reembolsada',
     DISPUTE_OPENED: 'disputada',

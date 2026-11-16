@@ -91,6 +91,7 @@ export const orders = pgTable(
       enum: [
         'creada',
         'transferencia_pendiente',
+        'comprobante_en_revision',
         'entrada_recibida',
         'ingreso_confirmado',
         'disputada',
@@ -105,6 +106,12 @@ export const orders = pgTable(
     priceCents: integer('price_cents').notNull(),
     feeCents: integer('fee_cents').notNull(),
     providerRef: text('provider_ref'),
+    /** Manual checkout (Yappy / ACH): null for gateway orders. */
+    paymentMethod: text('payment_method', { enum: ['yappy', 'ach'] }),
+    /** Opaque private-storage key of the payment receipt (`proof/<orderId>/<uuid>`). */
+    paymentProofKey: text('payment_proof_key'),
+    /** Optional bank/Yappy confirmation number typed by the buyer. */
+    paymentReference: text('payment_reference'),
     transferDeadline: timestamp('transfer_deadline', { withTimezone: true }),
     needsManualReview: boolean('needs_manual_review').notNull().default(false),
     createdAt: createdAt(),

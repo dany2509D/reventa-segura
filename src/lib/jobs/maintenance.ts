@@ -143,6 +143,8 @@ async function expiredTransferIds(db: Db, now: Date): Promise<string[]> {
     .where(
       and(
         eq(orders.state, 'transferencia_pendiente'),
+        // Manual (Yappy / ACH) orders hold no captured money: abandonStaleCheckouts cancels them.
+        isNull(orders.paymentMethod),
         or(isNull(orders.transferDeadline), lt(orders.transferDeadline, now), lte(events.startsAt, now)),
       ),
     );
@@ -152,7 +154,7 @@ async function expiredTransferIds(db: Db, now: Date): Promise<string[]> {
 function expireTransfer(db: Db, gw: PaymentGateway, id: string, now: Date): Promise<boolean> {
   return db.transaction(async (tx) => {
     const o = await lockOrderForUpdate(tx, id);
-    if (!o || o.state !== 'transferencia_pendiente') return false;
+    if (!o || o.state !== 'transferencia_pendiente' || o.paymentMethod !== null) return false;
     const ev = await eventForOrder(tx, o);
     if (!transferExpired(o, ev, now)) return false;
     await refundPaidOrder(tx, gw, o, 'TRANSFER_EXPIRED', {

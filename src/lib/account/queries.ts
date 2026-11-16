@@ -1,4 +1,4 @@
-import { and, asc, count, desc, eq, gt, min, sql } from 'drizzle-orm';
+import { and, asc, count, desc, eq, gt, isNull, min, notInArray, or, sql } from 'drizzle-orm';
 import { disputes, events, listings, orders, payouts, users } from '@/lib/db/schema';
 import type { Db } from '@/lib/db/types';
 import { isUuid } from '@/lib/uuid';
@@ -54,6 +54,7 @@ export async function buyerOrders(db: Db, buyerId: string) {
       priceCents: orders.priceCents,
       createdAt: orders.createdAt,
       transferDeadline: orders.transferDeadline,
+      paymentMethod: orders.paymentMethod,
       deliveryMode: listings.deliveryMode,
       eventId: events.id,
       eventName: events.name,
@@ -100,7 +101,13 @@ export async function sellerSales(db: Db, sellerId: string) {
     .innerJoin(listings, eq(listings.id, orders.listingId))
     .innerJoin(events, eq(events.id, listings.eventId))
     .leftJoin(payouts, eq(payouts.orderId, orders.id))
-    .where(eq(listings.sellerId, sellerId))
+    // A manual order awaiting payment or receipt review is not a sale yet.
+    .where(
+      and(
+        eq(listings.sellerId, sellerId),
+        or(isNull(orders.paymentMethod), notInArray(orders.state, ['transferencia_pendiente', 'comprobante_en_revision'])),
+      ),
+    )
     .orderBy(desc(orders.createdAt));
 }
 

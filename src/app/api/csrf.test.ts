@@ -29,7 +29,9 @@ const GUARDS: Record<string, Guard> = {
   'DELETE /api/listings/[id]': 'origin',
   'POST /api/orders/[id]/dispute': 'multipart',
   'POST /api/orders/[id]/entry': 'multipart',
+  'POST /api/orders/[id]/proof': 'multipart',
   'POST /api/orders/[id]/received': 'multipart',
+  'POST /api/orders/manual': 'json',
   'POST /api/webhooks/payments': 'signature',
 };
 

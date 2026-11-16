@@ -1,7 +1,9 @@
-import { and, eq, isNull, lt } from 'drizzle-orm';
+import { randomBytes } from 'node:crypto';
+import { and, eq, isNotNull, isNull, lt } from 'drizzle-orm';
 import { audit } from '@/lib/audit/audit';
 import { events, ledgerEntries, listings, orders } from '@/lib/db/schema';
 import type { Db, Tx } from '@/lib/db/types';
+import { ForbiddenError } from '@/lib/errors';
 import type { PaymentGateway } from '@/lib/payments/gateway';
 import { computeFees, DEFAULT_FEE_BPS } from '@/lib/pricing/pricing';
 import { isSellerBlocked } from '@/lib/tickets/listings';
@@ -226,13 +228,26 @@ export async function handlePaymentWebhook(
   if (mismatch) throw mismatch;
 }
 
-/** Cancels unpaid checkouts older than CHECKOUT_TTL_MS. Returns how many were abandoned. */
+/**
+ * Cancels unpaid checkouts older than CHECKOUT_TTL_MS, and manual (Yappy / ACH) orders whose
+ * transfer deadline passed without a receipt. Returns how many were abandoned.
+ */
 export async function abandonStaleCheckouts(db: Db, now: Date): Promise<number> {
   const cutoff = new Date(now.getTime() - CHECKOUT_TTL_MS);
   const candidates = await db
     .select({ id: orders.id })
     .from(orders)
     .where(and(eq(orders.state, 'creada'), lt(orders.createdAt, cutoff)));
+  const manualCandidates = await db
+    .select({ id: orders.id })
+    .from(orders)
+    .where(
+      and(
+        eq(orders.state, 'transferencia_pendiente'),
+        isNotNull(orders.paymentMethod),
+        lt(orders.transferDeadline, now),
+      ),
+    );
 
   let abandoned = 0;
   for (const c of candidates) {
@@ -246,7 +261,120 @@ export async function abandonStaleCheckouts(db: Db, now: Date): Promise<number> 
     });
     if (done) abandoned++;
   }
+  for (const c of manualCandidates) {
+    const done = await db.transaction(async (tx) => {
+      const o = await lockOrder(tx, c.id);
+      const expired = o.transferDeadline !== null && o.transferDeadline.getTime() < now.getTime();
+      if (o.state !== 'transferencia_pendiente' || o.paymentMethod === null || !expired) return false;
+      await applyTransition(tx, o, 'MANUAL_EXPIRED', { action: 'order.manual_expired' });
+      return true;
+    });
+    if (done) abandoned++;
+  }
   return abandoned;
+}
+
+/** A manual order is paid off-platform: it only needs a short, unique reference for the transfer note. */
+export const MANUAL_PAYMENT_WINDOW_MS = 15 * 60 * 1000;
+export const MANUAL_METHODS = ['yappy', 'ach'] as const;
+export type ManualMethod = (typeof MANUAL_METHODS)[number];
+
+const REF_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no 0/O/1/I
+
+function shortRef(): string {
+  const bytes = randomBytes(8);
+  let s = '';
+  for (const b of bytes) s += REF_ALPHABET[b % REF_ALPHABET.length];
+  return `RS-${s}`;
+}
+
+/** Stand-in for the gateway on manual orders: nothing is created remotely, only a reference. */
+const manualGateway: PaymentGateway = {
+  createCheckout: async () => ({ checkoutUrl: '', providerRef: shortRef() }),
+  parseWebhook: () => {
+    throw new Error('Manual orders have no provider webhooks');
+  },
+  refund: async () => {
+    throw new Error('Manual orders are refunded by hand');
+  },
+};
+
+/**
+ * Manual checkout: reuses startCheckout's atomic listing reservation, then moves the order to
+ * `transferencia_pendiente` with a 15-minute deadline for the buyer to pay and upload the receipt.
+ */
+export async function startManualCheckout(
+  db: Db,
+  buyerId: string,
+  listingId: string,
+  method: ManualMethod,
+  now: Date = new Date(),
+): Promise<{ orderId: string; ref: string; amount: number; transferDeadline: Date }> {
+  await abandonStaleCheckouts(db, now);
+  const { orderId } = await startCheckout(db, manualGateway, buyerId, listingId, now);
+  const transferDeadline = new Date(now.getTime() + MANUAL_PAYMENT_WINDOW_MS);
+  return db.transaction(async (tx) => {
+    const o = await lockOrder(tx, orderId);
+    if (o.state !== 'creada' || !o.providerRef) throw new ListingUnavailableError();
+    await applyTransition(tx, o, 'MANUAL_PENDING', {
+      action: 'order.manual_started',
+      actorId: buyerId,
+      set: { paymentMethod: method, transferDeadline },
+      detail: { method, ref: o.providerRef, transferDeadline: transferDeadline.toISOString() },
+    });
+    return { orderId, ref: o.providerRef, amount: o.priceCents, transferDeadline };
+  });
+}
+
+export class ProofNotAllowedError extends Error {
+  constructor(message = 'This order does not accept a payment receipt') {
+    super(message);
+    this.name = 'ProofNotAllowedError';
+  }
+}
+
+export class ProofWindowClosedError extends Error {
+  constructor(message = 'The payment window has closed') {
+    super(message);
+    this.name = 'ProofWindowClosedError';
+  }
+}
+
+/** Cheap pre-check (before reading the upload): the buyer owns a manual order that still takes a receipt. */
+export function assertProofAllowed(
+  o: { buyerId: string; state: OrderState; paymentMethod: string | null; transferDeadline: Date | null },
+  buyerId: string,
+  now: Date,
+): void {
+  if (o.buyerId !== buyerId) throw new ForbiddenError();
+  if (o.paymentMethod === null || (o.state !== 'transferencia_pendiente' && o.state !== 'comprobante_en_revision')) {
+    throw new ProofNotAllowedError();
+  }
+  if (!o.transferDeadline || now.getTime() >= o.transferDeadline.getTime()) throw new ProofWindowClosedError();
+}
+
+/**
+ * Records the stored receipt and moves the order to `comprobante_en_revision`. Returns the key of
+ * the receipt it replaced (if any) so the caller can delete that blob.
+ */
+export async function submitPaymentProof(
+  db: Db,
+  buyerId: string,
+  orderId: string,
+  proof: { key: string; reference: string | null },
+  now: Date = new Date(),
+): Promise<{ replacedKey: string | null }> {
+  return db.transaction(async (tx) => {
+    const o = await lockOrder(tx, orderId);
+    assertProofAllowed(o, buyerId, now);
+    await applyTransition(tx, o, 'PROOF_SUBMITTED', {
+      action: 'order.proof_submitted',
+      actorId: buyerId,
+      set: { paymentProofKey: proof.key, paymentReference: proof.reference },
+      detail: { method: o.paymentMethod, replaced: o.paymentProofKey !== null },
+    });
+    return { replacedKey: o.paymentProofKey };
+  });
 }
 
 async function recordSale(tx: Tx, order: Order, listing: Listing, event: Event, providerRef: string, paidAt: Date) {

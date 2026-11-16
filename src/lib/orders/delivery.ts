@@ -7,7 +7,7 @@ import { watermark } from '@/lib/tickets/watermark';
 import { InvalidUploadError } from '@/lib/uploads/errors';
 import type { BlobStore } from '@/lib/uploads/store';
 import { detectType, parseFilePath } from '@/lib/uploads/uploads';
-import { transition, type OrderState } from './state-machine';
+import { InvalidTransitionError, transition, type OrderState } from './state-machine';
 
 export class TransferDeadlineError extends Error {
   constructor(message = 'The transfer deadline has passed') {
@@ -42,8 +42,14 @@ type Order = typeof orders.$inferSelect;
  * is pending, and only before the deadline (after it the maintenance job refunds the order).
  * A pending transfer without a deadline is treated as expired (fail closed).
  */
-function assertCanConfirm(order: Pick<Order, 'buyerId' | 'state' | 'transferDeadline'>, buyerId: string, now: Date) {
+function assertCanConfirm(
+  order: Pick<Order, 'buyerId' | 'state' | 'transferDeadline' | 'paymentMethod'>,
+  buyerId: string,
+  now: Date,
+) {
   if (order.buyerId !== buyerId) throw new ForbiddenError();
+  // A manual (Yappy / ACH) order in this state is still unpaid: it has nothing to confirm.
+  if (order.paymentMethod !== null) throw new InvalidTransitionError(order.state, 'RECEIVED_CONFIRMED');
   transition(order.state, 'RECEIVED_CONFIRMED'); // InvalidTransitionError outside transferencia_pendiente
   if (!order.transferDeadline || now.getTime() >= order.transferDeadline.getTime()) {
     throw new TransferDeadlineError();

@@ -114,7 +114,7 @@ describe('confirmReceived', () => {
 
   it('rejects every other state with InvalidTransitionError', async () => {
     const others = ORDER_STATES.filter((s) => s !== 'transferencia_pendiente');
-    expect(others).toHaveLength(8);
+    expect(others).toHaveLength(9);
     for (const state of others) {
       const { buyer, order } = await seedOrder({ state });
       const err = await confirmReceived(db, buyer.id, order.id, proofPath(buyer.id), NOW).catch((e: unknown) => e);
@@ -189,6 +189,7 @@ describe('getDeliveredFile', () => {
     const table: Record<OrderState, boolean> = {
       creada: false,
       transferencia_pendiente: false,
+      comprobante_en_revision: false,
       entrada_recibida: true,
       ingreso_confirmado: true,
       disputada: true,

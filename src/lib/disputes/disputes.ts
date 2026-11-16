@@ -95,6 +95,10 @@ export async function openDispute(
       .limit(1);
     if (open || order.state === 'disputada') throw new DisputeAlreadyOpenError();
     if (!DISPUTABLE_STATES.includes(order.state)) throw new InvalidTransitionError(order.state, 'DISPUTE_OPENED');
+    // A manual (Yappy / ACH) order still awaiting payment review has no captured money to dispute.
+    if (order.paymentMethod !== null && order.state === 'transferencia_pendiente') {
+      throw new InvalidTransitionError(order.state, 'DISPUTE_OPENED');
+    }
 
     const event = await eventForOrder(tx, order);
     if (now.getTime() >= confirmationWindowEndsAt(event.startsAt).getTime()) throw new DisputeWindowClosedError();
