@@ -83,6 +83,17 @@ export async function qrScreenshot(
   return encode(img, o.format ?? 'jpeg');
 }
 
+/** Deterministic RGB noise (worst case for the QR locator), as a PNG. */
+export function noisePng(side: number, seed = 1): Promise<Buffer> {
+  const data = Buffer.alloc(side * side * 3);
+  let s = seed >>> 0 || 1;
+  for (let i = 0; i < data.length; i++) {
+    s = (Math.imul(s, 1664525) + 1013904223) >>> 0; // LCG
+    data[i] = s >>> 24;
+  }
+  return sharp(data, { raw: { width: side, height: side, channels: 3 } }).png().toBuffer();
+}
+
 /** A deterministic QR-less "photo" (smooth pattern); different seeds give different pictures. */
 export function patternImage(seed: number, width = 320, height = 240): Sharp {
   const data = Buffer.alloc(width * height * 3);
