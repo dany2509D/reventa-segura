@@ -5,6 +5,8 @@ import { events } from '@/lib/db/schema';
 import type { Actor, Db } from '@/lib/db/types';
 import { ValidationError } from '@/lib/errors';
 
+export { cancelEvent, type CancelEventResult } from './cancellation';
+
 const INT32_MAX = 2_147_483_647;
 
 // Unknown keys (e.g. `status`, `id`) are stripped, so callers cannot set them.
