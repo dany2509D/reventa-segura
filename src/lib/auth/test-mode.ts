@@ -8,7 +8,9 @@ import type { SmsSender } from './sms';
  * whose number they type, so it must never be enabled on a public deployment.
  *  - On only with TEST_MODE_SHOW_LOGIN_CODE=1, and in production only with ALSO
  *    ALLOW_TEST_LOGIN_CODES=1.
- *  - Admin numbers are never revealed (the route checks the role): admins keep using real SMS + TOTP.
+ *  - Admin numbers are not revealed (the route checks the role), except to the owner's own computer
+ *    holding the local TEST_MODE_ADMIN_KEY, outside production builds (admin-test-key.ts); the
+ *    admin still needs TOTP.
  *  - Phones and codes are never written to the logs.
  */
 
