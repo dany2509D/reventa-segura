@@ -1,5 +1,4 @@
 import type { ReactNode } from 'react';
-import '../admin.css';
 import { requireAdminPage } from '../session';
 
 export const metadata = { title: 'Administración' };
