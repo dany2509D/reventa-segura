@@ -175,3 +175,14 @@ export const auditLog = pgTable('audit_log', {
   detail: jsonb('detail'),
   createdAt: createdAt(),
 });
+
+// Sliding-window rate limiting (src/lib/security/rate-limit.ts): one row per attempt.
+export const rateLimitHits = pgTable(
+  'rate_limit_hits',
+  {
+    id: id(),
+    key: text('key').notNull(),
+    at: timestamp('at', { withTimezone: true }).notNull(),
+  },
+  (t) => [index('rate_limit_hits_key_at_idx').on(t.key, t.at)],
+);
