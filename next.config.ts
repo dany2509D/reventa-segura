@@ -35,6 +35,7 @@ const nextConfig: NextConfig = {
       })),
       { source: '/api/files/:token', headers: privateFileHeaders },
       { source: '/api/orders/:id/ticket', headers: privateFileHeaders },
+      { source: '/api/listings/:id/download', headers: privateFileHeaders },
     ];
   },
 };

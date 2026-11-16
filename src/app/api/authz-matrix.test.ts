@@ -41,7 +41,7 @@ type Fx = {
   admin: Principal;
   adminNoMfa: Principal & { totpSecret: string };
   listing: { id: string; seller: Principal };
-  fileOrder: { id: string; buyer: Principal; seller: Principal; ticketPath: string; providerRef: string };
+  fileOrder: { id: string; listingId: string; buyer: Principal; seller: Principal; ticketPath: string; providerRef: string };
   transferOrder: { id: string; buyer: Principal; seller: Principal };
   buyerFile: { path: string; ownerToken: string; adminToken: string };
   eventId: string;
@@ -247,6 +247,15 @@ const MATRIX: Record<string, Row> = {
     expect: { anon: [401], other: DENIED, seller: DENIED, admin: DENIED, owner: [200] },
     call: (f, { cookie }) => get('GET /api/orders/[id]/ticket', `/api/orders/${f.fileOrder.id}/ticket`, cookie, { id: f.fileOrder.id }),
   },
+  'GET /api/listings/[id]/download': {
+    access: 'owner',
+    why: 'ticket file: the listing’s seller, a 2FA admin, or the buyer of a paid order (watermarked copy) only',
+    owner: (f) => f.fileOrder.seller,
+    seller: (f) => f.fileOrder.buyer,
+    expect: { anon: [401], other: DENIED, user: DENIED, adminNoMfa: DENIED, seller: [200], admin: [200], owner: [200] },
+    call: (f, { cookie }) =>
+      get('GET /api/listings/[id]/download', `/api/listings/${f.fileOrder.listingId}/download`, cookie, { id: f.fileOrder.listingId }),
+  },
   'POST /api/webhooks/payments': {
     access: 'machine',
     why: 'payment provider, authenticated by its signature over the raw body; cookies are ignored',
@@ -316,6 +325,7 @@ async function fixtures(): Promise<Fx> {
     listing: { id: open.listing.id, seller: await asPrincipal(open.seller.id) },
     fileOrder: {
       id: file.order.id,
+      listingId: file.listing.id,
       buyer: fileBuyer,
       seller: await asPrincipal(file.seller.id),
       ticketPath,
