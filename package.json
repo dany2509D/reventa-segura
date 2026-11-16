@@ -11,7 +11,8 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx scripts/db-migrate.ts",
     "admin:create": "tsx scripts/create-admin.ts",
-    "seed:dev": "tsx scripts/seed-dev.ts"
+    "seed:dev": "tsx scripts/seed-dev.ts",
+    "db:set-password": "tsx scripts/set-db-password.ts"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.5.16",
