@@ -71,7 +71,7 @@ describe('POST /api/webhooks/payments: alerts (RNF-10)', () => {
     const errors = vi.spyOn(console, 'error').mockImplementation(() => {});
     const { rawBody, headers } = gw.buildWebhook({ providerRef: `fake_${orderId}`, status: 'paid', amountCents: 1 });
     await post(rawBody, headers);
-    expect(lines(errors)).toContainEqual(expect.objectContaining({ alert: true, msg: 'payment_webhook_amount_mismatch' }));
+    expect(lines(errors)).toContainEqual(expect.objectContaining({ alert: true, msg: 'payment_webhook_amount_mismatch', ctx: expect.objectContaining({ orderId }) }));
     errors.mockRestore();
   });
 

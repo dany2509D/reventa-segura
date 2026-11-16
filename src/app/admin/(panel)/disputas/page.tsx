@@ -1,11 +1,14 @@
 import { openDisputes } from '@/lib/admin/queries';
 import { getDb } from '@/lib/db/client';
+import { requireAdminPage } from '../../session';
 import { formatPanamaDateTime, formatUsd } from '@/lib/format';
 import { resolveDisputeAction } from '../actions';
 import { FileLink, Flash, type FlashParams } from '../flash';
 
 export default async function DisputesPage({ searchParams }: { searchParams: Promise<FlashParams> }) {
-  const rows = await openDisputes(getDb());
+  // Next can render a page without running its layout: the page gates itself.
+  const actor = await requireAdminPage();
+  const rows = await openDisputes(getDb(), actor);
   return (
     <main>
       <h1>Disputas abiertas</h1>

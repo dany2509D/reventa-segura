@@ -20,6 +20,7 @@ const GUARDS: Record<string, Guard> = {
   'POST /api/auth/logout': 'json',
   'POST /api/auth/mfa': 'json',
   'POST /api/auth/request': 'json',
+  'POST /api/auth/test-code': 'json', // login-code TEST MODE only; 404 (before the guard) when the mode is off
   'POST /api/auth/verify': 'json',
   'POST /api/checkout': 'json',
   'POST /api/identity': 'multipart',
@@ -43,6 +44,9 @@ vi.mock('@/lib/db/client', () => ({
       },
     ),
 }));
+
+// The test-code route answers an empty 404 unless login-code test mode is on: turn it on so its guard is reachable.
+vi.stubEnv('TEST_MODE_SHOW_LOGIN_CODE', '1');
 
 const all = await discoverApiHandlers();
 const stateChanging = all.filter((h) => (STATE_CHANGING as readonly string[]).includes(h.method));

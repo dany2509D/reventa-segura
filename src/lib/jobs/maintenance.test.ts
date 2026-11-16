@@ -129,13 +129,14 @@ describe('runMaintenance: expired transfers', () => {
       .map((c) => JSON.parse(String(c[0])) as Record<string, unknown>)
       .filter((l) => l.alert === true);
     expect(alerts).toEqual([
-      expect.objectContaining({ msg: 'maintenance_step_failed', ctx: { step: 'expire_transfers', error: 'Error' } }),
+      expect.objectContaining({ msg: 'maintenance_step_failed', ctx: { step: 'expire_transfers', error: 'Error', itemId: first.order.id } }),
     ]);
     expect((await getOrder(db, first.order.id)).state).toBe('transferencia_pendiente');
     expect(await ledgerOf(db, first.order.id)).toHaveLength(3);
     expect((await getOrder(db, second.order.id)).state).toBe('reembolsada');
-    // Logs carry the error name only: no message, ids or references.
-    expect(JSON.stringify(errors.mock.calls)).not.toContain(first.order.id);
+    // Logs carry the error name and the order id (so an operator knows which one), never the message or references.
+    expect(JSON.stringify(errors.mock.calls)).not.toContain('gateway down');
+    expect(JSON.stringify(errors.mock.calls)).not.toContain(String(first.order.providerRef));
     expect(JSON.stringify(errors.mock.calls)).toContain('Error');
 
     expect(await runMaintenance(db, { gw }, later)).toEqual({ ...ZERO, expiredTransfers: 1 });
@@ -210,7 +211,7 @@ describe('runMaintenance: release when the window ends', () => {
     expect((await auditOf(db, bad.order.id)).filter((a) => a.action === 'order.released')).toHaveLength(0);
     expect((await getOrder(db, good.order.id)).state).toBe('liberada');
     expect(JSON.stringify(errors.mock.calls)).toContain('TypeError');
-    expect(JSON.stringify(errors.mock.calls)).not.toContain(bad.order.id);
+    expect(JSON.stringify(errors.mock.calls)).not.toContain('payout failed for');
 
     // Retried on the next run once the hook works.
     expect(await runMaintenance(db, { gw, onReleased: async () => {} }, WINDOW_END)).toEqual({ ...ZERO, released: 1 });
@@ -550,7 +551,8 @@ describe('runMaintenance: identity retention (SEG-11)', () => {
     expect(await runMaintenance(db, { gw, deleteBlob }, NOW)).toEqual({ ...ZERO, purgedIdentities: 1, failed: 1 });
     expect(await userRow(a.id)).toMatchObject({ idDocPath: a.idDocPath, selfiePath: a.selfiePath });
     expect(await userRow(b.id)).toMatchObject({ idDocPath: null, selfiePath: null });
-    expect(JSON.stringify(errors.mock.calls)).not.toContain(a.id);
+    expect(JSON.stringify(errors.mock.calls)).not.toContain('blob store down');
+    expect(JSON.stringify(errors.mock.calls)).not.toContain(a.selfiePath!);
 
     expect(await runMaintenance(db, { gw, deleteBlob: async () => {} }, NOW)).toEqual({ ...ZERO, purgedIdentities: 1 });
     expect(await userRow(a.id)).toMatchObject({ idDocPath: null, selfiePath: null });

@@ -99,6 +99,11 @@ async function activeListingCount(db: Db, sellerId: string): Promise<number> {
  * do not count. Unblocking is an operator decision (raise the setting or wait out the window).
  */
 export async function assertSellerNotBlocked(db: Db, sellerId: string, now: Date = new Date()): Promise<void> {
+  if (await isSellerBlocked(db, sellerId, now)) throw new SellerBlockedError();
+}
+
+/** The block rule as a boolean (also enforced at the point of sale and when a listing is approved). */
+export async function isSellerBlocked(db: Db, sellerId: string, now: Date = new Date()): Promise<boolean> {
   const max = await configInt(db, MAX_LOST_DISPUTES_KEY, DEFAULT_MAX_LOST_DISPUTES);
   const since = new Date(now.getTime() - LOST_DISPUTE_WINDOW_DAYS * 24 * 60 * 60 * 1000);
   const [row] = await db
@@ -115,7 +120,7 @@ export async function assertSellerNotBlocked(db: Db, sellerId: string, now: Date
         ne(events.status, 'cancelled'),
       ),
     );
-  if (row.n >= max) throw new SellerBlockedError();
+  return row.n >= max;
 }
 
 /**
@@ -246,6 +251,12 @@ export async function reviewListing(
     throw new ValidationError('Reason too long', [{ path: 'reason', message: `max ${MAX_REVIEW_REASON}` }]);
   }
   if (!isUuid(listingId)) throw new NotFoundError('Listing not found');
+
+  if (decision === 'verified') {
+    // A blocked seller's listing is not put on sale (SEG-08); rejecting it stays possible.
+    const [row] = await db.select({ sellerId: listings.sellerId }).from(listings).where(eq(listings.id, listingId));
+    if (row) await assertSellerNotBlocked(db, row.sellerId);
+  }
 
   await db.transaction(async (tx) => {
     const listing = await lockListing(tx, listingId);

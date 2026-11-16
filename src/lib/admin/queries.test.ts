@@ -7,8 +7,12 @@ import { openDispute } from '@/lib/disputes/disputes';
 import { seedPaidOrder } from '@/lib/orders/paid-order-fixture';
 import { newUser, seedListing } from '@/lib/orders/test-fixtures';
 import { FakeGateway } from '@/lib/payments/fake-gateway';
-import { allEvents, openDisputes, pendingIdentities, pendingListings, queuedPayouts } from './queries';
+import { allEvents, manualReviewOrders, openDisputes, pendingIdentities, pendingListings, queuedPayouts } from './queries';
 
+import type { Actor } from '@/lib/db/types';
+import { ForbiddenError } from '@/lib/errors';
+
+const ADMIN: Actor = { userId: '00000000-0000-4000-8000-0000000000aa', role: 'admin', mfa: true };
 let db: Db;
 const gw = new FakeGateway('admin-q-secret');
 beforeEach(async () => {
@@ -23,7 +27,7 @@ describe('pendingIdentities', () => {
     await db.update(users).set({ identityStatus: 'pending', idDocPath: `identity/${pending.id}/a`, selfiePath: `selfie/${pending.id}/b` }).where(eq(users.id, pending.id));
     await db.update(users).set({ identityStatus: 'approved' }).where(eq(users.id, approved.id));
 
-    const rows = await pendingIdentities(db);
+    const rows = await pendingIdentities(db, ADMIN);
     expect(rows).toEqual([
       { userId: pending.id, phone: pending.phone, idDocPath: `identity/${pending.id}/a`, selfiePath: `selfie/${pending.id}/b` },
     ]);
@@ -38,7 +42,7 @@ describe('openDisputes', () => {
     await openDispute(db, b.buyer.id, b.order.id, 'QR inválido', []);
     await db.update(disputes).set({ status: 'released' }).where(eq(disputes.orderId, b.order.id));
 
-    const rows = await openDisputes(db);
+    const rows = await openDisputes(db, ADMIN);
     expect(rows).toHaveLength(1);
     expect(rows[0]).toMatchObject({
       orderId: a.order.id,
@@ -60,7 +64,7 @@ describe('queuedPayouts', () => {
     await db.insert(payouts).values({ orderId: b.order.id, sellerId: b.seller.id, amountCents: 4500, status: 'paid', bankRef: 'X' });
     await db.update(orders).set({ state: 'liberada' }).where(eq(orders.id, a.order.id));
 
-    const rows = await queuedPayouts(db);
+    const rows = await queuedPayouts(db, ADMIN);
     expect(rows).toHaveLength(1);
     expect(rows[0]).toMatchObject({ orderId: a.order.id, amountCents: 4500, sellerPhone: a.seller.phone, orderState: 'liberada', eventName: 'Concierto' });
   });
@@ -69,14 +73,34 @@ describe('queuedPayouts', () => {
     const a = await seedPaidOrder(db, gw, { deliveryMode: 'file' });
     await db.insert(payouts).values({ orderId: a.order.id, sellerId: a.seller.id, amountCents: 4500 });
     await db.update(orders).set({ state: 'reembolsada' }).where(eq(orders.id, a.order.id));
-    expect((await queuedPayouts(db))[0].orderState).toBe('reembolsada');
+    expect((await queuedPayouts(db, ADMIN))[0].orderState).toBe('reembolsada');
+  });
+});
+
+describe('manualReviewOrders', () => {
+  it('lists orders flagged for manual review (e.g. refund owed after the seller was paid) with event and parties', async () => {
+    const a = await seedPaidOrder(db, gw, { deliveryMode: 'file' });
+    const b = await seedPaidOrder(db, gw, { deliveryMode: 'file' }); // not flagged
+    await db.update(orders).set({ state: 'liquidada', needsManualReview: true }).where(eq(orders.id, a.order.id));
+
+    const rows = await manualReviewOrders(db, ADMIN);
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({
+      orderId: a.order.id,
+      orderState: 'liquidada',
+      priceCents: a.order.priceCents,
+      eventName: 'Concierto',
+      buyerPhone: a.buyer.phone,
+      sellerPhone: a.seller.phone,
+    });
+    expect(rows.map((r) => r.orderId)).not.toContain(b.order.id);
   });
 });
 
 describe('allEvents', () => {
   it('lists events newest-first with status', async () => {
     const a = await seedPaidOrder(db, gw, { deliveryMode: 'file', startsAt: new Date(Date.now() + 5 * 864e5) });
-    const rows = await allEvents(db);
+    const rows = await allEvents(db, ADMIN);
     expect(rows).toHaveLength(1);
     expect(rows[0]).toMatchObject({ id: a.event.id, name: 'Concierto', status: 'active', faceValueCents: 5000 });
   });
@@ -89,7 +113,7 @@ describe('pendingListings', () => {
     await seedListing(db, { status: 'rejected' });
     await db.update(listings).set({ proofPath: `proof/${p.seller.id}/x`, filePath: `ticket/${p.seller.id}/y` }).where(eq(listings.id, p.listing.id));
 
-    const rows = await pendingListings(db);
+    const rows = await pendingListings(db, ADMIN);
     expect(rows).toEqual([
       {
         listingId: p.listing.id,
@@ -103,4 +127,25 @@ describe('pendingListings', () => {
       },
     ]);
   });
+});
+
+describe('every admin read requires an admin who passed 2FA (data-layer gate, not only the page layout)', () => {
+  const READS = {
+    pendingIdentities,
+    openDisputes,
+    queuedPayouts,
+    allEvents,
+    pendingListings,
+    manualReviewOrders,
+  } as const;
+  const DENIED: [string, Actor | null][] = [
+    ['no actor', null],
+    ['a normal user', { userId: ADMIN.userId, role: 'user', mfa: true }],
+    ['an admin without 2FA', { userId: ADMIN.userId, role: 'admin', mfa: false }],
+  ];
+  for (const [name, fn] of Object.entries(READS)) {
+    it.each(DENIED)(`${name} refuses %s`, async (_who, actor) => {
+      await expect((fn as (d: Db, a: Actor | null) => Promise<unknown>)(db, actor)).rejects.toBeInstanceOf(ForbiddenError);
+    });
+  }
 });

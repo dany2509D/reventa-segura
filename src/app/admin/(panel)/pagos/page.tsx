@@ -1,11 +1,14 @@
 import { queuedPayouts } from '@/lib/admin/queries';
 import { getDb } from '@/lib/db/client';
+import { requireAdminPage } from '../../session';
 import { formatUsd } from '@/lib/format';
 import { markPayoutPaidAction } from '../actions';
 import { Flash, type FlashParams } from '../flash';
 
 export default async function PayoutsPage({ searchParams }: { searchParams: Promise<FlashParams> }) {
-  const rows = await queuedPayouts(getDb());
+  // Next can render a page without running its layout: the page gates itself.
+  const actor = await requireAdminPage();
+  const rows = await queuedPayouts(getDb(), actor);
   return (
     <main>
       <h1>Pagos a vendedores</h1>

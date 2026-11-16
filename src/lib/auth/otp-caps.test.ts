@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { appConfig, otpCodes } from '@/lib/db/schema';
+import { appConfig, otpCodes, users } from '@/lib/db/schema';
 import { makeTestDb } from '@/lib/db/test-db';
 import type { Db } from '@/lib/db/types';
 import { RateLimitError, SmsCapError } from './errors';
@@ -24,6 +24,11 @@ beforeEach(async () => {
 });
 
 describe('global SMS daily cap (SEG-07, app_config.smsDailyCap)', () => {
+  // These phones already have an account, so only the whole cap (not the unknown-phone share) applies.
+  beforeEach(async () => {
+    await db.insert(users).values(Array.from({ length: 20 }, (_, i) => ({ phone: phone(i + 1) })));
+  });
+
   it('defaults to 500', () => {
     expect(DEFAULT_SMS_DAILY_CAP).toBe(500);
   });
@@ -66,5 +71,27 @@ describe('per-phone OTP limit', () => {
     expect(results.filter((r) => r.status === 'rejected' && r.reason instanceof RateLimitError)).toHaveLength(
       9 - OTP_MAX_REQUESTS_PER_HOUR,
     );
+  });
+});
+
+describe('the daily cap keeps half for phones that already have an account', () => {
+  it('unknown phones can use at most half the cap, so an anonymous flood cannot lock out real users', async () => {
+    await db.insert(appConfig).values({ key: 'smsDailyCap', value: '4' });
+    await requestOtp(db, phone(1), sender, NOW);
+    await requestOtp(db, phone(2), sender, NOW);
+    await expect(requestOtp(db, phone(3), sender, NOW)).rejects.toBeInstanceOf(SmsCapError);
+    expect(sender.sent).toBe(2);
+  });
+
+  it('existing users can still log in after the unknown-phone share is used up, until the whole cap is reached', async () => {
+    await db.insert(appConfig).values({ key: 'smsDailyCap', value: '4' });
+    await db.insert(users).values([{ phone: phone(100) }, { phone: phone(101) }, { phone: phone(102) }]);
+    await requestOtp(db, phone(1), sender, NOW);
+    await requestOtp(db, phone(2), sender, NOW);
+    await expect(requestOtp(db, phone(3), sender, NOW)).rejects.toBeInstanceOf(SmsCapError);
+    await requestOtp(db, phone(100), sender, NOW);
+    await requestOtp(db, phone(101), sender, NOW);
+    await expect(requestOtp(db, phone(102), sender, NOW)).rejects.toBeInstanceOf(SmsCapError); // whole cap (4) reached
+    expect(sender.sent).toBe(4);
   });
 });

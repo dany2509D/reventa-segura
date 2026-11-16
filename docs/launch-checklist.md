@@ -21,7 +21,7 @@ Responsables: [Abogado] · [Negocio] fundador/operación · [Dev] desarrollo · 
       en cada evento). Riesgo aceptado: la boletera puede anular una entrada revendida; la plataforma solo
       garantiza el reembolso por disputa.
 - [ ] [Abogado] **Ley 81 de 2019** (protección de datos personales; DEL-14): base legal y consentimiento para
-      teléfono, cédula/pasaporte y selfie, derechos del titular, encargado del tratamiento (Vercel, Neon,
+      teléfono, cédula/pasaporte y selfie, derechos del titular, encargado del tratamiento (Vercel, Supabase,
       proveedor de SMS y pasarela) y transferencia internacional de datos.
 - [ ] [Abogado] **Retención de documentos de identidad** (SEG-11): fijar el plazo y cargarlo en
       `app_config.identityRetentionDays` (hoy 365 días, valor provisional). El cron de mantenimiento borra el
@@ -61,7 +61,7 @@ Responsables: [Abogado] · [Negocio] fundador/operación · [Dev] desarrollo · 
 
 ## 3. Datos, secretos y operación
 
-- [ ] [Dev] **Copias de seguridad y prueba de restauración** (RNF-11, SEG-23): copias diarias en Neon (PITR ≥ 7 días);
+- [ ] [Dev] **Copias de seguridad y prueba de restauración** (RNF-11, SEG-23): copias diarias en Supabase (PITR ≥ 7 días, requiere plan de pago);
       restaurar a una rama nueva, ejecutar `npm run db:migrate`, comprobar conteos de órdenes, ledger y
       auditoría, y anotar fecha, duración y resultado aquí: ______________________.
 - [ ] [Dev] **Migraciones en el despliegue**: `npm run db:migrate` como paso explícito (no `AUTO_MIGRATE` en
@@ -76,7 +76,7 @@ Responsables: [Abogado] · [Negocio] fundador/operación · [Dev] desarrollo · 
   - `FILE_URL_SECRET`: solo invalida las URL firmadas vigentes (duran 60 s).
   - `CRON_SECRET`: Vercel Cron envía el valor nuevo tras el despliegue.
   - `BLOB_READ_WRITE_TOKEN`: regenerarlo en Vercel Blob.
-  - `DATABASE_URL`: restablecer la contraseña del rol en Neon.
+  - `DATABASE_URL`: restablecer la contraseña de la base en Supabase (Project Settings → Database) y actualizarla con `npm run db:set-password`.
   - Claves de la pasarela y del proveedor de SMS: en sus paneles.
   - TOTP de un administrador (teléfono perdido o sospecha de filtración): `npm run admin:create -- +507…` rota el
     secreto; el anterior deja de funcionar al instante.
@@ -108,7 +108,7 @@ Responsables: [Abogado] · [Negocio] fundador/operación · [Dev] desarrollo · 
       worker se registra y la PWA se instala.
 - [ ] [Dev] **Cron**: `/api/cron/maintenance` responde 401 sin el secreto y Vercel Cron lo ejecuta cada 10 minutos
       con 200 (ver logs).
-- [ ] [Dev] **Neon**: cadena *pooled* por TCP (no un driver HTTP): transacciones y `SELECT … FOR UPDATE` funcionan.
+- [ ] [Dev] **Supabase**: cadena del *session pooler* por TCP (no un driver HTTP) con TLS verificado (`DATABASE_CA_CERT`): transacciones y `SELECT … FOR UPDATE` funcionan. Comprobar con `npm run db:check`.
       Prueba: dos navegadores compran la misma entrada a la vez → una sola orden; repetir un webhook → un solo
       cargo en el ledger.
 - [ ] [Dev] **Subidas desde el móvil** (identidad, publicación, ingreso, disputa): no se probaron en navegador en la
@@ -148,9 +148,17 @@ resolverse o aceptarse por escrito antes de cobrar.
 - (antes del dinero real) Si un reembolso falla, la transacción se revierte y solo queda la alerta en logs: añadir un registro de
   auditoría en transacción aparte junto con el adaptador real.
 - (antes del dinero real) Un monto distinto en el webhook solo se audita y alerta; el 422 hace que el proveedor reintente. Definir el
-  procedimiento manual (`needsManualReview` existe pero no tiene flujo en el panel).
+  procedimiento manual (`needsManualReview` ya tiene lista de solo lectura en `/admin/revision`; falta el flujo para resolverlas).
 - `paidAt` es la hora de recepción del webhook; `appendEntry` no impone el signo de cada tipo de asiento.
 - No hay tope por comprador de checkouts abiertos; el límite de 20 checkouts por hora lo acota.
+
+- (antes del dinero real) Si un evento se cancela cuando la orden ya está `liquidada` (al vendedor ya se le pagó), no hay
+  reembolso automático: queda marcada `needsManualReview` y aparece en `/admin/revision`; hay que recuperar el pago del
+  vendedor o reembolsar al comprador de la cuenta de la empresa.
+- (antes del dinero real) La migración 0004 añade restricciones: si hay datos previos que las violen, falla. Antes de
+  migrar una base con datos reales, revisar a mano las filas que incumplan los CHECK/índices únicos parciales de
+  `drizzle/0004_hardening.sql` (pegar sus condiciones como `SELECT` en el editor SQL de Supabase y esperar 0 filas).
+- Las alertas ya incluyen `orderId`/`eventId`/`itemId` para localizar el caso sin buscar en la base.
 
 **Publicaciones y entradas**
 - El QR del comprobante no se indexa (pequeña ventana de carrera para publicar dos veces la misma entrada); un
@@ -175,7 +183,7 @@ resolverse o aceptarse por escrito antes de cobrar.
 - La CSP permite `style-src 'unsafe-inline'` (React escribe atributos `style` en el HTML del servidor).
 
 **Mantenimiento y modelo de datos**
-- Las órdenes con `needsManualReview` no se liberan solas y no tienen pantalla en el panel; `confirmEntry` no
+- Las órdenes con `needsManualReview` no se liberan solas y solo tienen lista de lectura en `/admin/revision`; `confirmEntry` no
   revisa si el evento sigue activo; las rutas de evidencia no quedan ligadas a una sola orden.
 - Los estados de texto (`state`, `status`, `role`) se validan en TypeScript, no con CHECK en la base; el teléfono
   E.164 tampoco tiene CHECK.

@@ -1,12 +1,13 @@
 // Usage: npm run admin:create -- +50761234567
 // Creates (or promotes) an admin and prints a NEW TOTP secret once. Admins cannot enroll their own
 // second factor over HTTP; this out-of-band step is the only way, so a stolen SMS code is not enough.
+import './load-env';
 // Running it again for an existing admin ROTATES the secret (lost phone, suspected leak): the old
 // authenticator entry stops working immediately.
 import { eq } from 'drizzle-orm';
 import { normalizePanamaPhone } from '../src/lib/auth/phone';
 import { enrollTotp } from '../src/lib/auth/totp';
-import { getDb, migrateDb } from '../src/lib/db/client';
+import { describeDatabaseTarget, getDb, migrateDb } from '../src/lib/db/client';
 import { users } from '../src/lib/db/schema';
 
 const phone = normalizePanamaPhone(process.argv[2] ?? '');
@@ -14,6 +15,7 @@ if (!phone) {
   console.error('Usage: npm run admin:create -- <panamanian mobile number, e.g. +50761234567>');
   process.exit(1);
 }
+console.log(`Database: ${process.env.DATABASE_URL ? describeDatabaseTarget(process.env.DATABASE_URL) : 'local PGlite (.data/pglite)'}`);
 await migrateDb();
 const db = getDb();
 const [existing] = await db.select({ id: users.id }).from(users).where(eq(users.phone, phone));

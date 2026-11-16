@@ -4,6 +4,7 @@ import { events, ledgerEntries, listings, orders } from '@/lib/db/schema';
 import type { Db, Tx } from '@/lib/db/types';
 import type { PaymentGateway } from '@/lib/payments/gateway';
 import { computeFees, DEFAULT_FEE_BPS } from '@/lib/pricing/pricing';
+import { isSellerBlocked } from '@/lib/tickets/listings';
 import { appendEntry } from './ledger';
 import { transition, type OrderEvent, type OrderState } from './state-machine';
 
@@ -30,6 +31,7 @@ export class AmountMismatchError extends Error {
   constructor(
     readonly expectedCents: number,
     readonly receivedCents: number,
+    readonly orderId?: string,
   ) {
     super(`Webhook amount ${receivedCents} does not match order price ${expectedCents}`);
     this.name = 'AmountMismatchError';
@@ -62,6 +64,11 @@ export async function startCheckout(
   listingId: string,
   now: Date = new Date(),
 ): Promise<{ orderId: string; checkoutUrl: string }> {
+  // SEG-08: a seller who lost too many disputes stops selling, including listings that were already
+  // verified. Reported as 'unavailable' so a buyer learns nothing about the seller.
+  const [preview] = await db.select({ sellerId: listings.sellerId }).from(listings).where(eq(listings.id, listingId));
+  if (preview && (await isSellerBlocked(db, preview.sellerId, now))) throw new ListingUnavailableError();
+
   let order: Order;
   try {
     order = await db.transaction(async (tx) => {
@@ -166,7 +173,7 @@ export async function handlePaymentWebhook(
     if (!listing) throw new Error(`Listing ${ref.listingId} of order ${order.id} not found`);
 
     if (evt.amountCents !== order.priceCents) {
-      mismatch = new AmountMismatchError(order.priceCents, evt.amountCents);
+      mismatch = new AmountMismatchError(order.priceCents, evt.amountCents, order.id);
       await audit(tx, {
         actorId: null,
         action: 'payment.amount_mismatch',

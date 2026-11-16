@@ -1,11 +1,13 @@
-// Usage: npm run seed:dev   — local demo data only (refuses to run in production).
+// Usage: npm run seed:dev   — demo data only (refuses to run in production).
+import './load-env';
 import { events, listings, users } from '../src/lib/db/schema';
-import { getDb, migrateDb } from '../src/lib/db/client';
+import { describeDatabaseTarget, getDb, migrateDb } from '../src/lib/db/client';
 
 if (process.env.NODE_ENV === 'production') {
   console.error('seed:dev refuses to run in production');
   process.exit(1);
 }
+console.log(`Database: ${process.env.DATABASE_URL ? describeDatabaseTarget(process.env.DATABASE_URL) : 'local PGlite (.data/pglite)'}`);
 await migrateDb();
 const db = getDb();
 const DAY = 24 * 60 * 60 * 1000;

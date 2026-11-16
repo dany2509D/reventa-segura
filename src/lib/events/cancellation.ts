@@ -102,7 +102,7 @@ export async function cancelEvent(
       result.failed++;
       // A buyer is still owed a refund: page an operator (RNF-10). Name only: messages can carry
       // ids, provider references or bound query parameters.
-      alert('event_cancel_order_failed', { error: errorName(e) });
+      alert('event_cancel_order_failed', { error: errorName(e), eventId, orderId: c.id });
     }
   }
   return result;

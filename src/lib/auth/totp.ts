@@ -57,11 +57,17 @@ export async function enrollTotp(
   { rotate = false }: { rotate?: boolean } = {},
 ): Promise<{ secret: string; otpauthUrl: string }> {
   const secret = base32Encode(randomBytes(20)); // 160 bits -> 32 base32 chars
-  const [user] = await db
-    .update(users)
-    .set({ totpSecret: secret })
-    .where(and(eq(users.id, adminId), eq(users.role, 'admin'), rotate ? undefined : isNull(users.totpSecret)))
-    .returning({ phone: users.phone });
+  // Rotation is the response to a lost phone or a suspected leak: every existing session of that
+  // admin goes too, otherwise a 2FA-verified session held by an attacker would survive it.
+  const [user] = await db.transaction(async (tx) => {
+    const updated = await tx
+      .update(users)
+      .set({ totpSecret: secret })
+      .where(and(eq(users.id, adminId), eq(users.role, 'admin'), rotate ? undefined : isNull(users.totpSecret)))
+      .returning({ phone: users.phone });
+    if (updated.length > 0 && rotate) await tx.delete(sessions).where(eq(sessions.userId, adminId));
+    return updated;
+  });
   if (!user) {
     const [admin] = await db
       .select({ id: users.id })
