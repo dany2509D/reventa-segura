@@ -18,7 +18,7 @@ function hasBearer(req: Request, secret: string): boolean {
   return timingSafeEqual(digest(req.headers.get('authorization') ?? ''), digest(`Bearer ${secret}`));
 }
 
-// Vercel Cron (every 5 min, see vercel.ts) calls this with `Authorization: Bearer $CRON_SECRET`.
+// Vercel Cron (once a day on the Hobby plan, see vercel.ts) calls this with `Authorization: Bearer $CRON_SECRET`.
 // Bearer-authenticated, so no Origin guard (the caller is not a browser). Responds with counts only.
 export async function GET(req: Request) {
   const secret = process.env.CRON_SECRET;
@@ -37,7 +37,9 @@ export async function GET(req: Request) {
     const result = await runMaintenance(
       db,
       {
-        gw: getPaymentGateway(),
+        // No gateway in production (manual Yappy / ACH only): getPaymentGateway() would throw there
+        // and take the whole run down, including the expiry of abandoned manual checkouts.
+        gw: process.env.NODE_ENV === 'production' ? undefined : getPaymentGateway(),
         // Queues the seller's manual payout inside the releasing transaction (Task 10).
         onReleased: queuePayoutOnRelease,
         // The store is resolved only when an identity document is actually purged, so a storage

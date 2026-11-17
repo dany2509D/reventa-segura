@@ -88,13 +88,12 @@ describe('GET /api/cron/maintenance', () => {
     expect((await call({ authorization: 'Bearer ' })).status).toBe(500);
   });
 
-  it('500 (error name only in logs) when the job cannot be built, e.g. fake gateway in production', async () => {
-    const errors = vi.spyOn(console, 'error').mockImplementation(() => {});
+  it('still runs in production, where there is no payment gateway (manual Yappy / ACH only)', async () => {
     vi.stubEnv('NODE_ENV', 'production');
     vi.stubEnv('ALLOW_FAKE_GATEWAY', '');
     vi.stubEnv('BLOB_READ_WRITE_TOKEN', 'blob-token');
     const res = await call({ authorization: `Bearer ${SECRET}` });
-    expect(res.status).toBe(500);
-    expect(JSON.stringify(errors.mock.calls)).not.toMatch(/gateway is refused/);
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({ failed: 0 });
   });
 });

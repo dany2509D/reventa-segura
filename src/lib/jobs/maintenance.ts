@@ -25,7 +25,11 @@ export const IDENTITY_RETENTION_KEY = 'identityRetentionDays';
 export const DEFAULT_IDENTITY_RETENTION_DAYS = 365;
 
 export type MaintenanceDeps = {
-  gw: PaymentGateway;
+  /**
+   * Needed only to refund orders paid through a gateway. Production has none (it sells through the
+   * manual Yappy / ACH flow), so it may be absent: such an order would then fail loudly and be retried.
+   */
+  gw?: PaymentGateway;
   /** Runs inside each release transaction (Task 10 queues the payout here). */
   onReleased?: OnReleased;
   /** Deletes a private blob; identity paths are cleared even when absent. */
@@ -151,12 +155,13 @@ async function expiredTransferIds(db: Db, now: Date): Promise<string[]> {
   return rows.map((r) => r.id);
 }
 
-function expireTransfer(db: Db, gw: PaymentGateway, id: string, now: Date): Promise<boolean> {
+function expireTransfer(db: Db, gw: PaymentGateway | undefined, id: string, now: Date): Promise<boolean> {
   return db.transaction(async (tx) => {
     const o = await lockOrderForUpdate(tx, id);
     if (!o || o.state !== 'transferencia_pendiente' || o.paymentMethod !== null) return false;
     const ev = await eventForOrder(tx, o);
     if (!transferExpired(o, ev, now)) return false;
+    if (!gw) throw new Error('No payment gateway configured to refund a gateway order');
     await refundPaidOrder(tx, gw, o, 'TRANSFER_EXPIRED', {
       action: 'order.transfer_expired',
       actorId: null,
