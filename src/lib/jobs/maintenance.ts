@@ -52,7 +52,7 @@ const RELEASABLE: readonly OrderState[] = ['entrada_recibida', 'ingreso_confirma
 const FINAL_STATES: readonly OrderState[] = ['liquidada', 'reembolsada', 'cancelada'];
 
 /**
- * Periodic job (cron every 10 min). Every order is handled in its own transaction under
+ * Periodic job (cron every 5 min). Every order is handled in its own transaction under
  * SELECT ... FOR UPDATE with the state re-checked after the lock, so it can race the buyer's
  * dispute or a second run without double effects; running it twice in a row is a no-op.
  * A failing item is logged (error name only) and counted, and the run goes on.

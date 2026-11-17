@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { getClientIp } from './client-ip';
 
 const req = (headers: Record<string, string>) => new Request('http://localhost/api/x', { headers });
@@ -26,5 +26,19 @@ describe('getClientIp', () => {
     expect(getClientIp(req({ 'x-forwarded-for': 'not an ip; drop table' }))).toBe('unknown');
     expect(getClientIp(req({ 'x-forwarded-for': '', 'x-real-ip': 'x'.repeat(200) }))).toBe('unknown');
     expect(getClientIp(req({ 'x-forwarded-for': '1.2.3.4, <script>' , 'x-real-ip': '192.0.2.6' }))).toBe('192.0.2.6');
+  });
+
+  describe('behind Cloudflare', () => {
+    afterEach(() => vi.unstubAllEnvs());
+
+    it('prefers cf-connecting-ip when TRUST_CLOUDFLARE_IP=1', () => {
+      vi.stubEnv('TRUST_CLOUDFLARE_IP', '1');
+      expect(getClientIp(req({ 'cf-connecting-ip': '203.0.113.50', 'x-forwarded-for': '172.70.1.1' }))).toBe('203.0.113.50');
+      expect(getClientIp(req({ 'cf-connecting-ip': 'junk!', 'x-forwarded-for': '172.70.1.1' }))).toBe('172.70.1.1');
+    });
+
+    it('ignores cf-connecting-ip unless trusted (it is forgeable when hitting the origin directly)', () => {
+      expect(getClientIp(req({ 'cf-connecting-ip': '203.0.113.50', 'x-forwarded-for': '172.70.1.1' }))).toBe('172.70.1.1');
+    });
   });
 });

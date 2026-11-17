@@ -18,7 +18,7 @@ function hasBearer(req: Request, secret: string): boolean {
   return timingSafeEqual(digest(req.headers.get('authorization') ?? ''), digest(`Bearer ${secret}`));
 }
 
-// Vercel Cron (every 10 min, see vercel.ts) calls this with `Authorization: Bearer $CRON_SECRET`.
+// Vercel Cron (every 5 min, see vercel.ts) calls this with `Authorization: Bearer $CRON_SECRET`.
 // Bearer-authenticated, so no Origin guard (the caller is not a browser). Responds with counts only.
 export async function GET(req: Request) {
   const secret = process.env.CRON_SECRET;
