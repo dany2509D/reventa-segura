@@ -4,7 +4,13 @@ import { rejectUnsafeRequest } from '@/lib/auth/http';
 import { sessionFromRequest } from '@/lib/auth/request-session';
 import { getDb } from '@/lib/db/client';
 import { errorName, log } from '@/lib/observability/log';
-import { ListingUnavailableError, MANUAL_METHODS, SelfPurchaseError, startManualCheckout } from '@/lib/orders/service';
+import {
+  ListingUnavailableError,
+  MANUAL_METHODS,
+  PendingOrdersLimitError,
+  SelfPurchaseError,
+  startManualCheckout,
+} from '@/lib/orders/service';
 import { LIMITS, limitOr429 } from '@/lib/security/limits';
 
 const body = z.object({ listingId: z.uuid(), paymentMethod: z.enum(MANUAL_METHODS) });
@@ -33,6 +39,7 @@ export async function POST(req: Request) {
     );
   } catch (e) {
     if (e instanceof ListingUnavailableError) return json({ error: 'Esta entrada ya no está disponible' }, 409);
+    if (e instanceof PendingOrdersLimitError) return json({ error: e.message }, 429);
     if (e instanceof SelfPurchaseError) return json({ error: 'No puedes comprar tu propia entrada' }, 422);
     // Never log the message: it may carry bound query parameters.
     log('error', 'manual checkout route error', { error: errorName(e) });

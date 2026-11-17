@@ -1,5 +1,5 @@
 import { randomBytes } from 'node:crypto';
-import { and, eq, isNotNull, isNull, lt } from 'drizzle-orm';
+import { and, count, eq, gt, gte, isNotNull, isNull, lt, or, sql } from 'drizzle-orm';
 import { audit } from '@/lib/audit/audit';
 import { events, ledgerEntries, listings, orders } from '@/lib/db/schema';
 import type { Actor, Db, Tx } from '@/lib/db/types';
@@ -20,6 +20,18 @@ export class ListingUnavailableError extends Error {
   constructor(message = 'Listing is not available for purchase') {
     super(message);
     this.name = 'ListingUnavailableError';
+  }
+}
+
+/** A buyer may hold at most this many unpaid orders at once (anti-hoarding). */
+export const MAX_PENDING_ORDERS_PER_BUYER = 2;
+
+export class PendingOrdersLimitError extends Error {
+  constructor(
+    message = 'Tienes órdenes pendientes de pago. Completa o cancela una antes de reservar otro boleto.',
+  ) {
+    super(message);
+    this.name = 'PendingOrdersLimitError';
   }
 }
 
@@ -75,9 +87,15 @@ export async function startCheckout(
   let order: Order;
   try {
     order = await db.transaction(async (tx) => {
+      // Serializes this buyer's checkouts so two parallel requests cannot both slip under the
+      // pending-order cap. Always taken before any row lock, so it cannot deadlock.
+      await tx.execute(sql`select pg_advisory_xact_lock(hashtextextended(${`buyer-checkout:${buyerId}`}, 0))`);
       const listing = await lockListing(tx, listingId);
       if (!listing || listing.status !== 'verified') throw new ListingUnavailableError();
       if (listing.sellerId === buyerId) throw new SelfPurchaseError();
+      if ((await countPendingOrders(tx, buyerId, now)) >= MAX_PENDING_ORDERS_PER_BUYER) {
+        throw new PendingOrdersLimitError();
+      }
       const event = await getEvent(tx, listing.eventId);
       if (event.status !== 'active' || event.startsAt.getTime() <= now.getTime()) {
         throw new ListingUnavailableError();
@@ -527,6 +545,25 @@ async function hasCharge(tx: Tx, orderId: string): Promise<boolean> {
     .where(and(eq(ledgerEntries.orderId, orderId), eq(ledgerEntries.kind, 'charge')))
     .limit(1);
   return Boolean(c);
+}
+
+/** Live unpaid orders of a buyer: abandoned checkouts and expired transfer windows do not count. */
+async function countPendingOrders(tx: Tx, buyerId: string, now: Date): Promise<number> {
+  const cutoff = new Date(now.getTime() - CHECKOUT_TTL_MS);
+  const [r] = await tx
+    .select({ n: count() })
+    .from(orders)
+    .where(
+      and(
+        eq(orders.buyerId, buyerId),
+        or(
+          and(eq(orders.state, 'creada'), gte(orders.createdAt, cutoff)),
+          and(eq(orders.state, 'transferencia_pendiente'), gt(orders.transferDeadline, now)),
+          eq(orders.state, 'comprobante_en_revision'),
+        ),
+      ),
+    );
+  return Number(r?.n ?? 0);
 }
 
 function isStale(o: { createdAt: Date }, now: Date): boolean {

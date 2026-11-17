@@ -87,6 +87,7 @@ describe('POST /api/auth/test-code — test mode ON', () => {
   });
 
   it('end to end through the real routes: /request → /test-code → /verify logs in', async () => {
+    vi.stubEnv('ALLOW_FAKE_SMS', 'true'); // /verify's legacy { phone, code } flow is gated behind it (non-production only)
     const r = await requestPost(post('http://localhost/api/auth/request', { phone: PHONE }));
     expect(r.status).toBe(200);
     const { code } = await (await ask(PHONE)).json();
@@ -199,6 +200,7 @@ describe('POST /api/auth/test-code — admin phone with the local admin key', ()
 
   it('end to end: /request → /test-code with the key → /verify still demands the TOTP second factor', async () => {
     adminKeyEnv();
+    vi.stubEnv('ALLOW_FAKE_SMS', 'true'); // /verify's legacy { phone, code } flow is gated behind it (non-production only)
     await db.insert(users).values({ phone: ADMIN, role: 'admin' });
     expect((await requestPost(post('http://localhost/api/auth/request', { phone: ADMIN }))).status).toBe(200);
     const { code } = await (await ask(ADMIN, withKey(KEY))).json();

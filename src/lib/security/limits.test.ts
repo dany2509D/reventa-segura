@@ -47,6 +47,7 @@ describe('LIMITS (SEG-07)', () => {
     expect(LIMITS.identity).toMatchObject({ limit: 5, windowSeconds: DAY });
     expect(LIMITS.orderReceived).toMatchObject({ limit: 20, windowSeconds: HOUR });
     expect(LIMITS.orderEntry).toMatchObject({ limit: 20, windowSeconds: HOUR });
+    expect(LIMITS.orderProof).toMatchObject({ limit: 20, windowSeconds: HOUR });
     expect(LIMITS.orderDispute).toMatchObject({ limit: 5, windowSeconds: DAY });
     const names = Object.values(LIMITS).map((r) => r.name);
     expect(new Set(names).size).toBe(names.length);

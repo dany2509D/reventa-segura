@@ -30,6 +30,8 @@ vi.mock('@/lib/db/client', () => ({ getDb: () => h.db }));
 vi.stubEnv('BLOB_READ_WRITE_TOKEN', '');
 vi.stubEnv('FAKE_GATEWAY_SECRET', 'authz-gw-secret');
 vi.stubEnv('CRON_SECRET', 'authz-cron-secret-0123456789abcdef');
+vi.stubEnv('ALLOW_FAKE_SMS', '');
+vi.stubEnv('FIREBASE_PROJECT_ID', '');
 
 type Caller = 'anon' | 'other' | 'seller' | 'user' | 'adminNoMfa' | 'admin' | 'machine' | 'owner';
 const ORDER: Caller[] = ['anon', 'other', 'seller', 'user', 'adminNoMfa', 'admin', 'machine', 'owner'];
@@ -137,6 +139,13 @@ const MATRIX: Record<string, Row> = {
     call: (f, { who, cookie }) =>
       json('POST /api/auth/mfa', '/api/auth/mfa', { code: who === 'owner' ? totpNow(f.adminNoMfa.totpSecret) : '000000' }, cookie),
   },
+  'POST /api/auth/phone/verify': {
+    access: 'member',
+    why: 'marks the caller’s own phone as verified (Firebase token); fake SMS code only outside production; 5 tries / 15 min',
+    owner: (f) => f.stranger,
+    expect: { anon: [401], owner: [503] },
+    call: (_f, { cookie }) => json('POST /api/auth/phone/verify', '/api/auth/phone/verify', { idToken: 'x'.repeat(30) }, cookie),
+  },
   'POST /api/auth/request': {
     access: 'public',
     why: 'login step 1 (sends an SMS code); rate limited per IP, per phone and globally',
@@ -151,8 +160,8 @@ const MATRIX: Record<string, Row> = {
   },
   'POST /api/auth/verify': {
     access: 'public',
-    why: 'login step 2: the SMS code is the credential',
-    expect: { anon: [401] },
+    why: 'login step 2: a Firebase ID token (or the fake SMS code outside production) is the credential; 503 while Firebase is not configured',
+    expect: { anon: [503] },
     call: () => json('POST /api/auth/verify', '/api/auth/verify', { phone: '+50769990002', code: '000000' }),
   },
   'POST /api/checkout': {
