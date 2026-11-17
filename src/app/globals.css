@@ -1129,19 +1129,10 @@ a.list-row:hover .list-chevron { transform: translate3d(4px, 0, 0); color: var(-
 .sticky-cta > .stack { width: 100%; }
 .sticky-cta .test-mode { white-space: nowrap; }
 @media (max-width: 767.98px) {
-  /* Primary action pinned above the tab bar on phones */
-  .sticky-cta {
-    position: fixed;
-    z-index: 35;
-    left: max(12px, env(safe-area-inset-left));
-    right: max(12px, env(safe-area-inset-right));
-    bottom: calc(var(--tabbar-space) + 10px);
-    max-width: 440px;
-    margin: 0 auto;
-  }
-  .sticky-cta .btn { box-shadow: 0 0 0 4px var(--bg), var(--shadow-lg); }
-  .sticky-cta .test-mode { justify-self: center; background: var(--bg); }
-  .buy-page { padding-bottom: 168px; }
+  /* The CTA holds the payment-method picker plus the pay button, so pinning the whole block would
+     cover the page content on phones: keep it in the flow and just clear the tab bar below it. */
+  .sticky-cta .btn { box-shadow: var(--shadow-lg); }
+  .buy-page { padding-bottom: calc(var(--tabbar-space) + 24px); }
 }
 @media (min-width: 1024px) {
   .buy-layout { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--space-6); align-items: start; }
