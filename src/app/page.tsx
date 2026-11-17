@@ -1,7 +1,9 @@
 import { Suspense } from 'react';
 import { upcomingEvents } from '@/lib/account/queries';
 import { getDb } from '@/lib/db/client';
-import { IconArrowDown } from './_components/icons';
+import { IconArrowDown, IconArrowRight } from './_components/icons';
+import { FadeInUp } from './_components/motion-primitives';
+import TrustBar from './_home/trust-bar';
 import EventAgenda from './_home/event-agenda';
 import FeaturedEvents from './_home/featured-events';
 import { HeroSearch, HeroStats, HeroTicket } from './_home/hero-parts';
@@ -41,9 +43,9 @@ export default function Home() {
       <SearchProvider>
         <section className="hero container" aria-labelledby="hero-title">
           <div className="hero-copy">
-            <p className="eyebrow hero-in hero-in-0">
-              <span className="dot" aria-hidden="true" />
-              Reventa de entradas · Panamá
+            <p className="hero-badge hero-in hero-in-0">
+              <span className="pulse-dot" aria-hidden="true" />
+              Reventa 100% verificada <span aria-hidden="true">•</span> Protección antifraude en Panamá
             </p>
             <h1 id="hero-title" className="hero-title">
               <span className="line">
@@ -62,6 +64,15 @@ export default function Home() {
               Descubre entradas de reventa para conciertos, partidos y más. Tu pago se retiene y el vendedor cobra después del evento, no
               antes.
             </p>
+            <FadeInUp className="hero-ctas" delay={0.3}>
+              <a className="btn lg hero-cta-primary" href="#eventos">
+                Explorar eventos
+                <IconArrowRight />
+              </a>
+              <a className="btn lg hero-cta-glass" href="/vender">
+                Vender mis entradas
+              </a>
+            </FadeInUp>
             <div className="hero-search hero-in hero-in-2">
               <Suspense fallback={<SearchSkeleton />}>
                 <HeroSearch data={data} />
@@ -83,6 +94,8 @@ export default function Home() {
             </Suspense>
           </HeroVisual>
         </section>
+
+        <TrustBar />
 
         <Suspense fallback={<SectionsSkeleton />}>
           <FeaturedEvents data={data} />

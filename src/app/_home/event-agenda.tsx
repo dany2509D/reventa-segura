@@ -4,9 +4,10 @@ import { useState } from 'react';
 import { searchEvents } from '@/lib/ui/search';
 import EmptyState from '../_components/empty-state';
 import EventPoster from '../_components/event-poster';
-import { IconArrowRight } from '../_components/icons';
+import { IconArrowRight, IconPin } from '../_components/icons';
+import { HoverCard, StaggerGrid, StaggerItem } from '../_components/motion-primitives';
 import { useSearch } from './search-context';
-import { eventCountLabel, ticketCountLabel, type EventView } from './view-model';
+import { eventCountLabel, type EventView } from './view-model';
 
 /** Rows shown before "show all": enough to scan, short enough not to bury the rest of the page. */
 const PAGE_SIZE = 8;
@@ -61,9 +62,10 @@ export default function EventAgenda({ events }: { events: EventView[] }) {
           </button>
         </EmptyState>
       ) : (
-        <ol className="agenda">
+        <StaggerGrid as="ol" className="agenda" stagger={0.05}>
           {visible.map((event) => (
-            <li key={event.id} className="agenda-item">
+            <StaggerItem as="li" key={event.id} className="agenda-item">
+              <HoverCard className="agenda-hover">
               <a className="agenda-row" href={`/eventos/${event.id}`} data-card="">
                 <time className="agenda-date" dateTime={event.date.iso}>
                   <b>{event.date.day}</b>
@@ -80,13 +82,16 @@ export default function EventAgenda({ events }: { events: EventView[] }) {
                     {event.date.weekday} · {event.date.time}
                   </span>
                   <span className="agenda-name">{event.name}</span>
-                  <span className="agenda-venue">{event.venue}</span>
+                  <span className="agenda-venue">
+                    <IconPin />
+                    {event.venue}
+                  </span>
                 </span>
                 <span className="agenda-tags">
                   {event.from ? (
                     <>
                       <span className="tag agenda-price">Desde {event.from}</span>
-                      <span className="tag">{ticketCountLabel(event.count)}</span>
+                      <span className="tag">{event.count <= 2 ? 'Últimas entradas' : `${event.count} entradas disponibles`}</span>
                     </>
                   ) : (
                     <span className="tag">{event.resaleProhibited ? 'Reventa no permitida' : 'Sin entradas por ahora'}</span>
@@ -96,9 +101,10 @@ export default function EventAgenda({ events }: { events: EventView[] }) {
                   <IconArrowRight />
                 </span>
               </a>
-            </li>
+              </HoverCard>
+            </StaggerItem>
           ))}
-        </ol>
+        </StaggerGrid>
       )}
 
       {hidden > 0 ? (

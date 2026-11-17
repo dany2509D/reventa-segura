@@ -1,3 +1,6 @@
+import type { ReactNode } from 'react';
+import { IconBanknote, IconLock, IconShieldCheck, IconTicketCheck } from '../_components/icons';
+import { StaggerGrid, StaggerItem } from '../_components/motion-primitives';
 import ScrollScene from '../_components/scroll-scene';
 import { isTestMode } from '../_components/test-mode';
 
@@ -6,20 +9,24 @@ import { isTestMode } from '../_components/test-mode';
 // held, the seller delivers through the ticketing platform (or as an image), the buyer confirms
 // receipt and then entry, and the money goes to the seller only when the dispute window closes
 // (12 hours after the event starts). No guarantees are promised beyond that flow.
-const STEPS: { title: string; text: string }[] = [
+const STEPS: { title: string; text: string; icon: ReactNode }[] = [
   {
+    icon: <IconShieldCheck />,
     title: 'Eliges una entrada',
     text: 'Solo publican personas cuya identidad verificó nuestro equipo. Además, revisamos cada publicación antes de mostrarla.',
   },
   {
+    icon: <IconLock />,
     title: 'Pagas y el dinero se retiene',
     text: 'Pagas dentro de la plataforma. El dinero no pasa al vendedor: queda retenido mientras se completa la entrega.',
   },
   {
+    icon: <IconTicketCheck />,
     title: 'Recibes la entrada',
     text: 'El vendedor te la transfiere en la boletera (Panatickets, Ticketplus u otra) o te envía la imagen. Tú confirmas que la recibiste.',
   },
   {
+    icon: <IconBanknote />,
     title: 'Entras al evento',
     text: 'El día del evento confirmas tu ingreso. El pago se libera al vendedor cuando cierra el plazo de reportes, 12 horas después del inicio.',
   },
@@ -49,18 +56,21 @@ export default function HowItWorks() {
           <span className="how-line" aria-hidden="true">
             <span className="how-line-fill" />
           </span>
-          <ol className="how-steps">
+          <StaggerGrid as="ol" className="how-steps" stagger={0.12}>
             {STEPS.map((step, i) => (
-              <li key={step.title} className={`how-step how-step-${i} reveal reveal-${i}`}>
+              <StaggerItem as="li" key={step.title} className={`how-step how-step-${i}`}>
                 <span className="how-node" aria-hidden="true">
                   <span className="how-node-fill" />
                   <span className="how-node-num">{String(i + 1).padStart(2, '0')}</span>
                 </span>
-                <h3>{step.title}</h3>
-                <p>{step.text}</p>
-              </li>
+                <div className="how-card">
+                  <span className="how-icon">{step.icon}</span>
+                  <h3>{step.title}</h3>
+                  <p>{step.text}</p>
+                </div>
+              </StaggerItem>
             ))}
-          </ol>
+          </StaggerGrid>
         </ScrollScene>
 
         <div className="how-notes">

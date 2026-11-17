@@ -1,6 +1,7 @@
 import EventPoster from '../_components/event-poster';
-import { IconArrowDown, IconArrowRight } from '../_components/icons';
-import { ticketCountLabel, type EventView, type HomeData } from './view-model';
+import { IconArrowDown, IconArrowRight, IconPin } from '../_components/icons';
+import { HoverCard, StaggerGrid, StaggerItem } from '../_components/motion-primitives';
+import type { EventView, HomeData } from './view-model';
 
 /**
  * Section 01: up to three large editorial cards. Asymmetric on purpose: the first card leads
@@ -30,18 +31,22 @@ export default async function FeaturedEvents({ data }: { data: Promise<HomeData>
           </a>
         ) : null}
       </header>
-      <div className={`feature-grid feature-grid--${featured.length}`}>
+      <StaggerGrid className={`feature-grid feature-grid--${featured.length}`}>
         {featured.map((event, i) => (
-          <FeatureCard key={event.id} event={event} index={i} />
+          <StaggerItem key={event.id} className={`feature-cell${i === 0 ? ' is-lead' : ''}`}>
+            <HoverCard>
+              <FeatureCard event={event} index={i} />
+            </HoverCard>
+          </StaggerItem>
         ))}
-      </div>
+      </StaggerGrid>
     </section>
   );
 }
 
 function FeatureCard({ event, index }: { event: EventView; index: number }) {
   return (
-    <a className={`feature-card on-art reveal reveal-${index}${index === 0 ? ' is-lead' : ''}`} href={`/eventos/${event.id}`} data-card="">
+    <a className={`feature-card on-art${index === 0 ? ' is-lead' : ''}`} href={`/eventos/${event.id}`} data-card="">
       <div className="feature-art">
         <EventPoster seed={event.id} title={event.name} size="feature" />
       </div>
@@ -50,14 +55,21 @@ function FeatureCard({ event, index }: { event: EventView; index: number }) {
           <b>{event.date.day}</b>
           <span>{event.date.month}</span>
         </time>
-        {event.count > 0 ? <span className="art-pill">{ticketCountLabel(event.count)}</span> : null}
+        {event.count > 0 ? (
+          <span className={`art-pill${event.count <= 2 ? ' is-last' : ''}`}>
+            {event.count <= 2 ? 'Últimas entradas' : `${event.count} entradas disponibles`}
+          </span>
+        ) : null}
       </div>
       <div className="feature-body">
         <p className="feature-meta">
           <span>
             {event.date.weekday} · {event.date.time}
           </span>
-          <span>{event.venue}</span>
+          <span className="venue">
+            <IconPin />
+            {event.venue}
+          </span>
         </p>
         <h3 className="feature-name">{event.name}</h3>
         <div className="feature-foot">
