@@ -1,17 +1,17 @@
 import type { Metadata, Viewport } from 'next';
 import { headers } from 'next/headers';
 import { connection } from 'next/server';
-import Script from 'next/script';
 import { GeistMono } from 'geist/font/mono';
 import { GeistSans } from 'geist/font/sans';
 import type { ReactNode } from 'react';
 import './globals.css';
-import { THEME_BOOTSTRAP_SCRIPT, THEME_COLORS } from '@/lib/ui/theme';
+import { THEME_COLORS } from '@/lib/ui/theme';
 import LinkEnhancer from './_components/link-enhancer';
 import RegisterSw from './_components/register-sw';
 import RevealObserver from './_components/reveal-observer';
 import SiteFooter from './_components/site-footer';
 import SiteHeader, { TabBar } from './_components/site-header';
+import ThemeScript from './_components/theme-script';
 
 export const metadata: Metadata = {
   title: { default: 'Reventa Segura · Entradas de reventa en Panamá', template: '%s · Reventa Segura' },
@@ -42,9 +42,9 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
     // suppressHydrationWarning on this one element. Fonts: Geist Sans and Geist Mono, self-hosted
     // by next/font from the `geist` package (no request to a font CDN; font-src stays 'self').
     <html lang="es" data-theme="light" className={`${GeistSans.variable} ${GeistMono.variable}`} suppressHydrationWarning>
-      <Script id="theme-bootstrap" strategy="beforeInteractive" nonce={nonce}>
-        {THEME_BOOTSTRAP_SCRIPT}
-      </Script>
+      <head>
+        <ThemeScript nonce={nonce} />
+      </head>
       <body>
         <SiteHeader />
         <div id="contenido" tabIndex={-1} />
