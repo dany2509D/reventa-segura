@@ -10,6 +10,11 @@ export async function GET(req: Request) {
   const path = new URL(req.url).searchParams.get('path');
   const access = await adminAccess(getDb(), readSessionToken(req));
   if (access.state !== 'ok' || !path) return new NextResponse('Not found', { status: 404 });
+  // Defence in depth on top of parseFilePath (exactly `<kind>/<uuid>/<uuid>`): no traversal,
+  // backslashes, control characters or oversized keys ever reach the signer.
+  if (path.length > 200 || path.includes('..') || path.includes('\\') || /[\u0000-\u001f]/.test(path)) {
+    return new NextResponse('Not found', { status: 404 });
+  }
   try {
     const url = signedUrl(path, access.actor);
     return new NextResponse(null, { status: 302, headers: { location: url, 'cache-control': 'no-store' } });

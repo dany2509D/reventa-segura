@@ -10,19 +10,10 @@ describe('getPaymentGateway', () => {
     expect(getPaymentGateway()).toBeInstanceOf(FakeGateway);
   });
 
-  it('refuses the fake gateway in production', () => {
+  it.each(['', 'true', '1'])('refuses the fake gateway in production (ALLOW_FAKE_GATEWAY=%j)', (flag) => {
     vi.stubEnv('NODE_ENV', 'production');
     vi.stubEnv('FAKE_GATEWAY_SECRET', 'factory-secret');
-    vi.stubEnv('ALLOW_FAKE_GATEWAY', '');
+    vi.stubEnv('ALLOW_FAKE_GATEWAY', flag);
     expect(() => getPaymentGateway()).toThrow(/production/i);
-    vi.stubEnv('ALLOW_FAKE_GATEWAY', 'true');
-    expect(() => getPaymentGateway()).toThrow(/production/i);
-  });
-
-  it('allows the fake gateway in production only with ALLOW_FAKE_GATEWAY=1', () => {
-    vi.stubEnv('NODE_ENV', 'production');
-    vi.stubEnv('FAKE_GATEWAY_SECRET', 'factory-secret');
-    vi.stubEnv('ALLOW_FAKE_GATEWAY', '1');
-    expect(getPaymentGateway()).toBeInstanceOf(FakeGateway);
   });
 });

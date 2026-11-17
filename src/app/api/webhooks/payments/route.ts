@@ -8,6 +8,9 @@ import { InvalidWebhookError } from '@/lib/payments/gateway';
 // Payment provider notifications. Authenticated by the provider signature (verified in
 // parseWebhook), so no Origin/content-type guard: the caller is a server, not a browser.
 export async function POST(req: Request) {
+  // The only gateway is the simulated one, which must never process anything in production,
+  // whatever ALLOW_FAKE_GATEWAY says. Answer before reading the body.
+  if (process.env.NODE_ENV === 'production') return new NextResponse('Not found', { status: 404 });
   // The signature covers the exact bytes received, so read the body as raw text.
   const rawBody = await req.text();
   const headers = Object.fromEntries(req.headers);
