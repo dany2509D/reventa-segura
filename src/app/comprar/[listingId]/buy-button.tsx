@@ -3,7 +3,16 @@
 import { useState } from 'react';
 import { errorText, postJson } from '@/lib/client/http';
 
-export default function BuyButton({ listingId }: { listingId: string }) {
+type Method = 'card' | 'yappy' | 'ach';
+
+const METHODS: { id: Method; title: string; hint: string }[] = [
+  { id: 'card', title: 'Tarjeta', hint: 'Débito o crédito. Pago inmediato.' },
+  { id: 'yappy', title: 'Yappy', hint: 'Transfieres y subes el comprobante (15 min).' },
+  { id: 'ach', title: 'ACH', hint: 'Transferencia bancaria y comprobante (15 min).' },
+];
+
+export default function BuyButton({ listingId, total }: { listingId: string; total: string }) {
+  const [method, setMethod] = useState<Method>('card');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -21,28 +30,29 @@ export default function BuyButton({ listingId }: { listingId: string }) {
     else setError(errorText(r));
   }
 
-  const buy = () =>
-    start('/api/checkout', { listingId }, (d) => (typeof d.checkoutUrl === 'string' ? d.checkoutUrl : null));
-  const buyManual = (paymentMethod: 'yappy' | 'ach') =>
-    start('/api/orders/manual', { listingId, paymentMethod }, (d) =>
-      typeof d.orderId === 'string' ? `/pago-manual/${d.orderId}` : null,
-    );
+  const pay = () =>
+    method === 'card'
+      ? start('/api/checkout', { listingId }, (d) => (typeof d.checkoutUrl === 'string' ? d.checkoutUrl : null))
+      : start('/api/orders/manual', { listingId, paymentMethod: method }, (d) =>
+          typeof d.orderId === 'string' ? `/pago-manual/${d.orderId}` : null,
+        );
 
   return (
     <div className="stack">
       {error ? <p role="alert" className="error">{error}</p> : null}
-      <button className="btn block" type="button" onClick={buy} disabled={busy}>
-        {busy ? 'Preparando el pago…' : 'Pagar de forma protegida'}
+      <fieldset className="method-picker">
+        <legend>Método de pago</legend>
+        {METHODS.map((m) => (
+          <label key={m.id} className={`method-option${method === m.id ? ' selected' : ''}`}>
+            <input type="radio" name="method" value={m.id} checked={method === m.id} onChange={() => setMethod(m.id)} />
+            <span className="method-title">{m.title}</span>
+            <span className="method-hint">{m.hint}</span>
+          </label>
+        ))}
+      </fieldset>
+      <button className="btn block" type="button" onClick={pay} disabled={busy}>
+        {busy ? 'Preparando el pago…' : method === 'card' ? `Pagar ${total}` : `Continuar con ${method === 'yappy' ? 'Yappy' : 'ACH'} · ${total}`}
       </button>
-      <p className="hint">O paga por transferencia y sube tu comprobante (15 minutos para completarlo):</p>
-      <div className="actions">
-        <button className="btn secondary" type="button" onClick={() => buyManual('yappy')} disabled={busy}>
-          Pagar con Yappy
-        </button>
-        <button className="btn secondary" type="button" onClick={() => buyManual('ach')} disabled={busy}>
-          Pagar con ACH
-        </button>
-      </div>
     </div>
   );
 }

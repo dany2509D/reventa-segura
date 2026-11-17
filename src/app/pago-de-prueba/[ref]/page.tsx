@@ -6,7 +6,7 @@ import { formatUsd } from '@/lib/format';
 import { FakeGateway } from '@/lib/payments/fake-gateway';
 import { getPaymentGateway } from '@/lib/payments';
 import { requireUser } from '../../session';
-import { simulatePaymentAction } from './actions';
+import Checkout from './checkout';
 
 export const metadata = { title: 'Pago de prueba' };
 export const dynamic = 'force-dynamic';
@@ -28,17 +28,15 @@ export default async function TestPaymentPage({ params }: { params: Promise<{ re
   if (!order || order.buyerId !== user.userId || order.state !== 'creada') notFound();
 
   return (
-    <main className="page">
+    <main className="page wide">
       <h1>Pago de prueba</h1>
       <p className="notice warning">Modo de prueba: no se cobra dinero real.</p>
-      <div className="card">
-        <p className="price price-lg">{formatUsd(order.priceCents)}</p>
-        <form action={simulatePaymentAction} className="stack">
-          <input type="hidden" name="ref" value={decodeURIComponent(ref)} />
-          <button className="btn" name="outcome" value="paid" type="submit">Simular pago exitoso</button>
-          <button className="btn danger" name="outcome" value="failed" type="submit">Simular pago rechazado</button>
-        </form>
-      </div>
+      <Checkout
+        reference={decodeURIComponent(ref)}
+        totalLabel={formatUsd(order.priceCents)}
+        ticketLabel={formatUsd(order.priceCents - order.feeCents)}
+        feeLabel={formatUsd(order.feeCents)}
+      />
     </main>
   );
 }

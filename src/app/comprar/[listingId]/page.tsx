@@ -84,7 +84,7 @@ export default async function BuyPage({ params }: { params: Promise<{ listingId:
           ) : (
             <div className="sticky-cta">
               <TestModeNotice short />
-              <BuyButton listingId={listingId} />
+              <BuyButton listingId={listingId} total={formatUsd(offer.askCents)} />
             </div>
           )}
         </div>
