@@ -1,4 +1,5 @@
 import { headers } from 'next/headers';
+import Script from 'next/script';
 import { THEME_BOOTSTRAP_SCRIPT } from '@/lib/ui/theme';
 
 /**
@@ -10,5 +11,12 @@ import { THEME_BOOTSTRAP_SCRIPT } from '@/lib/ui/theme';
  */
 export default async function ThemeScript() {
   const nonce = (await headers()).get('x-nonce') ?? undefined;
-  return <script nonce={nonce} dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP_SCRIPT }} />;
+  return (
+    <Script
+      id="theme-bootstrap"
+      strategy="beforeInteractive"
+      nonce={nonce}
+      dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP_SCRIPT }}
+    />
+  );
 }
