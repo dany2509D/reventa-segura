@@ -1,7 +1,7 @@
 'use server';
 
 import { eq } from 'drizzle-orm';
-import { redirect } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { getDb } from '@/lib/db/client';
 import { orders } from '@/lib/db/schema';
 import { handlePaymentWebhook } from '@/lib/orders/service';
@@ -12,6 +12,7 @@ import { requireUser } from '../../session';
 // Plays the provider's part in test mode: a correctly signed webhook goes through the same
 // handler a real provider would call. Only the buyer of that very order, only with the fake gateway.
 export async function simulatePaymentAction(fd: FormData) {
+  if (process.env.NODE_ENV === 'production') notFound(); // sandbox: unreachable in production
   const user = await requireUser('/mis-ordenes');
   const gw = getPaymentGateway();
   if (!(gw instanceof FakeGateway)) redirect('/');

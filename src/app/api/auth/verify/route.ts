@@ -16,7 +16,8 @@ const legacyBody = z.object({
 });
 const firebaseBody = z.object({ idToken: z.string().min(20).max(4096) });
 
-const fakeSmsEnabled = () => process.env.ALLOW_FAKE_SMS === 'true';
+// The fake mode only ever works outside production, even if ALLOW_FAKE_SMS=true is set there.
+const fakeSmsEnabled = () => process.env.ALLOW_FAKE_SMS === 'true' && process.env.NODE_ENV !== 'production';
 
 // Verifies a login code.
 //  - ALLOW_FAKE_SMS=true: legacy flow { phone, code }. Each code allows 5 attempts (verifyOtp).
@@ -71,10 +72,9 @@ export async function POST(req: Request) {
 
     // The token travels only in the httpOnly cookie, never in the JSON body.
     const res = NextResponse.json({ ok: true, role, mfaRequired: role === 'admin' });
-    const env = process.env.NODE_ENV;
     res.cookies.set('session', sessionToken, {
       httpOnly: true,
-      secure: env !== 'development' && env !== 'test',
+      secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       path: '/',
       maxAge: Math.floor(sessionTtlMs(role) / 1000),

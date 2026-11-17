@@ -10,6 +10,13 @@ import { SECURITY_HEADERS, buildCsp, newNonce } from '@/lib/security/headers';
  * server action checks the session itself.
  */
 export function proxy(request: NextRequest) {
+  // Sandbox routes do not exist in production, whatever env flags are set.
+  if (process.env.NODE_ENV === 'production') {
+    const p = request.nextUrl.pathname;
+    if (p === '/pago-de-prueba' || p.startsWith('/pago-de-prueba/')) {
+      return new NextResponse(null, { status: 404, headers: { 'cache-control': 'no-store' } });
+    }
+  }
   const nonce = newNonce();
   const csp = buildCsp({ nonce, dev: process.env.NODE_ENV === 'development' });
 

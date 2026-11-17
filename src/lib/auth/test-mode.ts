@@ -24,7 +24,8 @@ const g = globalThis as unknown as Globals;
 
 export function isLoginCodeTestMode(env: Env = process.env): boolean {
   if (env.TEST_MODE_SHOW_LOGIN_CODE !== '1') return false;
-  return env.NODE_ENV !== 'production' || env.ALLOW_TEST_LOGIN_CODES === '1';
+  // Never in production, whatever flags are set: showing login codes on screen is account takeover.
+  return env.NODE_ENV !== 'production';
 }
 
 // Process-global (survives dev hot reloads and is shared by every route bundle in the process).

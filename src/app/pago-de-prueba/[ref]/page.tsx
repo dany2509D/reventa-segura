@@ -14,6 +14,7 @@ export const dynamic = 'force-dynamic';
 // Test-mode checkout (no real money): only exists while the fake gateway is the configured one
 // (never in production unless ALLOW_FAKE_GATEWAY=1). A real gateway redirects to its own page.
 export default async function TestPaymentPage({ params }: { params: Promise<{ ref: string }> }) {
+  if (process.env.NODE_ENV === 'production') notFound(); // sandbox: unreachable in production
   const { ref } = await params;
   let isFake = false;
   try {

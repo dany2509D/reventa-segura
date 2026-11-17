@@ -25,7 +25,7 @@ describe('isLoginCodeTestMode', () => {
     ['1', undefined, 'test', true],
     ['1', undefined, undefined, true],
     ['1', undefined, 'production', false],
-    ['1', '1', 'production', true],
+    ['1', '1', 'production', false], // production never qualifies, whatever the flags
     [undefined, '1', 'production', false],
     [undefined, '1', 'development', false],
     [undefined, undefined, 'development', false],
@@ -118,7 +118,6 @@ describe('getSmsSender', () => {
     ['test', undefined, undefined, ConsoleSmsSender],
     ['development', '1', undefined, CapturingSmsSender],
     ['test', '1', undefined, CapturingSmsSender],
-    ['production', '1', '1', CapturingSmsSender],
   ])('NODE_ENV=%s TEST_MODE=%j ALLOW=%j → %o', (nodeEnv, flag, allow, Expected) => {
     const sender = getSmsSender({ NODE_ENV: nodeEnv, TEST_MODE_SHOW_LOGIN_CODE: flag, ALLOW_TEST_LOGIN_CODES: allow });
     expect(sender).toBeInstanceOf(Expected);
@@ -128,7 +127,8 @@ describe('getSmsSender', () => {
     [undefined, undefined],
     ['1', undefined],
     [undefined, '1'],
-  ])('production without both flags (TEST_MODE=%j ALLOW=%j) still has no SMS provider → SmsConfigError', (flag, allow) => {
+    ['1', '1'],
+  ])('production with these flags (TEST_MODE=%j ALLOW=%j) still has no SMS provider → SmsConfigError', (flag, allow) => {
     expect(() => getSmsSender({ NODE_ENV: 'production', TEST_MODE_SHOW_LOGIN_CODE: flag, ALLOW_TEST_LOGIN_CODES: allow })).toThrow(SmsConfigError);
   });
 

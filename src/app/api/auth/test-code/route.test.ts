@@ -139,10 +139,10 @@ describe('POST /api/auth/test-code — test mode ON', () => {
     expect((await ask('+50769999999', { 'x-forwarded-for': '198.51.100.9' })).status).toBe(404); // other client
   });
 
-  it('production with BOTH flags works (pre-launch only — never on a public deployment)', async () => {
+  it('production with BOTH flags is still a 404 (unreachable in production)', async () => {
     testMode(true, 'production', '1');
     await requestOtp(db, PHONE, new CapturingSmsSender());
-    expect((await ask(PHONE)).status).toBe(200);
+    await expectNotFound(await ask(PHONE));
   });
 
   it('logs neither phones nor codes', async () => {
@@ -328,11 +328,11 @@ describe('POST /api/auth/test-code — admin phone with the local admin key', ()
       expect(await res.json()).toEqual({ code: peekCapturedLoginCode(PHONE) });
     });
 
-    it('in production with BOTH flags a non-admin still works, while the admin (even with the key) does not', async () => {
+    it('in production with BOTH flags neither a non-admin nor the admin (even with the key) gets a code', async () => {
       adminKeyEnv({ nodeEnv: 'production', allow: '1' });
       await requestOtp(db, PHONE, new CapturingSmsSender());
       await adminWithCode();
-      expect((await ask(PHONE, withKey(KEY))).status).toBe(200);
+      await expectNotFound(await ask(PHONE, withKey(KEY)));
       await expectNotFound(await ask(ADMIN, withKey(KEY)));
     });
   });
