@@ -200,7 +200,7 @@ const MATRIX: Record<string, Row> = {
     why: 'uploads the caller’s own identity documents; never someone else’s',
     owner: (f) => f.stranger,
     expect: { anon: [401], owner: [200] },
-    call: (_f, { cookie }) => upload('POST /api/identity', '/api/identity', { doc: blob(png, 'image/png'), selfie: blob(jpg, 'image/jpeg') }, cookie, {}),
+    call: (_f, { cookie }) => upload('POST /api/identity', '/api/identity', { consent: 'yes', doc: blob(png, 'image/png'), selfie: blob(jpg, 'image/jpeg') }, cookie, {}),
   },
   'DELETE /api/listings/[id]': {
     access: 'owner',

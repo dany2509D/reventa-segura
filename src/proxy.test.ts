@@ -6,6 +6,13 @@ import { buildCsp, PRIVATE_FILE_CSP, SECURITY_HEADERS } from './lib/security/hea
 
 afterEach(() => vi.unstubAllEnvs());
 
+const FIREBASE_CONNECT = [
+  'https://identitytoolkit.googleapis.com',
+  'https://securetoken.googleapis.com',
+  'https://www.google.com',
+  'https://www.gstatic.com',
+];
+
 /** Directive name → its sources, from a CSP header value. */
 function parseCsp(value: string): Map<string, string[]> {
   const map = new Map<string, string[]>();
@@ -25,7 +32,8 @@ function expectStrictCsp(value: string | null, nonce?: string) {
   expect(csp.get('base-uri')).toEqual(["'self'"]);
   expect(csp.get('form-action')).toEqual(["'self'"]);
   expect(csp.get('img-src')).toEqual(["'self'", 'data:', 'blob:']);
-  expect(csp.get('connect-src')).toEqual(["'self'"]);
+  // Same origin plus Firebase Phone Auth (login by SMS); analytics hosts only when ANALYTICS_GA4_ID is set.
+  expect(csp.get('connect-src')).toEqual(["'self'", ...FIREBASE_CONNECT]);
   expect(csp.get('worker-src')).toEqual(["'self'"]);
   const script = csp.get('script-src')!;
   expect(script).toContain("'self'");
@@ -114,7 +122,37 @@ describe('next.config headers for private files', () => {
   });
 });
 
+describe('proxy: one address per page (301)', () => {
+  it('redirects plain HTTP and the www twin in production, and nothing else', () => {
+    vi.stubEnv('NODE_ENV', 'production');
+    vi.stubEnv('SITE_URL', 'https://reventa.example');
+    const http = proxy(new NextRequest('http://reventa.example/eventos/1?a=b', { headers: { host: 'reventa.example', 'x-forwarded-proto': 'http' } }));
+    expect(http.status).toBe(301);
+    expect(http.headers.get('location')).toBe('https://reventa.example/eventos/1?a=b');
+    const www = proxy(new NextRequest('https://www.reventa.example/privacidad', { headers: { host: 'www.reventa.example', 'x-forwarded-proto': 'https' } }));
+    expect(www.status).toBe(301);
+    expect(www.headers.get('location')).toBe('https://reventa.example/privacidad');
+    const ok = proxy(new NextRequest('https://reventa.example/', { headers: { host: 'reventa.example', 'x-forwarded-proto': 'https' } }));
+    expect(ok.status).toBe(200);
+  });
+
+  it('never redirects outside production (local development over HTTP)', () => {
+    vi.stubEnv('SITE_URL', 'https://reventa.example');
+    const res = proxy(new NextRequest('http://reventa.example/', { headers: { host: 'reventa.example', 'x-forwarded-proto': 'http' } }));
+    expect(res.status).toBe(200);
+  });
+});
+
 describe('buildCsp', () => {
+  it('lets Google Analytics report only when analytics is on', () => {
+    const off = parseCsp(buildCsp({ analytics: false }));
+    expect(off.get('connect-src')!.some((s) => s.includes('google-analytics'))).toBe(false);
+    expect(off.get('img-src')).toEqual(["'self'", 'data:', 'blob:']);
+    const on = parseCsp(buildCsp({ analytics: true }));
+    expect(on.get('connect-src')).toEqual(expect.arrayContaining(['https://*.google-analytics.com', 'https://*.googletagmanager.com']));
+    expect(on.get('img-src')).toEqual(expect.arrayContaining(['https://*.google-analytics.com']));
+    expect(on.get('script-src')).toEqual(["'self'"]); // the tag is trusted through the nonce, never by host
+  });
   it('without a nonce allows only same-origin scripts', () => {
     const script = parseCsp(buildCsp({})).get('script-src');
     expect(script).toEqual(["'self'"]);

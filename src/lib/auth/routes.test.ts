@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { makeTestDb } from '@/lib/db/test-db';
+import { otpCodes } from '@/lib/db/schema';
 import type { Db } from '@/lib/db/types';
 import { requestOtp, type SmsSender } from './otp';
 import { getSmsSender } from './sms';
@@ -55,6 +56,18 @@ describe('auth routes', () => {
     }
     expect(statuses.slice(0, 5)).toEqual([200, 200, 200, 200, 200]);
     expect(statuses[5]).toBe(429);
+  });
+
+  it('a filled honeypot field looks like a success but sends no code and spends no per-phone budget', async () => {
+    const statuses: number[] = [];
+    for (let i = 0; i < 8; i++) {
+      const res = await requestPost(req('http://localhost/api/auth/request', { phone: PHONE, website: 'https://spam.example' }));
+      statuses.push(res.status);
+      expect(await res.json()).toEqual({ ok: true });
+    }
+    // Never a 429 (the budget is 5 per hour per phone): none of these counted.
+    expect(statuses).toEqual(Array(8).fill(200));
+    expect(await db.select().from(otpCodes)).toHaveLength(0);
   });
 
   it('sets a hardened cookie and keeps the token out of the body', async () => {

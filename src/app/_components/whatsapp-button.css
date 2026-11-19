@@ -1,0 +1,45 @@
+/* Floating WhatsApp button. The green is WhatsApp's own; the text is ink-green for >= 7:1 contrast. */
+.wa-fab {
+  position: fixed;
+  z-index: 45;
+  right: max(var(--space-4), env(safe-area-inset-right));
+  bottom: max(var(--space-4), env(safe-area-inset-bottom));
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 52px;
+  padding: 0 var(--space-5) 0 var(--space-4);
+  border-radius: var(--radius-pill);
+  background: #25d366;
+  color: #052e16;
+  font-weight: 700;
+  font-size: 0.9375rem;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  box-shadow: var(--shadow-lg);
+  transition: transform var(--ease), background-color var(--ease);
+}
+.wa-fab:hover { background: #20bd5a; }
+.wa-fab:active { transform: scale(0.96); }
+.wa-fab:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+.wa-icon { width: 24px; height: 24px; fill: currentColor; flex: none; }
+
+/* Phones: an icon-only round button standing above the floating tab bar. */
+@media (max-width: 767.98px) {
+  .wa-fab {
+    bottom: calc(var(--tabbar-space) + var(--space-3));
+    width: 52px;
+    padding: 0;
+    justify-content: center;
+  }
+  .wa-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+@media print { .wa-fab { display: none; } }

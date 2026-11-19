@@ -58,7 +58,7 @@ export default async function AppPortals({ data }: { data: Promise<HomeData> }) 
           </div>
         </a>
 
-        <a className="portal-card is-accent reveal reveal-2" href="/vender">
+        <a className="portal-card is-accent reveal reveal-2" href="/vender" data-track="sell_cta_click" data-track-label="home-portal">
           <div>
             <div className="portal-card-top">
               <span className="portal-icon" aria-hidden="true">

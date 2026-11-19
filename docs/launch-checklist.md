@@ -27,9 +27,11 @@ Responsables: [Abogado] · [Negocio] fundador/operación · [Dev] desarrollo · 
       `app_config.identityRetentionDays` (hoy 365 días, valor provisional). El cron de mantenimiento borra el
       documento y la selfie al vencer el plazo. Fijar también el plazo del ledger y la auditoría (propuesta:
       ≥ 5 años, RNF-06); ambas tablas son solo-agregar y la base rechaza UPDATE, DELETE y TRUNCATE.
-- [ ] [Abogado] [Negocio] **Términos y condiciones y política de privacidad publicados** en la app (aún no existen páginas
-      para ellos) y aceptados al registrarse; incluir el tope de precio (`priceCapBps`, hoy 150 % del valor
-      nominal), la comisión, la ventana de disputa de 12 h y el bloqueo por disputas perdidas.
+- [ ] [Abogado] [Negocio] **Términos y condiciones y política de privacidad: revisión legal.** Ya existen como texto base en
+      `/terminos`, `/privacidad`, `/cookies` y `/reembolsos` (2026-11-19), con el tope de precio, la comisión, la ventana de
+      disputa de 12 h y el bloqueo por disputas perdidas tomados del código. Falta que el abogado los apruebe y complete los
+      marcadores `[COMPLETAR_…]`; la lista y el resto del trabajo externo están en `docs/seo-y-lanzamiento.md`. La casilla de
+      aceptación del ingreso aún no se registra en la base de datos (ver sección 5 de esa guía).
 - [ ] [Negocio] **Verificación con la pasarela elegida** (DEL-12): ¿permite dividir pagos (*split*), retener fondos o
       programar *payouts*? ¿Reembolso total por API con clave de idempotencia? ¿Plazo máximo para reembolsar?
       ¿Solo USD? ¿Webhooks firmados y con reintentos? Guardar las respuestas por escrito.

@@ -1,0 +1,66 @@
+/* Footer additions: legal column, contact channels, social links, business line.
+   The base footer rules live in globals.css; colours come from its tokens. */
+
+/* A button that looks like the footer's links (the cookie preferences opener). Same underline-on-hover as `.footer-nav a`. */
+.footer-nav button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--on-scrim);
+  font: inherit;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+}
+.footer-nav button::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 9px;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--dur-short) var(--ease-out);
+}
+.footer-nav button:hover::after { transform: scaleX(1); }
+.footer-nav button:focus-visible { outline: 2px solid var(--art-sky); outline-offset: 3px; border-radius: var(--radius-xs); }
+
+/* Four columns now (explore, sell, account, legal): the brand block sits above them until there is room beside. */
+@media (min-width: 768px) {
+  .footer-top { grid-template-columns: minmax(0, 1fr); }
+  .footer-nav { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+@media (min-width: 1100px) {
+  .footer-top { grid-template-columns: minmax(0, 4fr) minmax(0, 7fr); }
+}
+
+.footer-contact,
+.footer-social { list-style: none; margin: var(--space-4) 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-5); }
+.footer-contact a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--on-scrim);
+  font-weight: 500;
+  text-underline-offset: 4px;
+}
+.footer-social { gap: var(--space-2); margin-top: var(--space-2); }
+.footer-social a {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--scrim-border);
+  border-radius: var(--radius-pill);
+  color: var(--on-scrim);
+  transition: background-color var(--ease), border-color var(--ease);
+}
+.footer-social a:hover { background: var(--scrim-2); border-color: var(--on-scrim-muted); }
+.footer-social .icon { width: 20px; height: 20px; }
+.footer-business { max-width: 40rem; }

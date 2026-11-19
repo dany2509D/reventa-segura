@@ -57,6 +57,8 @@ for (const path of pages) {
   const scripts = html.match(/<script\b[^>]*>/gi) ?? [];
   if (res.status === 200 && scripts.length === 0) fail(`${path}: no <script> tags found`);
   for (const tag of scripts) {
+    // JSON-LD blocks are data, never executed, so the CSP does not apply to them (no nonce needed).
+    if (/\btype="application\/ld\+json"/i.test(tag)) continue;
     checkedScripts++;
     if (!tag.includes(`nonce="${nonce}"`)) fail(`${path}: script without the response nonce: ${tag.slice(0, 120)}`);
   }

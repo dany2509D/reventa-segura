@@ -1,0 +1,42 @@
+/* Legal pages (privacy, terms, cookies, refunds): long text made easy to read.
+   Same tokens as the rest of the site; line length capped near 70 characters. */
+
+.legal { max-width: calc(820px + 2 * var(--gutter)); }
+.legal-meta { margin: var(--space-3) 0 0; color: var(--text-muted); font-family: var(--font-mono); font-size: var(--fs-caption); letter-spacing: 0.02em; }
+
+.legal-toc {
+  margin: 0 0 var(--space-10);
+  padding: var(--space-5) var(--space-6);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+.legal-toc ol { margin: 0; padding-left: var(--space-6); display: grid; gap: var(--space-1); }
+.legal-toc a { display: inline-block; padding: var(--space-1) 0; color: var(--link); text-underline-offset: 3px; }
+
+.legal-body { display: grid; gap: var(--space-10); }
+.legal-section { scroll-margin-top: calc(var(--header-h) + var(--space-6)); max-width: 70ch; }
+.legal-section h2 { margin: 0 0 var(--space-4); font-size: var(--fs-card-title); letter-spacing: var(--tracking-title); }
+.legal-section h3 { margin: var(--space-6) 0 var(--space-2); font-size: 1.0625rem; letter-spacing: -0.02em; }
+.legal-section p,
+.legal-section li { line-height: 1.7; }
+.legal-section p { margin: 0 0 var(--space-4); }
+.legal-section ul,
+.legal-section ol { margin: 0 0 var(--space-4); padding-left: var(--space-6); display: grid; gap: var(--space-2); }
+.legal-section a { color: var(--link); text-underline-offset: 3px; }
+.legal-section strong { font-weight: 650; }
+/* An unfilled fact: visible on purpose, so nobody publishes it by mistake. */
+.legal-section mark,
+.legal-meta mark { padding: 0 4px; border-radius: var(--radius-xs); background: var(--warning-soft); color: var(--warning); font-weight: 600; }
+
+.legal-table-wrap { margin: 0 0 var(--space-4); overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius-md); }
+.legal-table { width: 100%; min-width: 560px; border-collapse: collapse; font-size: var(--fs-small); }
+.legal-table th,
+.legal-table td { padding: var(--space-3) var(--space-4); text-align: left; vertical-align: top; border-bottom: 1px solid var(--border); line-height: 1.5; }
+.legal-table th { background: var(--surface-2); font-weight: 650; }
+.legal-table tr:last-child td { border-bottom: 0; }
+.legal-table code { font-family: var(--font-mono); font-size: 0.8125rem; }
+
+.legal-actions { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-4); }
+.legal-section .btn { color: var(--brand-contrast); text-decoration: none; }
+.legal-section .btn.outline { color: var(--text); }

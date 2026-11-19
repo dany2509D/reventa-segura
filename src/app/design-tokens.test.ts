@@ -284,9 +284,21 @@ describe('CSP-ready markup and styles', () => {
   });
 
   it('gives the only inline script (the theme bootstrap) the request nonce', () => {
-    const withInlineScript = tsx.filter((f) => /<script[\s>]/.test(readFileSync(f, 'utf8')));
+    // JSON-LD blocks (<script type="application/ld+json">) are data: the browser never runs them, so the
+    // CSP does not apply and they need no nonce. Any OTHER inline script must be the theme bootstrap.
+    const withInlineScript = tsx.filter((f) => /<script(?![^>]*application\/ld\+json)[\s>]/.test(readFileSync(f, 'utf8')));
     expect(withInlineScript.map((f) => f.replace(/\\/g, '/').split('/src/app/')[1])).toEqual(['_components/theme-script.tsx']);
     expect(readFileSync(withInlineScript[0], 'utf8')).toMatch(/<script nonce=\{nonce\}/);
+  });
+
+  it('only ever emits JSON-LD as a data block filled by serializeJsonLd (which escapes "<")', () => {
+    const emitters = tsx.filter((f) => /application\/ld\+json/.test(readFileSync(f, 'utf8')));
+    expect(emitters.length).toBeGreaterThan(0);
+    for (const f of emitters) {
+      const blocks = readFileSync(f, 'utf8').match(/<script[^>]*application\/ld\+json[\s\S]*?\/>/g) ?? [];
+      expect(blocks.length).toBeGreaterThan(0);
+      for (const block of blocks) expect(block, f).toMatch(/serializeJsonLd|siteJsonLd/);
+    }
   });
 
   it('loads self-hosted fonts only: Geist Sans from the geist package and Archivo Black from a local file', () => {

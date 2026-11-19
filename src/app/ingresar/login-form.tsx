@@ -5,6 +5,7 @@ import type { ConfirmationResult } from 'firebase/auth';
 import { errorText, postJson } from '@/lib/client/http';
 import { FAKE_SMS, confirmPhoneOtp, sendPhoneOtp } from '@/lib/firebase/phone-auth';
 import { fetchTestLoginCode } from '@/lib/client/test-login-code';
+import '../_pages/consent.css';
 
 // Login-code test mode only (no SMS provider yet): the server reveals the code to show here.
 export function TestCodeNotice({ code, onUse }: { code: string; onUse: () => void }) {
@@ -47,6 +48,10 @@ export default function LoginForm({ next }: { next: string }) {
   const [testCode, setTestCode] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  // Explicit acceptance of the terms and the privacy policy before a code is requested.
+  const [accepted, setAccepted] = useState(false);
+  // Honeypot: hidden from people; a bot that fills every input fills this one too.
+  const [trap, setTrap] = useState('');
 
   // Web OTP: on phones that support it (Chrome on Android), the SMS code is offered to the page
   // automatically; the person still presses "Entrar". The request is cancelled when the step changes.
@@ -68,6 +73,11 @@ export default function LoginForm({ next }: { next: string }) {
 
   async function sendFirebaseCode(e: FormEvent) {
     e.preventDefault();
+    if (trap) {
+      // A bot: look like success, send nothing.
+      setStep('code');
+      return;
+    }
     setBusy(true);
     setError(null);
     const e164 = toE164(phone);
@@ -112,7 +122,7 @@ export default function LoginForm({ next }: { next: string }) {
     setBusy(true);
     setError(null);
     setTestCode(null);
-    const r = await postJson('/api/auth/request', { phone });
+    const r = await postJson('/api/auth/request', { phone, website: trap });
     setBusy(false);
     if (r.ok) {
       setStep('code');
@@ -156,8 +166,28 @@ export default function LoginForm({ next }: { next: string }) {
           />
         </div>
       </label>
+      <div className="hp-field" aria-hidden="true">
+        <label>
+          Sitio web
+          <input type="text" name="website" tabIndex={-1} autoComplete="off" value={trap} onChange={(e) => setTrap(e.target.value)} />
+        </label>
+      </div>
+      <label className="consent">
+        <input type="checkbox" checked={accepted} onChange={(e) => setAccepted(e.target.checked)} required />
+        <span>
+          Acepto los{' '}
+          <a href="/terminos" target="_blank" rel="noopener noreferrer">
+            Términos y condiciones
+          </a>{' '}
+          y la{' '}
+          <a href="/privacidad" target="_blank" rel="noopener noreferrer">
+            Política de privacidad
+          </a>
+          .
+        </span>
+      </label>
       {error ? <p role="alert" className="error">{error}</p> : null}
-      <button className="btn" type="submit" disabled={busy || phone.trim().length < 8}>
+      <button className="btn" type="submit" disabled={busy || phone.trim().length < 8 || !accepted} data-track="login_start">
         {busy ? 'Enviando…' : 'Enviar código'}
       </button>
     </form>

@@ -9,7 +9,9 @@ import { alert, log } from '@/lib/observability/log';
 import { getClientIp } from '@/lib/security/client-ip';
 import { LIMITS, limitOr429 } from '@/lib/security/limits';
 
-const body = z.object({ phone: z.string().min(1).max(32) });
+// `website` is a honeypot: a field no person ever sees or fills (it is hidden in the login form), so a
+// value in it means a script filled in every input it found.
+const body = z.object({ phone: z.string().min(1).max(32), website: z.string().max(500).optional() });
 
 const UNAVAILABLE = 'Servicio no disponible por el momento.';
 
@@ -25,6 +27,8 @@ export async function POST(req: Request) {
     if (!parsed.success) {
       return NextResponse.json({ error: 'Teléfono inválido' }, { status: 400 });
     }
+    // A bot gets the same answer as a person, but no code is sent and no SMS or per-phone budget is spent.
+    if (parsed.data.website) return NextResponse.json({ ok: true });
     await requestOtp(getDb(), parsed.data.phone, getSmsSender());
     return NextResponse.json({ ok: true });
   } catch (e) {

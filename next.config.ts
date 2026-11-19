@@ -15,6 +15,12 @@ const privateFileHeaders = [
   { key: 'Referrer-Policy', value: 'no-referrer' },
 ];
 
+// Brand files in public/ are not fingerprinted (their URLs never change), so they cannot be cached
+// "forever" like the hashed build assets: one day in browsers and a week of stale-while-revalidate,
+// which is enough to make repeat visits free and still lets a new logo reach everyone within a day.
+const publicAssetCache = [{ key: 'Cache-Control', value: 'public, max-age=86400, stale-while-revalidate=604800' }];
+const PUBLIC_ASSET_SOURCES = ['/icons/:path*', '/apple-touch-icon.png', '/favicon.svg', '/og-default.png'];
+
 const nextConfig: NextConfig = {
   // Development only: lets a phone on the same Wi-Fi (192.168.x.x) load the dev server's assets
   // for manual testing. Ignored by `next build` / `next start`.
@@ -37,6 +43,8 @@ const nextConfig: NextConfig = {
         source,
         headers: assetHeaders,
       })),
+      // Cache policy for the unhashed files in public/ (the build assets already get immutable caching from Next).
+      ...[...PUBLIC_ASSET_SOURCES, '/favicon.ico'].map((source) => ({ source, headers: publicAssetCache })),
       { source: '/api/files/:token', headers: privateFileHeaders },
       { source: '/api/orders/:id/ticket', headers: privateFileHeaders },
       { source: '/api/listings/:id/download', headers: privateFileHeaders },

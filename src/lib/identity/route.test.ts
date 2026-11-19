@@ -28,7 +28,8 @@ function upload(
   headers: Record<string, string> = {},
 ): Request {
   const fd = new FormData();
-  for (const [k, v] of Object.entries(fields)) {
+  // The person's explicit consent travels with every submission (a test can override or drop it).
+  for (const [k, v] of Object.entries({ consent: 'yes', ...fields })) {
     if (typeof v === 'string') fd.append(k, v);
     else fd.append(k, v, `${k}.bin`);
   }
@@ -114,6 +115,18 @@ describe('POST /api/identity', () => {
     noOrigin.headers.delete('origin');
     expect((await POST(noOrigin)).status).toBe(403);
     expect((await userRow()).identityStatus).toBe('none');
+  });
+
+  it('returns 400 and stores nothing when the person did not tick the consent box', async () => {
+    const files = { doc: blob(docPng, 'image/png'), selfie: blob(selfieJpg, 'image/jpeg') };
+    for (const consent of ['', 'no', 'on']) {
+      const res = await POST(upload({ ...files, consent }));
+      expect(res.status).toBe(400);
+      expect((await res.json()).error).toMatch(/autorizar/);
+    }
+    const row = await userRow();
+    expect(row.identityStatus).toBe('none');
+    expect(row.idDocPath).toBeNull();
   });
 
   it('returns 400 when a file is missing', async () => {
