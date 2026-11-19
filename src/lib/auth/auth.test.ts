@@ -85,6 +85,8 @@ describe('OTP', () => {
     const [u] = await db.select().from(users).where(eq(users.phone, PHONE));
     expect(u.role).toBe('user');
     expect(u.identityStatus).toBe('none');
+    // A fake-SMS login proves the phone too; without this /vender bounced back to /ingresar.
+    expect(u.phoneVerifiedAt).toEqual(now);
     expect(await getSession(db, r!.sessionToken, now)).toEqual({
       userId: u.id,
       role: 'user',

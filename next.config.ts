@@ -27,6 +27,10 @@ const nextConfig: NextConfig = {
     '/api/listings': ['./src/lib/tickets/qr-worker.mjs', './node_modules/jsqr/**/*'],
   },
   poweredByHeader: false,
+  images: {
+    qualities: [75, 90],
+    formats: ['image/avif', 'image/webp'],
+  },
   async headers() {
     return [
       ...['/api/:path*', '/_next/static/:path*', '/_next/image', '/favicon.ico'].map((source) => ({

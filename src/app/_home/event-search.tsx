@@ -1,29 +1,34 @@
 'use client';
 
 import { useEffect, useId, useMemo, useRef, useState, type FocusEvent, type KeyboardEvent } from 'react';
+import { eventCoverImage } from '@/lib/ui/event-cover';
 import { motionAllowed } from '@/lib/ui/motion';
 import { moveActive, searchEvents } from '@/lib/ui/search';
 import EventPoster from '../_components/event-poster';
-import { IconArrowDown, IconClose, IconSearch } from '../_components/icons';
+import { IconArrowDown, IconArrowRight, IconClose, IconSearch } from '../_components/icons';
 import { useSearch } from './search-context';
 import { eventCountLabel, type EventView } from './view-model';
 
 const SUGGESTION_LIMIT = 5;
-/** The dropdown filters on every keystroke (in-memory, instant); committing the query to the
- *  agenda below and announcing the count to screen readers is debounced. */
 const COMMIT_DELAY_MS = 180;
 
 /**
- * Search box of the hero: an ARIA combobox over the events already on the page (real data only,
- * nothing fetched, nothing invented).
- *  - Focus shows the available events; typing filters them by name or venue, accents ignored.
- *  - ↓/↑ move through the options, Enter opens the active one, Esc closes (then clears).
- *  - Enter without an active option jumps to the agenda, filtered by the query.
- *  - "/" focuses the box from anywhere on the page.
+ * Search box for events.
+ * - `mode="navigate"` (on Inicio `/`): picking a result opens its event page; pressing Enter or
+ *   clicking "Ver todos" opens `/eventos?q=...` so the full directory lives on its own route.
+ * - `mode="filter"` (on `/eventos`): filters the event catalog in place as you type.
  */
-export default function EventSearch({ events }: { events: EventView[] }) {
+export default function EventSearch({
+  events,
+  mode = 'filter',
+  initialQuery = '',
+}: {
+  events: EventView[];
+  mode?: 'navigate' | 'filter';
+  initialQuery?: string;
+}) {
   const { setQuery } = useSearch();
-  const [text, setText] = useState('');
+  const [text, setText] = useState(initialQuery);
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(-1);
   const [announcement, setAnnouncement] = useState('');
@@ -41,12 +46,13 @@ export default function EventSearch({ events }: { events: EventView[] }) {
   const showPanel = open && (events.length > 0 || query !== '');
 
   useEffect(() => {
+    if (mode !== 'filter') return;
     const timer = window.setTimeout(() => {
       setQuery(query);
       setAnnouncement(query === '' ? '' : matchCount === 0 ? `Sin resultados para ${query}` : `${eventCountLabel(matchCount)} para ${query}`);
     }, COMMIT_DELAY_MS);
     return () => window.clearTimeout(timer);
-  }, [query, matchCount, setQuery]);
+  }, [query, matchCount, mode, setQuery]);
 
   useEffect(() => {
     const onKeyDown = (e: globalThis.KeyboardEvent) => {
@@ -76,10 +82,14 @@ export default function EventSearch({ events }: { events: EventView[] }) {
     inputRef.current?.focus();
   }
 
-  /** Jump to the agenda (already filtered by the query) and move focus to its heading. */
-  function showInAgenda(nextQuery: string) {
-    setQuery(nextQuery);
+  function submitQuery(nextQuery: string) {
     close();
+    if (mode === 'navigate') {
+      const dest = nextQuery ? `/eventos?q=${encodeURIComponent(nextQuery)}` : '/eventos';
+      window.location.assign(dest);
+      return;
+    }
+    setQuery(nextQuery);
     const section = document.getElementById('eventos');
     if (!section) return;
     section.scrollIntoView({ behavior: motionAllowed(window) ? 'smooth' : 'auto', block: 'start' });
@@ -94,7 +104,7 @@ export default function EventSearch({ events }: { events: EventView[] }) {
     } else if (e.key === 'Enter') {
       e.preventDefault();
       if (showPanel && active >= 0) document.getElementById(optionId(active))?.click();
-      else if (events.length > 0) showInAgenda(query);
+      else if (events.length > 0) submitQuery(query);
     } else if (e.key === 'Escape') {
       if (open) {
         e.preventDefault();
@@ -174,7 +184,13 @@ export default function EventSearch({ events }: { events: EventView[] }) {
                       onMouseEnter={() => setActive(i)}
                     >
                       <span className="search-option-art">
-                        <EventPoster seed={e.id} title={e.name} size="thumb" />
+                        <EventPoster
+                          seed={e.id}
+                          title={e.name}
+                          image={eventCoverImage(e.id, e.name, e.venue)}
+                          size="thumb"
+                          sizes="48px"
+                        />
                       </span>
                       <span className="search-option-main">
                         <span className="search-option-name">{e.name}</span>
@@ -188,9 +204,17 @@ export default function EventSearch({ events }: { events: EventView[] }) {
                 ))}
               </ul>
               {query !== '' || matchCount > options.length ? (
-                <button type="button" className="search-all" onClick={() => showInAgenda(query)}>
-                  {query === '' ? `Ver los ${matchCount} eventos` : matchCount === 1 ? 'Ver en la agenda' : `Ver los ${matchCount} en la agenda`}
-                  <IconArrowDown />
+                <button type="button" className="search-all" onClick={() => submitQuery(query)}>
+                  {mode === 'navigate'
+                    ? query === ''
+                      ? `Ver cartelera completa (${matchCount})`
+                      : `Ver ${matchCount} en Eventos`
+                    : query === ''
+                      ? `Ver los ${matchCount} eventos`
+                      : matchCount === 1
+                        ? 'Ver en la lista'
+                        : `Ver los ${matchCount} resultados`}
+                  {mode === 'navigate' ? <IconArrowRight /> : <IconArrowDown />}
                 </button>
               ) : null}
             </>
@@ -207,7 +231,7 @@ export default function EventSearch({ events }: { events: EventView[] }) {
                   className="btn sm secondary"
                   onClick={() => {
                     setText('');
-                    showInAgenda('');
+                    submitQuery('');
                   }}
                 >
                   Ver todos los eventos

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition, type ReactNode } from 'react';
+import { useRef, useState, useTransition, type KeyboardEvent, type ReactNode } from 'react';
 import { simulatePaymentAction } from './actions';
 
 type Method = 'card' | 'yappy' | 'nequi' | 'ach';
@@ -56,14 +56,31 @@ function formatExp(v: string) {
 }
 
 function CopyRow({ label, value }: { label: string; value: string }) {
+  // '' = nothing to say; the text of a button is not announced when it changes, so the result is
+  // spoken through a separate status region. A non-breaking space is appended on every repeat so
+  // the text really changes and VoiceOver announces the second copy too.
+  const [status, setStatus] = useState('');
   const [done, setDone] = useState(false);
+  const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const flip = useRef(false);
+
+  function announce(message: string, ok: boolean) {
+    flip.current = !flip.current;
+    setStatus(message + (flip.current ? '\u00A0' : ''));
+    setDone(ok);
+    clearTimeout(timer.current);
+    timer.current = setTimeout(() => {
+      setStatus('');
+      setDone(false);
+    }, ok ? 1500 : 4000);
+  }
+
   async function copy() {
     try {
       await navigator.clipboard.writeText(value);
-      setDone(true);
-      setTimeout(() => setDone(false), 1500);
+      announce(`${label} copiado`, true);
     } catch {
-      /* clipboard unavailable: value stays visible and selectable */
+      announce(`No se pudo copiar ${label}. Selecciónalo y cópialo manualmente.`, false);
     }
   }
   return (
@@ -71,10 +88,12 @@ function CopyRow({ label, value }: { label: string; value: string }) {
       <div>
         <span className="gw-copy-label">{label}</span>
         <span className="gw-copy-value">{value}</span>
+        {status && !done ? <span className="gw-note" aria-hidden="true">{status}</span> : null}
       </div>
       <button type="button" className="gw-copy-btn" onClick={copy} aria-label={`Copiar ${label}`}>
-        {done ? 'Copiado' : 'Copiar'}
+        <span aria-hidden="true">{done ? 'Copiado' : 'Copiar'}</span>
       </button>
+      <span className="visually-hidden" role="status">{status}</span>
     </div>
   );
 }
@@ -128,6 +147,7 @@ export default function Checkout({
   const [cvv, setCvv] = useState('');
   const [pushSent, setPushSent] = useState(false);
   const [busy, setBusy] = useState(false);
+  const tabRefs = useRef<Partial<Record<Method, HTMLButtonElement | null>>>({});
   const [, startTransition] = useTransition();
 
   // Same server action as before; only the optional delay is new. Card fields are never read here.
@@ -142,6 +162,22 @@ export default function Checkout({
         void simulatePaymentAction(fd);
       });
     }, delayMs);
+  }
+
+  // Roving tabindex: Tab enters the tab list once (on the selected tab); arrows, Home and End move
+  // between methods and select them, as in the ARIA tabs pattern.
+  function onTabKey(e: KeyboardEvent<HTMLDivElement>) {
+    const i = METHODS.findIndex((m) => m.id === method);
+    let next = -1;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') next = (i + 1) % METHODS.length;
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') next = (i - 1 + METHODS.length) % METHODS.length;
+    else if (e.key === 'Home') next = 0;
+    else if (e.key === 'End') next = METHODS.length - 1;
+    if (next < 0) return;
+    e.preventDefault();
+    const id = METHODS[next].id;
+    setMethod(id);
+    tabRefs.current[id]?.focus();
   }
 
   const shortRef = reference.length > 18 ? `${reference.slice(0, 18)}…` : reference;
@@ -164,13 +200,17 @@ export default function Checkout({
       </aside>
 
       <section className="gw-main" aria-label="Método de pago">
-        <div role="tablist" aria-label="Método de pago" className="gw-tabs">
+        <div role="tablist" aria-label="Método de pago" className="gw-tabs" onKeyDown={onTabKey}>
           {METHODS.map((m) => (
             <button
               key={m.id}
               type="button"
               role="tab"
               id={`tab-${m.id}`}
+              ref={(el) => {
+                tabRefs.current[m.id] = el;
+              }}
+              tabIndex={method === m.id ? 0 : -1}
               aria-selected={method === m.id}
               aria-controls={`panel-${m.id}`}
               className="gw-tab"

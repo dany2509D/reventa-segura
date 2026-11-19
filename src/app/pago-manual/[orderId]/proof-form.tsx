@@ -9,20 +9,21 @@ function remaining(deadlineIso: string): number {
 }
 
 export default function ProofForm({ orderId, deadlineIso, inReview }: { orderId: string; deadlineIso: string; inReview: boolean }) {
-  const [left, setLeft] = useState(() => remaining(deadlineIso));
+  const [left, setLeft] = useState<number | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [reference, setReference] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    setLeft(remaining(deadlineIso));
     const t = setInterval(() => setLeft(remaining(deadlineIso)), 1000);
     return () => clearInterval(t);
   }, [deadlineIso]);
 
-  const expired = left <= 0;
-  const mm = String(Math.floor(left / 60)).padStart(2, '0');
-  const ss = String(left % 60).padStart(2, '0');
+  const expired = left !== null && left <= 0;
+  const mm = left === null ? '--' : String(Math.floor(left / 60)).padStart(2, '0');
+  const ss = left === null ? '--' : String(left % 60).padStart(2, '0');
 
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -49,23 +50,24 @@ export default function ProofForm({ orderId, deadlineIso, inReview }: { orderId:
   if (expired) {
     return (
       <p role="alert" className="error">
-        El plazo terminó y la reserva se libera. <a href="/">Volver a los eventos</a>
+        El plazo terminó y la reserva se libera. <a href="/eventos">Volver a los eventos</a>
       </p>
     );
   }
 
   return (
-    <form className="form form-inset" onSubmit={submit}>
+    <form className="form" onSubmit={submit}>
       <p className="notice warning" role="timer" aria-live="off">
-        Te quedan <strong>{mm}:{ss}</strong> para pagar y subir el comprobante.
+        Te quedan <strong className="mono">{mm}:{ss}</strong> para pagar y subir el comprobante.
       </p>
       <label>
         Captura o PDF del comprobante
-        <input type="file" accept="image/*,application/pdf" onChange={(e) => setFile(e.target.files?.[0] ?? null)} required />
+        <input aria-invalid={false} type="file" accept="image/*,application/pdf" onChange={(e) => setFile(e.target.files?.[0] ?? null)} required />
+        {file ? <span className="file-picked">{file.name}</span> : null}
       </label>
       <label>
         Número de confirmación (opcional)
-        <input type="text" maxLength={64} value={reference} onChange={(e) => setReference(e.target.value)} />
+        <input aria-invalid={false} type="text" maxLength={64} value={reference} onChange={(e) => setReference(e.target.value)} />
       </label>
       {error ? <p role="alert" className="error">{error}</p> : null}
       <button className="btn" type="submit" disabled={busy || !file}>

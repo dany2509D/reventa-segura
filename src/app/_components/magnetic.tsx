@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, type ReactNode } from 'react';
-import { magneticOffset, pointerEffectsAllowed } from '@/lib/ui/motion';
+import { magneticOffset, pointerEffectsAllowed, shouldStepFrame, valueChanged } from '@/lib/ui/motion';
 
 /**
  * Magnetic pull for ONE primary call to action per view: while a mouse hovers it, the control
@@ -22,20 +22,44 @@ export default function Magnetic({ children, strength = 0.3, max = 7 }: { childr
     let frame = 0;
     let x = 0;
     let y = 0;
-    const paint = () => {
-      frame = 0;
-      el.style.transform = x === 0 && y === 0 ? '' : `translate3d(${x.toFixed(2)}px, ${y.toFixed(2)}px, 0)`;
+    let lastX: number | null = null;
+    let lastY: number | null = null;
+    let lastPaint = -1;
+    let cachedRect: DOMRect | null = null;
+
+    const invalidateRect = () => {
+      cachedRect = null;
+    };
+    const readRect = () => {
+      cachedRect ??= area.getBoundingClientRect();
+      return cachedRect;
     };
     const schedule = () => {
       if (!frame) frame = requestAnimationFrame(paint);
     };
+    const paint = (now: number) => {
+      frame = 0;
+      if (!shouldStepFrame(now, lastPaint)) {
+        schedule();
+        return;
+      }
+      if (valueChanged(x, lastX, 0.01) || valueChanged(y, lastY, 0.01)) {
+        lastX = x;
+        lastY = y;
+        el.style.transform = x === 0 && y === 0 ? '' : `translate3d(${x.toFixed(2)}px, ${y.toFixed(2)}px, 0)`;
+      }
+      lastPaint = now;
+    };
+    const onEnter = () => {
+      cachedRect = area.getBoundingClientRect();
+    };
     const onMove = (e: PointerEvent) => {
       if (e.pointerType !== 'mouse' || !pointerEffectsAllowed(window)) return;
-      // The zone itself never moves, so its box is a stable reference for the pull.
-      const o = magneticOffset(e.clientX, e.clientY, area.getBoundingClientRect(), strength, max);
+      // The zone itself never moves, so a cached box eliminates synchronous layout reads at 120 Hz.
+      const o = magneticOffset(e.clientX, e.clientY, readRect(), strength, max);
       x = o.x;
       y = o.y;
-      el.setAttribute('data-magnetic', 'active');
+      if (!el.hasAttribute('data-magnetic')) el.setAttribute('data-magnetic', 'active');
       schedule();
     };
     const onLeave = () => {
@@ -44,13 +68,19 @@ export default function Magnetic({ children, strength = 0.3, max = 7 }: { childr
       el.removeAttribute('data-magnetic');
       schedule();
     };
+    area.addEventListener('pointerenter', onEnter);
     area.addEventListener('pointermove', onMove);
     area.addEventListener('pointerleave', onLeave);
     area.addEventListener('pointercancel', onLeave);
+    window.addEventListener('scroll', invalidateRect, { passive: true });
+    window.addEventListener('resize', invalidateRect, { passive: true });
     return () => {
+      area.removeEventListener('pointerenter', onEnter);
       area.removeEventListener('pointermove', onMove);
       area.removeEventListener('pointerleave', onLeave);
       area.removeEventListener('pointercancel', onLeave);
+      window.removeEventListener('scroll', invalidateRect);
+      window.removeEventListener('resize', invalidateRect);
       if (frame) cancelAnimationFrame(frame);
       el.style.transform = '';
     };

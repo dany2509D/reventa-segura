@@ -3,33 +3,39 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#f8f9fb">
-  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#0F0F12">
+  <meta name="color-scheme" content="dark">
   <title>Sin conexión · Reventa Segura</title>
   <!-- Self-contained on purpose: this page is shown when nothing else can be fetched. System
        fonts, inline styles, no script (the Content-Security-Policy forbids inline scripts). -->
   <style>
-    :root { color-scheme: light; }
+    :root { color-scheme: dark; }
     *, *::before, *::after { box-sizing: border-box; }
     body { margin: 0; min-height: 100vh; min-height: 100dvh; display: grid; place-items: center; padding: 24px 16px;
            font: 16px/1.55 system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-           background: #f8f9fb; color: #111318; -webkit-font-smoothing: antialiased; }
+           background: #0F0F12; color: #EDEAE3; -webkit-font-smoothing: antialiased; }
     main { width: 100%; max-width: 400px; }
-    .panel { position: relative; overflow: hidden; border-radius: 32px; background: #0e1016; aspect-ratio: 4 / 3; }
+    .panel { position: relative; overflow: hidden; border-radius: 20px; background: #1A1A20; border: 1px solid #3A3A44; aspect-ratio: 4 / 3; }
     .panel svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
-    .sky { fill: #83ddf4; }
-    .mint { fill: #91ebcb; }
-    .ring { fill: none; stroke: #0e1016; stroke-width: 22; }
-    .ticket { fill: #ffffff; }
-    .perf { fill: none; stroke: #7c828e; stroke-width: 2; stroke-dasharray: 2 7; stroke-linecap: round; }
-    .line { fill: none; stroke: #111318; stroke-width: 5; stroke-linecap: round; }
-    .label { margin: 28px 0 8px; color: #626873; font: 500 12px/1.4 ui-monospace, 'SFMono-Regular', 'Cascadia Mono', Consolas, monospace;
+    .sky { fill: #4D96FF; }
+    .mint { fill: #FF3D6E; }
+    .ring { fill: none; stroke: #0F0F12; stroke-width: 22; }
+    .ticket { fill: #EDEAE3; }
+    .perf { fill: none; stroke: #6E6E7D; stroke-width: 2; stroke-dasharray: 2 7; stroke-linecap: round; }
+    .line { fill: none; stroke: #0F0F12; stroke-width: 5; stroke-linecap: round; }
+    .label { margin: 28px 0 8px; color: #A3A09A; font: 600 12px/1.4 inherit;
              letter-spacing: 0.08em; text-transform: uppercase; }
     h1 { margin: 0 0 12px; font-size: 2.5rem; line-height: 1.02; letter-spacing: -0.045em; font-weight: 700; }
-    p.text { color: #626873; margin: 0 0 28px; font-size: 1.0625rem; }
-    .retry { display: flex; align-items: center; justify-content: center; width: 100%; font: inherit; font-weight: 600;
-             min-height: 52px; padding: 0 26px; border-radius: 999px; border: 0; background: #111318; color: #ffffff; text-decoration: none; }
-    .retry:focus-visible { outline: 2px solid #111318; outline-offset: 3px; }
+    p.text { color: #A3A09A; margin: 0 0 28px; font-size: 1.0625rem; }
+    .retry { display: flex; align-items: center; justify-content: center; width: 100%; font: inherit; font-weight: 700;
+             min-height: 52px; padding: 0 26px; border-radius: 999px; border: 0; background: #FF3D6E; color: #0F0F12; text-decoration: none; }
+    .retry:focus-visible { outline: 2px solid #4D96FF; outline-offset: 3px; }
+    @media (prefers-color-scheme: light) {
+      :root { color-scheme: light; }
+      body { background: #F2F0EC; color: #121216; }
+      .panel { border-color: #DEDAD1; }
+      .label, p.text { color: #58554F; }
+    }
   </style>
 </head>
 <body>

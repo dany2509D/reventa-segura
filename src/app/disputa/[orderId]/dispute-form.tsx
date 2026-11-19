@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from 'react';
 import { errorText, postMultipart } from '@/lib/client/http';
 import { prepareImage } from '@/lib/client/image';
+import SuccessCard from '../../_components/success-card';
 
 export default function DisputeForm({ orderId }: { orderId: string }) {
   const [reason, setReason] = useState('');
@@ -30,11 +31,11 @@ export default function DisputeForm({ orderId }: { orderId: string }) {
 
   if (done) {
     return (
-      <div className="card pastel tone-sky">
+      <SuccessCard tone="sky">
         <h3>Recibimos tu reporte</h3>
         <p>Lo revisaremos y te avisaremos en Mis órdenes. Tu dinero está retenido mientras tanto.</p>
         <a className="btn" href="/mis-ordenes">Ir a mis órdenes</a>
-      </div>
+      </SuccessCard>
     );
   }
 
@@ -42,11 +43,12 @@ export default function DisputeForm({ orderId }: { orderId: string }) {
     <form className="form" onSubmit={submit}>
       <label>
         ¿Qué pasó?
-        <textarea rows={5} maxLength={2000} value={reason} onChange={(e) => setReason(e.target.value)} required />
+        <textarea aria-invalid={false} rows={5} maxLength={2000} value={reason} onChange={(e) => setReason(e.target.value)} required />
       </label>
       <label>
         Fotos o capturas (opcional, hasta 5)
-        <input type="file" accept="image/*" multiple onChange={(e) => setFiles(Array.from(e.target.files ?? []).slice(0, 5))} />
+        <input aria-invalid={false} type="file" accept="image/*" multiple onChange={(e) => setFiles(Array.from(e.target.files ?? []).slice(0, 5))} />
+        {files.length > 0 ? <span className="file-picked">{files.map((f) => f.name).join(' · ')}</span> : null}
       </label>
       {error ? <p role="alert" className="error">{error}</p> : null}
       <div className="cta-row">

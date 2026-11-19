@@ -795,6 +795,28 @@ describe('listVerifiedListings', () => {
     expect(json).not.toContain('qr:');
   });
 
+  // A listing held by a live order is refused by checkout (HTTP 409), so the catalogue must hide it.
+  it('hides listings held by a live order and shows them again once the hold lapses', async () => {
+    const seller = await newUser();
+    const buyer = await newUser();
+    const event = await newEvent();
+    const order = (listingId: string, state: (typeof orders.$inferInsert)['state'], ageMs: number) =>
+      db.insert(orders).values({ listingId, buyerId: buyer.id, state, priceCents: 5000, feeCents: 0, createdAt: new Date(NOW.getTime() - ageMs) });
+
+    const free = await rawListing(seller.id, event.id, { status: 'verified', askCents: 1000 });
+    const checkout = await rawListing(seller.id, event.id, { status: 'verified', askCents: 2000 });
+    await order(checkout.id, 'creada', 5 * 60 * 1000);
+    const manual = await rawListing(seller.id, event.id, { status: 'verified', askCents: 3000 });
+    await order(manual.id, 'comprobante_en_revision', DAY);
+    const abandoned = await rawListing(seller.id, event.id, { status: 'verified', askCents: 4000 });
+    await order(abandoned.id, 'creada', 16 * 60 * 1000);
+    const cancelled = await rawListing(seller.id, event.id, { status: 'verified', askCents: 5000 });
+    await order(cancelled.id, 'cancelada', 60 * 1000);
+
+    const ids = (await listVerifiedListings(db, event.id, NOW)).map((l) => l.id);
+    expect(ids).toEqual([free.id, abandoned.id, cancelled.id]);
+  });
+
   it('returns nothing for cancelled, started, unknown or malformed events', async () => {
     const seller = await newUser();
     const cancelled = await newEvent({ status: 'cancelled' });

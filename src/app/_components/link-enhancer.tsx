@@ -44,9 +44,23 @@ export default function LinkEnhancer() {
       }
     };
 
+    // Once the browser has captured the outgoing page, the temporary name is dropped: a name left
+    // behind can break the way back (bfcache restore) and a later transition on this page.
+    const onPageSwap = (e: Event) => {
+      const vt = (e as Event & { viewTransition?: { finished: Promise<void> } }).viewTransition;
+      if (vt) vt.finished.finally(clear);
+      else clear();
+    };
+    const onPageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) clear();
+    };
+    window.addEventListener('pageswap', onPageSwap);
+    window.addEventListener('pageshow', onPageShow);
     document.addEventListener('click', onClick, true);
     document.addEventListener('keydown', onKeyDown);
     return () => {
+      window.removeEventListener('pageswap', onPageSwap);
+      window.removeEventListener('pageshow', onPageShow);
       document.removeEventListener('click', onClick, true);
       document.removeEventListener('keydown', onKeyDown);
       clear();

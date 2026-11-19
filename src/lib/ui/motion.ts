@@ -6,7 +6,25 @@ export const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
 /** A mouse or trackpad: the only devices that get hover, magnetic and parallax effects. */
 export const FINE_POINTER_QUERY = '(hover: hover) and (pointer: fine)';
 
+/** Frame-rate envelope enforced for JS-driven motion (scroll scenes, pointer pull). */
+export const TARGET_FPS_MIN = 60;
+export const TARGET_FPS_MAX = 120;
+export const MIN_FRAME_INTERVAL_MS = 1000 / TARGET_FPS_MAX;
+/** Slight jitter tolerance (~90% of 8.33 ms) so native 120 Hz ProMotion rAF never skips alternate frames while >120 Hz panels cap at <=120 FPS. */
+export const FRAME_PACE_MS = MIN_FRAME_INTERVAL_MS * 0.9;
+
 type MediaWindow = { matchMedia?: (query: string) => { matches: boolean } };
+
+/** Gates rAF ticks so interactive effects stay smooth up to 120 FPS max without overspinning 144/240 Hz displays. */
+export function shouldStepFrame(nowMs: number, lastStepMs: number): boolean {
+  if (lastStepMs < 0) return true;
+  return nowMs - lastStepMs >= FRAME_PACE_MS;
+}
+
+/** Avoids redundant DOM writes when the rounded property would not visibly move. */
+export function valueChanged(next: number, prev: number | null, epsilon = 0.0008): boolean {
+  return prev === null || Math.abs(next - prev) >= epsilon;
+}
 
 function matches(win: MediaWindow | undefined, query: string): boolean {
   try {

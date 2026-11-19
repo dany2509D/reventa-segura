@@ -135,8 +135,11 @@ export async function verifyOtp(
     .set({ usedAt: now })
     .where(and(eq(otpCodes.phone, phone), isNull(otpCodes.usedAt)));
 
-  await db.insert(users).values({ phone }).onConflictDoNothing();
-  const [user] = await db.select().from(users).where(eq(users.phone, phone));
+  const [user] = await db
+    .insert(users)
+    .values({ phone, phoneVerifiedAt: now })
+    .onConflictDoUpdate({ target: users.phone, set: { phoneVerifiedAt: now } })
+    .returning();
   const sessionToken = await createSession(db, user.id, user.role, now);
   return { userId: user.id, sessionToken };
 }

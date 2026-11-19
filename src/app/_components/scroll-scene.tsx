@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, type ReactNode } from 'react';
-import { motionAllowed, pointerEffectsAllowed, viewOffset, viewProgress } from '@/lib/ui/motion';
+import { motionAllowed, pointerEffectsAllowed, shouldStepFrame, valueChanged, viewOffset, viewProgress } from '@/lib/ui/motion';
 
 type Props = {
   /**
@@ -33,14 +33,24 @@ export default function ScrollScene({ mode, className, children }: Props) {
 
     let frame = 0;
     let near = false;
-    const update = () => {
-      frame = 0;
-      const rect = el.getBoundingClientRect();
-      const value = mode === 'progress' ? viewProgress(rect.top, rect.height, window.innerHeight) : viewOffset(rect.top, rect.height, window.innerHeight);
-      el.style.setProperty('--scene', value.toFixed(4));
-    };
+    let lastPaint = -1;
+    let lastValue: number | null = null;
     const schedule = () => {
       if (near && !frame) frame = requestAnimationFrame(update);
+    };
+    const update = (now: number) => {
+      frame = 0;
+      if (!shouldStepFrame(now, lastPaint)) {
+        schedule();
+        return;
+      }
+      const rect = el.getBoundingClientRect();
+      const value = mode === 'progress' ? viewProgress(rect.top, rect.height, window.innerHeight) : viewOffset(rect.top, rect.height, window.innerHeight);
+      if (valueChanged(value, lastValue)) {
+        lastValue = value;
+        el.style.setProperty('--scene', value.toFixed(4));
+      }
+      lastPaint = now;
     };
     const io = new IntersectionObserver(
       ([entry]) => {
@@ -51,7 +61,7 @@ export default function ScrollScene({ mode, className, children }: Props) {
     );
     io.observe(el);
     el.setAttribute('data-scene', mode);
-    update();
+    update(performance.now());
     window.addEventListener('scroll', schedule, { passive: true });
     window.addEventListener('resize', schedule, { passive: true });
     return () => {

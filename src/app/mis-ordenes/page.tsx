@@ -1,20 +1,19 @@
-import { buyerOrders, sellerListings, sellerSales } from '@/lib/account/queries';
-import { buyerNextStep, listingStatusLabel, orderStatusLabel, sellerNextStep, type ListingStatus } from '@/lib/account/labels';
+import { buyerNextStep, orderStatusLabel } from '@/lib/account/labels';
+import { buyerOrders } from '@/lib/account/queries';
 import { getDb } from '@/lib/db/client';
 import { formatPanamaDateTime, formatUsd } from '@/lib/format';
 import type { OrderState } from '@/lib/orders/state-machine';
+import { eventCoverImage } from '@/lib/ui/event-cover';
 import EmptyState from '../_components/empty-state';
-import { IconChevronRight, IconOrders, IconSell, IconWallet } from '../_components/icons';
+import EscrowTrack from '../_components/escrow-track';
+import EventPoster from '../_components/event-poster';
+import SectionShell from '../_components/section-shell';
 import { requireUser } from '../session';
 import UploadReceived from './upload-received';
-import WithdrawButton from './withdraw-button';
 
 export const metadata = { title: 'Mis órdenes' };
 export const dynamic = 'force-dynamic';
 
-// Presentation only. Card tint by state, from the buyer's and the seller's point of view:
-// sky = in progress, mint = completed, sun = needs attention, plain = closed/neutral.
-// The state is always also written in the chip.
 const BUYER_TONE: Record<OrderState, string> = {
   creada: 'pastel tone-sun',
   transferencia_pendiente: 'pastel tone-sky',
@@ -24,156 +23,105 @@ const BUYER_TONE: Record<OrderState, string> = {
   disputada: 'pastel tone-sun',
   liberada: 'pastel tone-mint',
   liquidada: 'pastel tone-mint',
-  reembolsada: '',
-  cancelada: '',
+  reembolsada: 'is-closed',
+  cancelada: 'is-closed',
 };
-const SELLER_TONE: Record<OrderState, string> = {
-  creada: '',
-  comprobante_en_revision: '',
-  transferencia_pendiente: 'pastel tone-sun',
-  entrada_recibida: 'pastel tone-sky',
-  ingreso_confirmado: 'pastel tone-sky',
-  disputada: 'pastel tone-sun',
-  liberada: 'pastel tone-mint',
-  liquidada: 'pastel tone-mint',
-  reembolsada: '',
-  cancelada: '',
-};
-const LISTING_TONE: Record<ListingStatus, string> = {
-  pending: 'chip warning',
-  verified: 'chip info',
-  rejected: 'chip danger',
-  sold: 'chip success',
-  withdrawn: 'chip neutral',
-};
+const FINISHED: ReadonlySet<OrderState> = new Set<OrderState>(['liberada', 'liquidada', 'reembolsada', 'cancelada']);
+const BUYER_STAGES = ['Retenido', 'Entrega', 'Cerrado'] as const;
 
 export default async function MyOrdersPage({ searchParams }: { searchParams: Promise<{ pago?: string }> }) {
   const user = await requireUser('/mis-ordenes');
-  const db = getDb();
-  const [orders, sales, mine, q] = await Promise.all([
-    buyerOrders(db, user.userId),
-    sellerSales(db, user.userId),
-    sellerListings(db, user.userId),
-    searchParams,
-  ]);
+  const [orders, q] = await Promise.all([buyerOrders(getDb(), user.userId), searchParams]);
+  const steps = orders.map((o) =>
+    buyerNextStep({ state: o.state, deliveryMode: o.deliveryMode, hasOpenDispute: o.hasOpenDispute, paymentMethod: o.paymentMethod }),
+  );
+  const active = orders.filter((o) => !FINISHED.has(o.state)).length;
+  const needAction = steps.filter((s, i) => s.actions.some((a) => a !== 'dispute') && orders[i].state !== 'comprobante_en_revision').length;
+
   return (
-    <main className="page">
-      <header className="page-head">
-        <p className="eyebrow">Tu cuenta</p>
-        <h1>Mis órdenes</h1>
-      </header>
+    <SectionShell
+      tone="ordenes"
+      eyebrow="Tu cuenta"
+      title="Mis órdenes"
+      lead="Tus compras y en qué punto del escrow está cada una."
+      aside={
+        <ul className="section-stats" aria-label="Resumen de tus compras">
+          <li className="section-stat">
+            <strong>{String(active).padStart(2, '0')}</strong>
+            <span>En curso</span>
+          </li>
+          <li className="section-stat">
+            <strong>{String(needAction).padStart(2, '0')}</strong>
+            <span>Requieren acción</span>
+          </li>
+        </ul>
+      }
+    >
       {q.pago === 'ok' ? <p role="status" className="ok">¡Pago recibido! Queda retenido hasta después del evento.</p> : null}
       {q.pago === 'rechazado' ? <p role="alert" className="error">El pago fue rechazado. No se te cobró.</p> : null}
 
-      <nav className="list-group" aria-label="Secciones">
-        <a className="list-row" href="#compras">
-          <IconOrders />
-          <span className="list-label">Mis compras</span>
-          <span className="list-count">{orders.length}</span>
-          <span className="list-chevron" aria-hidden="true"><IconChevronRight /></span>
-        </a>
-        <a className="list-row" href="#ventas">
-          <IconWallet />
-          <span className="list-label">Mis ventas</span>
-          <span className="list-count">{sales.length}</span>
-          <span className="list-chevron" aria-hidden="true"><IconChevronRight /></span>
-        </a>
-        <a className="list-row" href="#publicaciones">
-          <IconSell />
-          <span className="list-label">Mis publicaciones</span>
-          <span className="list-count">{mine.length}</span>
-          <span className="list-chevron" aria-hidden="true"><IconChevronRight /></span>
-        </a>
-      </nav>
-
-      <h2 id="compras" className="section-title">Mis compras</h2>
-      {orders.length === 0 ? (
-        <EmptyState>
-          <p>Todavía no has comprado entradas.</p>
-          <a className="btn sm secondary" href="/">Ver eventos</a>
-        </EmptyState>
-      ) : null}
-      <div className="stack">
-        {orders.map((o) => {
-          const step = buyerNextStep({ state: o.state, deliveryMode: o.deliveryMode, hasOpenDispute: o.hasOpenDispute, paymentMethod: o.paymentMethod });
-          return (
-            <div key={o.orderId} className={`card ${BUYER_TONE[o.state]}`}>
-              <div className="card-head">
-                <h3>{o.eventName}</h3>
-                <span className="chip">{orderStatusLabel(o.state)}</span>
-              </div>
-              <div className="muted money">{formatPanamaDateTime(o.startsAt)} · {formatUsd(o.priceCents)}</div>
-              {o.state === 'transferencia_pendiente' && o.transferDeadline && !o.paymentMethod ? (
-                <p className="notice">El vendedor tiene hasta {formatPanamaDateTime(o.transferDeadline)} para transferirte la entrada.</p>
-              ) : null}
-              <p>{step.text}</p>
-              <div className="actions">
-                {step.actions.includes('pay_manual') ? (
-                  <a className="btn" href={`/pago-manual/${o.orderId}`}>
-                    {o.state === 'comprobante_en_revision' ? 'Ver o reemplazar comprobante' : 'Pagar y subir comprobante'}
-                  </a>
-                ) : null}
-                {step.actions.includes('view_ticket') ? (
-                  <a className="btn" href={`/api/orders/${o.orderId}/ticket`} target="_blank" rel="noopener noreferrer">Ver mi entrada</a>
-                ) : null}
-                {step.actions.includes('confirm_entry') ? (
-                  <a className="btn" href={`/ingreso/${o.orderId}`}>Confirmar mi ingreso</a>
-                ) : null}
-                {step.actions.includes('dispute') ? (
-                  <a className="btn secondary" href={`/disputa/${o.orderId}`}>Tengo un problema</a>
-                ) : null}
-              </div>
-              {step.actions.includes('upload_received') ? <UploadReceived orderId={o.orderId} /> : null}
-            </div>
-          );
-        })}
-      </div>
-
-      <h2 id="ventas" className="section-title">Mis ventas</h2>
-      {sales.length === 0 ? (
-        <EmptyState>
-          <p>Aún no tienes ventas.</p>
-        </EmptyState>
-      ) : null}
-      <div className="stack">
-        {sales.map((s) => (
-          <div key={s.orderId} className={`card ${SELLER_TONE[s.state]}`}>
-            <div className="card-head">
-              <h3>{s.eventName}</h3>
-              <span className="chip">{orderStatusLabel(s.state)}</span>
-            </div>
-            <div className="muted money">Recibirás {formatUsd(s.netCents)} (después de la comisión)</div>
-            <p>{sellerNextStep({ state: s.state, deliveryMode: s.deliveryMode, payoutStatus: s.payoutStatus })}</p>
-            {s.state === 'transferencia_pendiente' && s.transferDeadline ? (
-              <p className="notice warning">Transfiere la entrada antes de {formatPanamaDateTime(s.transferDeadline)}.</p>
-            ) : null}
+      <section className="section-panel" aria-labelledby="compras">
+        <h2 id="compras" className="section-title">
+          Mis compras <span className="count">{String(orders.length).padStart(2, '0')}</span>
+        </h2>
+        {orders.length === 0 ? (
+          <EmptyState>
+            <p>Todavía no has comprado entradas.</p>
+            <p className="muted">Explora los próximos eventos con retención escrow en Panamá.</p>
+            <a className="btn sm secondary" href="/eventos">Ver eventos</a>
+          </EmptyState>
+        ) : (
+          <div className="orders-grid">
+            {orders.map((o, i) => {
+              const step = steps[i];
+              return (
+                <article key={o.orderId} className={`card order-card reveal reveal-${Math.min(i, 4)} ${BUYER_TONE[o.state]}`}>
+                  <div className="order-top">
+                    <div className="order-thumb">
+                      <EventPoster seed={o.eventId} title={o.eventName} image={eventCoverImage(o.eventId, o.eventName)} size="thumb" sizes="56px" />
+                    </div>
+                    <div className="order-title-row">
+                      <div>
+                        <h3>{o.eventName}</h3>
+                        <div className="muted money">
+                          {formatPanamaDateTime(o.startsAt)} · {formatUsd(o.priceCents)}
+                        </div>
+                      </div>
+                      <span className="chip">{orderStatusLabel(o.state)}</span>
+                    </div>
+                  </div>
+                  <EscrowTrack state={o.state} labels={BUYER_STAGES} />
+                  {o.state === 'transferencia_pendiente' && o.transferDeadline && !o.paymentMethod ? (
+                    <p className="notice">El vendedor tiene hasta {formatPanamaDateTime(o.transferDeadline)} para transferirte la entrada.</p>
+                  ) : null}
+                  <p>{step.text}</p>
+                  {step.actions.length > 0 ? (
+                    <div className="actions">
+                      {step.actions.includes('pay_manual') ? (
+                        <a className="btn sm" href={`/pago-manual/${o.orderId}`}>
+                          {o.state === 'comprobante_en_revision' ? 'Ver o reemplazar comprobante' : 'Pagar y subir comprobante'}
+                        </a>
+                      ) : null}
+                      {step.actions.includes('view_ticket') ? (
+                        <a className="btn sm" href={`/api/orders/${o.orderId}/ticket`} target="_blank" rel="noopener noreferrer">
+                          Ver mi entrada
+                        </a>
+                      ) : null}
+                      {step.actions.includes('confirm_entry') ? (
+                        <a className="btn sm" href={`/ingreso/${o.orderId}`}>Confirmar ingreso</a>
+                      ) : null}
+                      {step.actions.includes('dispute') ? (
+                        <a className="btn sm secondary" href={`/disputa/${o.orderId}`}>Reportar problema</a>
+                      ) : null}
+                    </div>
+                  ) : null}
+                  {step.actions.includes('upload_received') ? <UploadReceived orderId={o.orderId} /> : null}
+                </article>
+              );
+            })}
           </div>
-        ))}
-      </div>
-
-      <h2 id="publicaciones" className="section-title">Mis publicaciones</h2>
-      {mine.length === 0 ? (
-        <EmptyState>
-          <p>No has publicado entradas.</p>
-          <a className="btn sm secondary" href="/vender">Vender una entrada</a>
-        </EmptyState>
-      ) : (
-        <div className="list-group">
-          {mine.map((l) => (
-            <div key={l.listingId} className="list-row">
-              <IconSell />
-              <div className="list-label">
-                {l.eventName}
-                <div className="list-sub">
-                  <span className="muted money">{formatUsd(l.askCents)}</span>
-                  <span className={LISTING_TONE[l.status]}>{listingStatusLabel(l.status)}</span>
-                </div>
-              </div>
-              {l.status === 'pending' || l.status === 'verified' ? <WithdrawButton listingId={l.listingId} /> : null}
-            </div>
-          ))}
-        </div>
-      )}
-    </main>
+        )}
+      </section>
+    </SectionShell>
   );
 }
