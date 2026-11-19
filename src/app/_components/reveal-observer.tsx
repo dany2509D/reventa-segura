@@ -10,9 +10,19 @@ declare global {
   }
 }
 
-const DURATION_MS = 560;
-const STAGGER_MS = 70;
+const DURATION_MS = 420;
+const STAGGER_MS = 55;
 const EASING = 'cubic-bezier(0.22, 1, 0.36, 1)';
+
+function readRevealIndex(el: Element): number {
+  for (const cls of el.classList) {
+    if (cls.startsWith('reveal-')) {
+      const parsed = Number.parseInt(cls.slice(7), 10);
+      if (!Number.isNaN(parsed)) return parsed;
+    }
+  }
+  return 0;
+}
 
 /**
  * Scroll reveals for every `.reveal` element on the page (one observer for the whole document).
@@ -42,10 +52,10 @@ export default function RevealObserver() {
     const reveal = (el: Element, instant: boolean) => {
       if (done.has(el)) return;
       done.add(el);
-      const index = Number.parseInt(getComputedStyle(el).getPropertyValue('--reveal-i'), 10) || 0;
+      const index = readRevealIndex(el);
       el.animate(
         [
-          { opacity: 0, translate: '0 20px' },
+          { opacity: 0, translate: '0 16px' },
           { opacity: 1, translate: '0 0' },
         ],
         { duration: instant ? 0 : DURATION_MS, delay: instant ? 0 : index * STAGGER_MS, easing: EASING, fill: 'both' },

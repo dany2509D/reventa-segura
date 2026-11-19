@@ -1,36 +1,39 @@
-import EventPoster from '../_components/event-poster';
-import { IconArrowDown, IconArrowRight } from '../_components/icons';
-import { ticketCountLabel, type EventView, type HomeData } from './view-model';
+import { splitHeadline } from '@/lib/ui/headline';
+import { IconArrowRight } from '../_components/icons';
+import { type EventView, type HomeData } from './view-model';
+
+function eventKind(name: string, venue: string): string {
+  const n = name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  const v = venue.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  if (/\b(vs|amistoso|futbol|copa|seleccion|clasico)\b/.test(n) || /rod carew/.test(v)) return 'Deportes';
+  if (/\b(gala|orquesta|sinfonica)\b/.test(n)) return 'Gala';
+  if (/\b(festival|fest)\b/.test(n)) return 'Festival';
+  if (/\b(jazz)\b/.test(n)) return 'Jazz';
+  if (/\b(teatro|bernarda|obra)\b/.test(n)) return v.startsWith('teatro') ? 'Obra' : 'Teatro';
+  return 'Concierto';
+}
 
 /**
- * Section 01: up to three large editorial cards. Asymmetric on purpose: the first card leads
- * (7 of 12 columns), the others sit beside it. Nothing renders when there are no events.
+ * Seasonal typographic poster wall ("Esta temporada"): up to three 3:4 flat-colour posters
+ * cycling crimson, warm paper and cobalt with Archivo Black display type.
  */
 export default async function FeaturedEvents({ data }: { data: Promise<HomeData> }) {
-  const { featured, featuredHaveTickets, events } = await data;
+  const { featured, events } = await data;
   if (featured.length === 0) return null;
   return (
-    <section className="section container" aria-labelledby="destacados-title">
-      <header className="section-head reveal">
-        <p className="eyebrow">
-          <span className="idx">01</span> En cartelera
-        </p>
-        <h2 id="destacados-title" className="section-title-xl">
-          Eventos destacados
+    <section className="section season-section container" aria-labelledby="temporada-title">
+      <header className="season-head reveal">
+        <h2 id="temporada-title" className="season-title">
+          ESTA TEMPORADA
         </h2>
-        <p className="section-desc">
-          {featuredHaveTickets
-            ? 'Los más próximos con entradas a la venta, publicadas por vendedores con identidad verificada.'
-            : 'Los eventos más próximos. Todavía no tienen entradas publicadas.'}
-        </p>
         {events.length > featured.length ? (
-          <a className="section-link" href="#eventos">
-            Ver todos los eventos
-            <IconArrowDown />
+          <a className="section-link" href="/eventos">
+            Ver los {events.length} eventos
+            <IconArrowRight />
           </a>
         ) : null}
       </header>
-      <div className={`feature-grid feature-grid--${featured.length}`}>
+      <div className="season-grid">
         {featured.map((event, i) => (
           <FeatureCard key={event.id} event={event} index={i} />
         ))}
@@ -40,42 +43,35 @@ export default async function FeaturedEvents({ data }: { data: Promise<HomeData>
 }
 
 function FeatureCard({ event, index }: { event: EventView; index: number }) {
+  const [line1, line2] = splitHeadline(event.name);
+  const kind = eventKind(event.name, event.venue);
+  const tone = index % 3;
   return (
-    <a className={`feature-card on-art reveal reveal-${index}${index === 0 ? ' is-lead' : ''}`} href={`/eventos/${event.id}`} data-card="">
-      <div className="feature-art">
-        <EventPoster seed={event.id} title={event.name} size="feature" />
-      </div>
-      <div className="feature-top">
-        <time className="date-badge" dateTime={event.date.iso}>
-          <b>{event.date.day}</b>
-          <span>{event.date.month}</span>
+    <a className={`season-card season-card--${tone} reveal reveal-${index}`} href={`/eventos/${event.id}`}>
+      <p className="season-kicker">
+        {kind} · {event.venue}
+      </p>
+      <h3 className="season-name" aria-label={event.name}>
+        <span className="visually-hidden">{event.name}</span>
+        <span className="season-name-lines" aria-hidden="true">
+          {line1}
+          {line2 ? (
+            <>
+              <br />
+              {line2}
+            </>
+          ) : null}
+        </span>
+      </h3>
+      <div className="season-foot">
+        <time className="season-date" dateTime={event.date.iso}>
+          {event.dateShort}
         </time>
-        {event.count > 0 ? <span className="art-pill">{ticketCountLabel(event.count)}</span> : null}
-      </div>
-      <div className="feature-body">
-        <p className="feature-meta">
-          <span>
-            {event.date.weekday} · {event.date.time}
-          </span>
-          <span>{event.venue}</span>
-        </p>
-        <h3 className="feature-name">{event.name}</h3>
-        <div className="feature-foot">
-          <p className="feature-price">
-            {event.from ? (
-              <>
-                <span className="price-label">Desde</span>
-                <strong>{event.from}</strong>
-              </>
-            ) : (
-              <span className="feature-none">{event.resaleProhibited ? 'Reventa no permitida' : 'Sin entradas por ahora'}</span>
-            )}
-          </p>
-          <span className="cta-pill">
-            <span>{event.count > 0 ? 'Ver entradas' : 'Ver evento'}</span>
-            <IconArrowRight />
-          </span>
-        </div>
+        {event.from ? (
+          <span className="season-price">{event.from}</span>
+        ) : (
+          <span className="season-none">{event.resaleProhibited ? 'Sin reventa' : 'Sin entradas'}</span>
+        )}
       </div>
     </a>
   );

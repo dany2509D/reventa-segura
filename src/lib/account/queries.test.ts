@@ -27,6 +27,15 @@ describe('upcomingEvents', () => {
     expect(rows[0]).toMatchObject({ fromCents: 7000, listingCount: 2, name: 'Concierto', faceValueCents: 5000, allowsTransfer: true });
   });
 
+  it('leaves listings held by a live order out of the price and the count', async () => {
+    const a = await seedListing(db, { askCents: 9000 });
+    const [held] = await db.insert(listings).values({ sellerId: a.seller.id, eventId: a.event.id, askCents: 1000, deliveryMode: 'transfer', status: 'verified', fingerprint: 'h1', proofPath: 'p' }).returning();
+    await db.insert(orders).values({ listingId: held.id, buyerId: a.buyer.id, state: 'creada', priceCents: 1000, feeCents: 0 });
+
+    const [row] = await upcomingEvents(db);
+    expect(row).toMatchObject({ id: a.event.id, fromCents: 9000, listingCount: 1 });
+  });
+
   it('hides cancelled and past events, and shows an event with no listings (price null, count 0)', async () => {
     await seedListing(db, { eventStatus: 'cancelled' });
     await seedListing(db, { startsAt: new Date(Date.now() - DAY) });
@@ -66,13 +75,21 @@ describe('sellerListings / sellerSales', () => {
     const a = await seedPaidOrder(db, gw, { deliveryMode: 'file' });
     const l = await sellerListings(db, a.seller.id);
     expect(l).toHaveLength(1);
-    expect(l[0]).toMatchObject({ listingId: a.listing.id, status: 'sold', askCents: 5000, eventName: 'Concierto' });
+    expect(l[0]).toMatchObject({ listingId: a.listing.id, eventId: a.event.id, status: 'sold', askCents: 5000, eventName: 'Concierto' });
 
     await db.update(orders).set({ state: 'liberada' }).where(eq(orders.id, a.order.id));
     await db.insert(payouts).values({ orderId: a.order.id, sellerId: a.seller.id, amountCents: 4500 });
     const s = await sellerSales(db, a.seller.id);
     expect(s).toEqual([
-      expect.objectContaining({ orderId: a.order.id, state: 'liberada', netCents: 4500, payoutStatus: 'queued', eventName: 'Concierto' }),
+      expect.objectContaining({
+        orderId: a.order.id,
+        eventId: a.event.id,
+        startsAt: a.event.startsAt,
+        state: 'liberada',
+        netCents: 4500,
+        payoutStatus: 'queued',
+        eventName: 'Concierto',
+      }),
     ]);
   });
 

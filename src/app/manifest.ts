@@ -11,9 +11,9 @@ export default function manifest(): MetadataRoute.Manifest {
     scope: '/',
     display: 'standalone',
     orientation: 'portrait',
-    // The app opens in the light theme by default (the stored preference applies once it loads).
-    background_color: THEME_COLORS.light,
-    theme_color: THEME_COLORS.light,
+    // Live pages follow the visitor's OS theme; Club Nocturno surface backdrop for standalone launch.
+    background_color: THEME_COLORS.dark,
+    theme_color: THEME_COLORS.dark,
     icons: [
       { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
       { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },

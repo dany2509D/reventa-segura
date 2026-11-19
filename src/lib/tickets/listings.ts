@@ -1,4 +1,4 @@
-import { and, asc, count, eq, gt, gte, inArray, ne, notInArray } from 'drizzle-orm';
+import { and, asc, count, eq, gt, gte, inArray, ne, not, notInArray } from 'drizzle-orm';
 import { audit } from '@/lib/audit/audit';
 import { assertAdmin } from '@/lib/authz';
 import { configInt } from '@/lib/config/app-config';
@@ -6,6 +6,7 @@ import { disputes, events, listings, orders, users } from '@/lib/db/schema';
 import type { Actor, Db, Tx } from '@/lib/db/types';
 import { ForbiddenError, NotFoundError, ValidationError } from '@/lib/errors';
 import { IdentityRequiredError } from '@/lib/identity/errors';
+import { listingHeld } from '@/lib/orders/hold';
 import { assertCanSell } from '@/lib/identity/identity';
 import { DEFAULT_PRICE_CAP_BPS, isPriceAllowed } from '@/lib/pricing/pricing';
 import { InvalidUploadError } from '@/lib/uploads/errors';
@@ -318,7 +319,10 @@ export async function withdrawListing(db: Db, sellerId: string, listingId: strin
   });
 }
 
-/** Public catalogue of an event: verified listings of an active, future event, cheapest first. */
+/**
+ * Public catalogue of an event: verified listings of an active, future event, cheapest first.
+ * Listings held by a live order are left out: checkout would refuse them.
+ */
 export async function listVerifiedListings(
   db: Db,
   eventId: string,
@@ -338,6 +342,7 @@ export async function listVerifiedListings(
       and(
         eq(listings.eventId, eventId),
         eq(listings.status, 'verified'),
+        not(listingHeld(now)),
         eq(events.status, 'active'),
         gt(events.startsAt, now),
       ),

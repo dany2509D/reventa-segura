@@ -8,13 +8,14 @@ import { ForbiddenError, NotFoundError, ValidationError } from '@/lib/errors';
 import type { PaymentGateway } from '@/lib/payments/gateway';
 import { computeFees, DEFAULT_FEE_BPS } from '@/lib/pricing/pricing';
 import { isSellerBlocked } from '@/lib/tickets/listings';
+import { CHECKOUT_TTL_MS } from './hold';
 import { appendEntry } from './ledger';
 import { InvalidTransitionError, transition, type OrderEvent, type OrderState } from './state-machine';
 
-/** An unpaid `creada` order older than this is abandoned and stops holding its listing. */
-export const CHECKOUT_TTL_MS = 15 * 60 * 1000;
 /** The seller must transfer the ticket within 2 h of payment (or before the event, if sooner). */
 export const TRANSFER_WINDOW_MS = 2 * 60 * 60 * 1000;
+
+export { CHECKOUT_TTL_MS };
 
 export class ListingUnavailableError extends Error {
   constructor(message = 'Listing is not available for purchase') {

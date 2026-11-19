@@ -13,7 +13,7 @@ export default async function IdentitiesPage({ searchParams }: { searchParams: P
       <h1>Identidades por revisar</h1>
       <Flash params={await searchParams} />
       {rows.length === 0 ? <p>No hay identidades pendientes.</p> : null}
-      <div className="admin-table-wrap">
+      <div className="admin-table-wrap" role="region" aria-label="Identidades por revisar" tabIndex={0}>
         <table className="admin-table">
           <thead>
             <tr><th>Celular</th><th>Cédula / pasaporte</th><th>Selfie</th><th>Decisión</th></tr>

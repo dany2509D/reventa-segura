@@ -33,8 +33,9 @@ export default function UploadReceived({ orderId }: { orderId: string }) {
     <form className="form form-inset" onSubmit={submit}>
       <label>
         Captura de la entrada en tu cuenta de la boletera
-        <input type="file" accept="image/*" onChange={(e) => setFile(e.target.files?.[0] ?? null)} required />
+        <input aria-invalid={false} type="file" accept="image/*" onChange={(e) => setFile(e.target.files?.[0] ?? null)} required />
         <span className="hint">Debe verse la entrada a tu nombre.</span>
+        {file ? <span className="file-picked">{file.name}</span> : null}
       </label>
       {error ? <p role="alert" className="error">{error}</p> : null}
       <button className="btn" type="submit" disabled={busy || !file}>

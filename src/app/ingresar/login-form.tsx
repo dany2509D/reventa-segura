@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import type { ConfirmationResult } from 'firebase/auth';
 import { errorText, postJson } from '@/lib/client/http';
 import { FAKE_SMS, confirmPhoneOtp, sendPhoneOtp } from '@/lib/firebase/phone-auth';
@@ -47,6 +47,24 @@ export default function LoginForm({ next }: { next: string }) {
   const [testCode, setTestCode] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+
+  // Web OTP: on phones that support it (Chrome on Android), the SMS code is offered to the page
+  // automatically; the person still presses "Entrar". The request is cancelled when the step changes.
+  useEffect(() => {
+    if (step !== 'code' || !('OTPCredential' in window)) return;
+    const abort = new AbortController();
+    const request = { otp: { transport: ['sms'] }, signal: abort.signal } as CredentialRequestOptions;
+    navigator.credentials
+      .get(request)
+      .then((credential) => {
+        const otp = (credential as (Credential & { code?: string }) | null)?.code;
+        if (otp) setCode(otp.replace(/\D/g, '').slice(0, 6));
+      })
+      .catch(() => {
+        /* dismissed or unsupported: the person types the code */
+      });
+    return () => abort.abort();
+  }, [step]);
 
   async function sendFirebaseCode(e: FormEvent) {
     e.preventDefault();
@@ -122,16 +140,21 @@ export default function LoginForm({ next }: { next: string }) {
     <form className="form" onSubmit={sendCode}>
       <label>
         Tu celular
-        <input
-          type="tel"
-          inputMode="tel"
-          autoComplete="tel"
-          placeholder="6123-4567"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          required
-        />
-        <span className="hint">Solo celulares de Panamá.</span>
+        <span className="hint" id="login-phone-hint">Paso 1 de 2 · Solo números móviles de Panamá.</span>
+        <div className="phone-field">
+          <span className="phone-prefix" aria-hidden="true">+507</span>
+          <input
+            aria-describedby="login-phone-hint"
+            aria-invalid={false}
+            type="tel"
+            inputMode="tel"
+            autoComplete="tel-national"
+            placeholder="6123-4567"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            required
+          />
+        </div>
       </label>
       {error ? <p role="alert" className="error">{error}</p> : null}
       <button className="btn" type="submit" disabled={busy || phone.trim().length < 8}>
@@ -142,13 +165,18 @@ export default function LoginForm({ next }: { next: string }) {
 
   const codeForm = (
     <form className="form" onSubmit={verify}>
-      <p>Enviamos un código de 6 dígitos a <strong>{phone}</strong>.</p>
+      <p>Paso 2 de 2 · Enviamos un código de 6 dígitos a <strong className="mono">{phone}</strong>.</p>
       {testCode ? <TestCodeNotice code={testCode} onUse={() => setCode(testCode)} /> : null}
       <label>
-        Código
+        Código de verificación
         <input
+          aria-invalid={false}
+          type="text"
           inputMode="numeric"
+          pattern="\d{6}"
+          enterKeyHint="done"
           autoComplete="one-time-code"
+          placeholder="000000"
           maxLength={6}
           value={code}
           onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
@@ -171,7 +199,9 @@ export default function LoginForm({ next }: { next: string }) {
     <>
       {/* Invisible reCAPTCHA mount point; stays mounted across both steps. */}
       <div id={RECAPTCHA_ID} />
-      {step === 'phone' ? phoneForm : codeForm}
+      <div key={step} className="login-step">
+        {step === 'phone' ? phoneForm : codeForm}
+      </div>
     </>
   );
 }

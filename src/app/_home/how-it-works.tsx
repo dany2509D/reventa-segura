@@ -1,3 +1,4 @@
+import { IconChevronDown } from '../_components/icons';
 import ScrollScene from '../_components/scroll-scene';
 import { isTestMode } from '../_components/test-mode';
 
@@ -30,18 +31,19 @@ const STEPS: { title: string; text: string }[] = [
  * that joins them is drawn as the section scrolls through the viewport (ScrollScene 'progress')
  * and is simply complete without JavaScript or with reduced motion.
  */
-export default function HowItWorks() {
+export default function HowItWorks({ asPage = false }: { asPage?: boolean }) {
   const testMode = isTestMode();
+  const TitleTag = asPage ? 'h1' : 'h2';
   return (
-    <section className="how on-scrim" id="como-funciona" aria-labelledby="como-title">
-      <div className="container">
+    <section className={asPage ? 'how is-page on-scrim' : 'how on-scrim'} id="como-funciona" aria-labelledby="como-title">
+      <div className={asPage ? 'how-inner' : 'container'}>
         <header className="section-head reveal">
           <p className="eyebrow">
-            <span className="idx">03</span> Cómo funciona
+            <span className="idx">Escrow</span> Cómo funciona
           </p>
-          <h2 id="como-title" className="section-title-xl">
+          <TitleTag id="como-title" className="section-title-xl">
             El vendedor cobra después del evento, no antes.
-          </h2>
+          </TitleTag>
           <p className="section-desc">Así pasa una entrada de una persona a otra en Reventa Segura.</p>
         </header>
 
@@ -63,24 +65,46 @@ export default function HowItWorks() {
           </ol>
         </ScrollScene>
 
-        <div className="how-notes">
-          <div className="how-note reveal">
-            <h3>Si algo sale mal</h3>
-            <p>
-              Abres una disputa desde Mis órdenes, hasta 12 horas después del inicio del evento. El equipo la revisa y, si procede, te
-              devuelve el dinero.
-            </p>
+        <div className="how-faq">
+          <div className="how-faq-lead reveal">
+            <h3>Preguntas frecuentes</h3>
+            <p>Cómo protegemos tu compra en escrow y cómo manejamos reportes o restricciones del evento.</p>
+            {testMode ? (
+              <div className="how-note is-status">
+                <h3>Estado actual: modo de prueba</h3>
+                <p>Los pagos funcionan con una pasarela de prueba. Aún no se cobra dinero real.</p>
+              </div>
+            ) : null}
           </div>
-          <div className="how-note reveal reveal-1">
-            <h3>Lo que no depende de nosotros</h3>
-            <p>Una boletera o un recinto puede restringir las entradas revendidas. Si te rechazan en la puerta, abre una disputa.</p>
+          <div className="faq-list reveal reveal-1">
+            <details className="faq-item" open>
+              <summary className="faq-trigger">
+                <span>¿Cuándo recibe el dinero el vendedor?</span>
+                <IconChevronDown />
+              </summary>
+              <p className="faq-answer">
+                El pago queda retenido en la plataforma durante la entrega y hasta 12 horas después del inicio del evento, cuando cierra el plazo de reportes sin incidencias.
+              </p>
+            </details>
+            <details className="faq-item">
+              <summary className="faq-trigger">
+                <span>¿Qué pasa si algo sale mal en la puerta?</span>
+                <IconChevronDown />
+              </summary>
+              <p className="faq-answer">
+                Abres una disputa desde Mis órdenes hasta 12 horas después del inicio del evento. El equipo revisa tu caso y, si procede, te devuelve el dinero.
+              </p>
+            </details>
+            <details className="faq-item">
+              <summary className="faq-trigger">
+                <span>¿Todas las boleteras permiten entradas revendidas?</span>
+                <IconChevronDown />
+              </summary>
+              <p className="faq-answer">
+                Una boletera o un recinto puede restringir la reventa; cuando un organizador la prohíbe explícitamente, bloqueamos publicaciones para ese evento. Si te rechazan en la puerta, abre una disputa.
+              </p>
+            </details>
           </div>
-          {testMode ? (
-            <div className="how-note is-status reveal reveal-2">
-              <h3>Estado actual: modo de prueba</h3>
-              <p>Los pagos funcionan con una pasarela de prueba. Aún no se cobra dinero real.</p>
-            </div>
-          ) : null}
         </div>
       </div>
     </section>

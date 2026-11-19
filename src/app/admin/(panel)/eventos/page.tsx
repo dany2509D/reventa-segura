@@ -2,6 +2,7 @@ import { allEvents } from '@/lib/admin/queries';
 import { getDb } from '@/lib/db/client';
 import { requireAdminPage } from '../../session';
 import { formatPanamaDateTime, formatUsd } from '@/lib/format';
+import { ConfirmActionButton } from '../../../_components/confirm-dialog';
 import { cancelEventAction, createEventAction } from '../actions';
 import { Flash, type FlashParams } from '../flash';
 
@@ -30,7 +31,7 @@ export default async function EventsPage({ searchParams }: { searchParams: Promi
 
       <h2>Todos los eventos</h2>
       {rows.length === 0 ? <p>Todavía no hay eventos.</p> : null}
-      <div className="admin-table-wrap">
+      <div className="admin-table-wrap" role="region" aria-label="Todos los eventos" tabIndex={0}>
         <table className="admin-table">
           <thead>
             <tr><th>Evento</th><th>Inicio</th><th>Nominal</th><th>Estado</th><th>Cancelar</th></tr>
@@ -43,11 +44,20 @@ export default async function EventsPage({ searchParams }: { searchParams: Promi
                 <td>{formatUsd(e.faceValueCents)}</td>
                 <td>{e.status === 'cancelled' ? 'Cancelado' : 'Activo'}{e.resaleProhibited ? ' · reventa prohibida' : ''}</td>
                 <td>
-                  <form action={cancelEventAction} className="admin-inline">
-                    <input type="hidden" name="eventId" value={e.id} />
-                    <label><input name="confirm" type="checkbox" /> Confirmo: reembolsa todas las órdenes</label>
-                    <button className="btn danger" type="submit">{e.status === 'cancelled' ? 'Reintentar reembolsos' : 'Cancelar evento'}</button>
-                  </form>
+                  <ConfirmActionButton
+                    action={cancelEventAction}
+                    fields={{ eventId: e.id, confirm: 'on' }}
+                    triggerLabel={e.status === 'cancelled' ? 'Reintentar reembolsos' : 'Cancelar evento'}
+                    triggerClassName="btn danger"
+                    title={e.status === 'cancelled' ? `¿Reintentar reembolsos de ${e.name}?` : `¿Cancelar ${e.name}?`}
+                    description={
+                      e.status === 'cancelled'
+                        ? 'Se volverán a intentar los reembolsos pendientes para este evento.'
+                        : 'Esta acción marca el evento como cancelado, retira las publicaciones activas y reembolsa todas las órdenes pagadas.'
+                    }
+                    confirmLabel={e.status === 'cancelled' ? 'Reintentar reembolsos' : 'Sí, cancelar evento'}
+                    tone="danger"
+                  />
                 </td>
               </tr>
             ))}

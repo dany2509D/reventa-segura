@@ -1,0 +1,76 @@
+/* Section accents: existing tokens only, so dark mode follows globals.css. */
+.section-page[data-section='eventos'] { --section: var(--accent); --section-soft: var(--sky-soft); --section-ink: var(--accent-ink); }
+.section-page[data-section='ordenes'] { --section: var(--accent-2); --section-soft: var(--mint-soft); --section-ink: var(--accent-2-ink); }
+.section-page[data-section='vender'] { --section: var(--warning); --section-soft: var(--sun-soft); --section-ink: var(--warning); }
+
+.section-hero {
+  position: relative;
+  display: grid;
+  gap: var(--space-5);
+  padding: var(--space-8) var(--space-6);
+  margin-bottom: var(--space-6);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, var(--section-soft), var(--surface) 70%);
+  box-shadow: inset 4px 0 0 var(--section);
+  z-index: 3;
+}
+.section-hero .eyebrow { margin-bottom: var(--space-3); }
+.section-hero .eyebrow .dot { background: var(--section); box-shadow: 0 0 0 1px var(--section-ink); }
+.section-hero h1 { margin: 0 0 var(--space-3); }
+.section-hero h1:focus { outline: none; }
+.section-hero .lead { margin: 0; max-width: 56ch; }
+@media (min-width: 768px) {
+  .section-hero { grid-template-columns: minmax(0, 1fr) minmax(0, auto); align-items: end; }
+}
+.section-hero-aside { min-width: 0; }
+@media (min-width: 768px) {
+  .section-page[data-section='eventos'] .section-hero-aside { width: min(440px, 40vw); }
+}
+
+.section-stats { display: flex; flex-wrap: wrap; gap: var(--space-3); margin: 0; padding: 0; list-style: none; }
+.section-stat {
+  min-width: 120px;
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+.section-stat strong { display: block; font-size: 1.5rem; color: var(--section-ink); font-variant-numeric: tabular-nums; }
+.section-stat span { color: var(--text-muted); font-size: var(--fs-small); }
+.section-panel > .section-stats { margin-bottom: var(--space-6); }
+
+/* Tabs: same shape as the admin panel's, tinted with the section accent. */
+.section-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 6px;
+  margin-bottom: var(--space-6);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+@media (max-width: 767.98px) {
+  .section-nav { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+  .section-nav::-webkit-scrollbar { display: none; }
+}
+.section-tab {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 16px;
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  font-weight: 500;
+  font-size: var(--fs-small);
+  text-decoration: none;
+}
+.section-tab:hover { background: var(--surface-2); color: var(--text); }
+.section-tab[aria-current='page'] { background: var(--section-soft); color: var(--section-ink); font-weight: 650; }
+@media (forced-colors: active) {
+  .section-tab[aria-current='page'] { outline: 2px solid CanvasText; }
+}
+
+.section-panel > .section-title:first-child { margin-top: 0; }

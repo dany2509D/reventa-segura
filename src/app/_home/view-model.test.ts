@@ -61,7 +61,23 @@ describe('buildHomeData', () => {
   });
 
   it('handles an empty catalogue', () => {
-    expect(buildHomeData([])).toEqual({ events: [], featured: [], featuredHaveTickets: false, next: null, totals: { events: 0, listings: 0 } });
+    expect(buildHomeData([])).toEqual({
+      events: [],
+      featured: [],
+      featuredHaveTickets: false,
+      hero: null,
+      next: null,
+      totals: { events: 0, listings: 0 },
+    });
+  });
+
+  it('picks the first featured event as the hero, and null when there are no events', () => {
+    expect(buildHomeData([]).hero).toBeNull();
+    const rows = [
+      { id: 'a', name: 'Sin entradas', venue: 'V', startsAt: new Date('2026-12-01T00:00:00Z'), resaleProhibited: false, fromCents: null, listingCount: 0 },
+      { id: 'b', name: 'Con entradas', venue: 'V', startsAt: new Date('2026-12-02T00:00:00Z'), resaleProhibited: false, fromCents: 2500, listingCount: 3 },
+    ];
+    expect(buildHomeData(rows).hero?.id).toBe('b');
   });
 });
 
