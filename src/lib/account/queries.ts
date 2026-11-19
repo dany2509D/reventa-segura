@@ -1,6 +1,7 @@
-import { and, asc, count, desc, eq, gt, isNull, min, notInArray, or, sql } from 'drizzle-orm';
+import { and, asc, count, desc, eq, gt, isNull, min, not, notInArray, or, sql } from 'drizzle-orm';
 import { disputes, events, listings, orders, payouts, users } from '@/lib/db/schema';
 import type { Db } from '@/lib/db/types';
+import { listingHeld } from '@/lib/orders/hold';
 import { isUuid } from '@/lib/uuid';
 
 /*
@@ -22,7 +23,8 @@ export async function upcomingEvents(db: Db, now: Date = new Date()) {
       listingCount: count(listings.id),
     })
     .from(events)
-    .leftJoin(listings, and(eq(listings.eventId, events.id), eq(listings.status, 'verified')))
+    // Listings held by a live order are not for sale, so they count neither in the price nor the total.
+    .leftJoin(listings, and(eq(listings.eventId, events.id), eq(listings.status, 'verified'), not(listingHeld(now))))
     .where(and(eq(events.status, 'active'), gt(events.startsAt, now)))
     .groupBy(events.id)
     .orderBy(asc(events.startsAt));
@@ -74,6 +76,7 @@ export async function sellerListings(db: Db, sellerId: string) {
   return db
     .select({
       listingId: listings.id,
+      eventId: events.id,
       status: listings.status,
       askCents: listings.askCents,
       deliveryMode: listings.deliveryMode,
@@ -90,10 +93,12 @@ export async function sellerSales(db: Db, sellerId: string) {
   return db
     .select({
       orderId: orders.id,
+      eventId: events.id,
       state: orders.state,
       netCents: sql<number>`${orders.priceCents} - ${orders.feeCents}`.mapWith(Number),
       payoutStatus: payouts.status,
       eventName: events.name,
+      startsAt: events.startsAt,
       deliveryMode: listings.deliveryMode,
       transferDeadline: orders.transferDeadline,
     })

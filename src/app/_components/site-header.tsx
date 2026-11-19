@@ -1,17 +1,27 @@
+import type { ComponentType } from 'react';
+import { primaryNav, type NavIcon } from '@/lib/ui/nav';
 import { shellUser } from './current-user';
 import HeaderScroll from './header-scroll';
-import { Brand, IconAdmin, IconEvents, IconOrders, IconSell, IconUser } from './icons';
+import { Brand, IconAdmin, IconEvents, IconHome, IconOrders, IconSell } from './icons';
 import LogoutButton from './logout-button';
 import NavLink from './nav-link';
-import ThemeSwitch from './theme-switch';
+
+const ICONS: Record<NavIcon, ComponentType> = {
+  home: IconHome,
+  events: IconEvents,
+  orders: IconOrders,
+  sell: IconSell,
+  admin: IconAdmin,
+};
 
 /**
- * Top bar: wordmark, section links, theme selector and the account action. Sticky; once the page
- * scrolls it gains a translucent plate and (from tablet up) a compact height, by transform only.
- * On phones the section links live in the bottom tab bar instead (<TabBar />, same destinations).
+ * Top bar: wordmark, segmented section menu (Inicio · Eventos · Mis órdenes · Vender · Cómo funciona)
+ * and account button. Sticky with translucent backdrop on scroll. On phones (< 768 px), the
+ * floating bottom TabBar holds the 4 primary app destinations while the top bar keeps brand + Ingresar/Salir.
  */
 export default async function SiteHeader() {
   const user = await shellUser();
+  const items = primaryNav(user?.role ?? null);
   return (
     <>
       <a className="skip-link" href="#contenido">Saltar al contenido</a>
@@ -24,23 +34,16 @@ export default async function SiteHeader() {
             <Brand />
           </a>
           <nav className="site-nav" aria-label="Principal">
-            <NavLink href="/" match={['/', '/eventos', '/comprar']}>
-              Eventos
-            </NavLink>
-            {user ? (
-              <NavLink href="/mis-ordenes" match={['/mis-ordenes', '/ingreso', '/disputa']}>
-                Mis órdenes
+            {items.map((item) => (
+              <NavLink key={item.href} href={item.href} match={item.match} exact={item.exact}>
+                {item.label}
               </NavLink>
-            ) : (
-              <a className="nav-item nav-optional" href="/#como-funciona">
-                Cómo funciona
-              </a>
-            )}
-            <NavLink href="/vender">Vender</NavLink>
-            {user?.role === 'admin' ? <NavLink href="/admin">Admin</NavLink> : null}
+            ))}
+            <NavLink href="/como-funciona" className="nav-item nav-optional">
+              Cómo funciona
+            </NavLink>
           </nav>
           <div className="header-tools">
-            <ThemeSwitch />
             <div className="header-account">
               {user ? (
                 <LogoutButton className="btn sm secondary" />
@@ -59,10 +62,8 @@ export default async function SiteHeader() {
 }
 
 /**
- * Phones: the same destinations as a floating bottom bar, within thumb reach. Hidden from tablet
- * up. `tab-fade` is the strip behind it: whatever scrolls under the bar is blurred away there, so
- * no label or card edge ever shows crisp around or below the bar. Every page also reserves the
- * bar's height at its end (the footer's bottom padding), so the last content is fully reachable.
+ * Phones: dedicated 4-tab floating dock within thumb reach (`Inicio`, `Eventos`, `Órdenes`, `Vender`),
+ * plus `Admin` when applicable. Hidden from tablet up.
  */
 export async function TabBar() {
   const user = await shellUser();
@@ -70,34 +71,15 @@ export async function TabBar() {
     <>
       <div className="tab-fade" aria-hidden="true" />
       <nav className="tab-bar" aria-label="Principal">
-        <NavLink className="tab-item" href="/" match={['/', '/eventos', '/comprar']}>
-          <IconEvents />
-          <span>Eventos</span>
-        </NavLink>
-        {user ? (
-          <NavLink className="tab-item" href="/mis-ordenes" match={['/mis-ordenes', '/ingreso', '/disputa']}>
-            <IconOrders />
-            <span>Órdenes</span>
-          </NavLink>
-        ) : null}
-        <NavLink className="tab-item" href="/vender">
-          <IconSell />
-          <span>Vender</span>
-        </NavLink>
-        {user?.role === 'admin' ? (
-          <NavLink className="tab-item" href="/admin">
-            <IconAdmin />
-            <span>Admin</span>
-          </NavLink>
-        ) : null}
-        {user ? (
-          <LogoutButton className="tab-item" />
-        ) : (
-          <NavLink className="tab-item" href="/ingresar">
-            <IconUser />
-            <span>Ingresar</span>
-          </NavLink>
-        )}
+        {primaryNav(user?.role ?? null).map((item) => {
+          const Icon = ICONS[item.icon];
+          return (
+            <NavLink key={item.href} className="tab-item" href={item.href} match={item.match} exact={item.exact}>
+              <Icon />
+              <span>{item.short}</span>
+            </NavLink>
+          );
+        })}
       </nav>
     </>
   );

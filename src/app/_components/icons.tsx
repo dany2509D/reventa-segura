@@ -46,7 +46,12 @@ export function TicketMark() {
   );
 }
 
+export const IconHome = () => <Icon d="M3 10.5L12 3l9 7.5V20a1 1 0 0 1-1 1h-5.5v-6h-5v6H4a1 1 0 0 1-1-1z" />;
 export const IconEvents = () => <Icon d="M4 8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v1.5a2.5 2.5 0 0 0 0 5V16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-1.5a2.5 2.5 0 0 0 0-5zM9.5 10.5l2 2 3.5-3.6" />;
+export const IconGrid = () => (
+  <Icon d="M4 4h6.5v6.5H4zM13.5 4H20v6.5h-6.5zM4 13.5h6.5V20H4zM13.5 13.5H20V20h-6.5z" />
+);
+export const IconList = () => <Icon d="M4 6h16M4 12h16M4 18h10" />;
 export const IconCalendar = () => <Icon d="M7 3v3M17 3v3M4 10h16M6 5h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z" />;
 export const IconSearch = () => <Icon d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-4-4" />;
 export const IconClose = () => <Icon d="M6 6l12 12M18 6L6 18" />;
@@ -65,8 +70,3 @@ export const IconArrowRight = () => <Icon d="M5 12h14M13 6l6 6-6 6" />;
 export const IconArrowUpRight = () => <Icon d="M7 17L17 7M8 7h9v9" />;
 export const IconArrowDown = () => <Icon d="M12 5v14M6 13l6 6 6-6" />;
 export const IconShieldCheck = () => <Icon d="M12 3l7 3v5.5c0 4.3-2.9 8-7 9.5-4.1-1.5-7-5.2-7-9.5V6zM9 12l2 2 4-4" />;
-export const IconSun = () => (
-  <Icon d="M12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4L6 18M18 6l1.4-1.4" />
-);
-export const IconMoon = () => <Icon d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" />;
-export const IconMonitor = () => <Icon d="M5 4h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zM8.5 21h7M12 17v4" />;

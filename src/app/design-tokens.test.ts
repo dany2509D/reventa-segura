@@ -289,10 +289,12 @@ describe('CSP-ready markup and styles', () => {
     expect(readFileSync(withInlineScript[0], 'utf8')).toMatch(/<script nonce=\{nonce\}/);
   });
 
-  it('loads fonts from the self-hosted geist package, never from a font CDN', () => {
+  it('loads self-hosted fonts only: Geist Sans from the geist package and Archivo Black from a local file', () => {
     const layout = readFileSync(join(APP_DIR, 'layout.tsx'), 'utf8');
     expect(layout).toMatch(/from 'geist\/font\/sans'/);
-    expect(layout).toMatch(/from 'geist\/font\/mono'/);
+    expect(layout).not.toMatch(/from 'geist\/font\/mono'/);
+    expect(layout).toMatch(/from 'next\/font\/local'/);
+    expect(layout).toMatch(/\.\/fonts\/ArchivoBlack-Regular\.ttf/);
     for (const f of [...tsx, ...walk(APP_DIR, '.ts')]) expect(readFileSync(f, 'utf8'), f).not.toMatch(/next\/font\/google/);
   });
 });

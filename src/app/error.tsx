@@ -6,7 +6,7 @@
 export default function PageError({ reset }: { error: Error & { digest?: string }; reset: () => void }) {
   return (
     <main className="page state-page">
-      <p className="state-code">Error</p>
+      <p className="state-code"><span className="dot" aria-hidden="true" />Error</p>
       <h1>No pudimos cargar esta página.</h1>
       <p className="lead">Puede ser un problema momentáneo. Inténtalo de nuevo; si sigue fallando, vuelve en unos minutos.</p>
       <div className="actions">

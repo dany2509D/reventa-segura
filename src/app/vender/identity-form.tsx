@@ -35,13 +35,15 @@ export default function IdentityForm() {
     <form className="form" onSubmit={submit}>
       <label>
         Cédula o pasaporte
-        <input type="file" accept="image/*,application/pdf" onChange={(e) => setDoc(e.target.files?.[0] ?? null)} required />
+        <input aria-invalid={false} type="file" accept="image/*,application/pdf" onChange={(e) => setDoc(e.target.files?.[0] ?? null)} required />
         <span className="hint">Foto clara del documento, con todos los datos visibles.</span>
+        {doc ? <span className="file-picked">{doc.name}</span> : null}
       </label>
       <label>
         Selfie
-        <input type="file" accept="image/*" capture="user" onChange={(e) => setSelfie(e.target.files?.[0] ?? null)} required />
+        <input aria-invalid={false} type="file" accept="image/*" capture="user" onChange={(e) => setSelfie(e.target.files?.[0] ?? null)} required />
         <span className="hint">Una foto de tu cara. La comparamos con el documento.</span>
+        {selfie ? <span className="file-picked">{selfie.name}</span> : null}
       </label>
       <p className="muted">Guardamos tus documentos de forma privada y solo el equipo de verificación los ve.</p>
       {error ? <p role="alert" className="error">{error}</p> : null}

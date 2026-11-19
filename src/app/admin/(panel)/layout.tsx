@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import NavLink from '../../_components/nav-link';
 import { requireAdminPage } from '../session';
 
 export const metadata = { title: 'Administración' };
@@ -10,13 +11,13 @@ export default async function PanelLayout({ children }: { children: ReactNode })
   return (
     <div className="admin-shell">
       <nav className="admin-nav" aria-label="Administración">
-        <a href="/admin">Resumen</a>
-        <a href="/admin/identidades">Identidades</a>
-        <a href="/admin/publicaciones">Publicaciones</a>
-        <a href="/admin/disputas">Disputas</a>
-        <a href="/admin/pagos">Pagos</a>
-        <a href="/admin/eventos">Eventos</a>
-        <a href="/admin/revision">Revisión manual</a>
+        <NavLink href="/admin" exact pill={false} className="admin-tab">Resumen</NavLink>
+        <NavLink href="/admin/identidades" pill={false} className="admin-tab">Identidades</NavLink>
+        <NavLink href="/admin/publicaciones" pill={false} className="admin-tab">Publicaciones</NavLink>
+        <NavLink href="/admin/disputas" pill={false} className="admin-tab">Disputas</NavLink>
+        <NavLink href="/admin/pagos" pill={false} className="admin-tab">Pagos</NavLink>
+        <NavLink href="/admin/eventos" pill={false} className="admin-tab">Eventos</NavLink>
+        <NavLink href="/admin/revision" pill={false} className="admin-tab">Revisión manual</NavLink>
       </nav>
       {children}
     </div>

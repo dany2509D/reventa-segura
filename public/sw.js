@@ -3,8 +3,8 @@
 // pages or anything tied to a person. It caches only the static build assets and icons, and shows
 // an offline page when a navigation cannot reach the network.
 // Bump on every change to a precached file (v2: offline page without inline script, for the CSP;
-// v3: offline page redrawn for the v3 design system).
-const CACHE = 'rs-static-v3';
+// v3: offline page redrawn for the v3 design system; v5: Club Nocturno + Azul & system light/dark).
+const CACHE = 'rs-static-v5';
 const OFFLINE_URL = '/offline.html';
 const PRECACHE = [OFFLINE_URL, '/icons/icon-192.png'];
 

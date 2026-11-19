@@ -32,7 +32,16 @@ export default function EventPoster({ seed, title, variant, image, size = 'card'
   if (image) {
     return (
       <div className={`poster poster--photo poster--${size}${extra}`}>
-        <Image className="poster-img" src={image.src} alt={image.alt} fill sizes={sizes} priority={priority} />
+        <Image
+          className="poster-img"
+          src={image.src}
+          alt={image.alt}
+          fill
+          sizes={sizes}
+          quality={90}
+          preload={priority}
+          loading={priority ? 'eager' : undefined}
+        />
       </div>
     );
   }

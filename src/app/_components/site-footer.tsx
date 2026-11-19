@@ -1,7 +1,6 @@
 import { shellUser } from './current-user';
 import { Brand } from './icons';
 import { TestModeNotice } from './test-mode';
-import ThemeSwitch from './theme-switch';
 
 /**
  * Footer: brand, the routes that exist, the theme selector and the test-mode marker.
@@ -27,20 +26,24 @@ export default async function SiteFooter() {
             <div>
               <h2>Explorar</h2>
               <ul>
-                <li><a href="/#eventos">Eventos</a></li>
-                <li><a href="/#como-funciona">Cómo funciona</a></li>
+                <li><a href="/">Inicio</a></li>
+                <li><a href="/eventos">Eventos</a></li>
+                <li><a href="/como-funciona">Cómo funciona</a></li>
               </ul>
             </div>
             <div>
               <h2>Vender</h2>
               <ul>
                 <li><a href="/vender">Vender una entrada</a></li>
+                <li><a href="/vender/publicaciones">Mis publicaciones</a></li>
+                <li><a href="/vender/ventas">Mis ventas</a></li>
               </ul>
             </div>
             <div>
               <h2>Tu cuenta</h2>
               <ul>
-                {user ? <li><a href="/mis-ordenes">Mis órdenes</a></li> : <li><a href="/ingresar">Ingresar</a></li>}
+                <li><a href="/mis-ordenes">Mis órdenes</a></li>
+                {!user ? <li><a href="/ingresar">Ingresar</a></li> : null}
               </ul>
             </div>
           </nav>
@@ -48,10 +51,6 @@ export default async function SiteFooter() {
         <div className="footer-bottom">
           <p>Reventa Segura · {year}</p>
           <TestModeNotice />
-          <div className="footer-theme">
-            <span aria-hidden="true">Tema</span>
-            <ThemeSwitch />
-          </div>
         </div>
         <div className="footer-wordmark-wrap">
           <p className="footer-wordmark" aria-hidden="true">reventa segura</p>

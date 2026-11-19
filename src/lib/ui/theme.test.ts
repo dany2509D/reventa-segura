@@ -15,9 +15,9 @@ describe('parseThemePreference', () => {
     expect(parseThemePreference('dark')).toBe('dark');
     expect(parseThemePreference('system')).toBe('system');
   });
-  it('falls back to light for anything else', () => {
-    expect(DEFAULT_THEME).toBe('light');
-    for (const raw of [null, undefined, '', 'DARK', 'auto', 42, {}]) expect(parseThemePreference(raw)).toBe('light');
+  it('falls back to system for anything else', () => {
+    expect(DEFAULT_THEME).toBe('system');
+    for (const raw of [null, undefined, '', 'DARK', 'auto', 42, {}]) expect(parseThemePreference(raw)).toBe('system');
   });
 });
 
@@ -71,21 +71,26 @@ function boot(o: Options = {}) {
 }
 
 describe('THEME_BOOTSTRAP_SCRIPT (pre-paint inline script)', () => {
-  it('is light by default, even when the operating system is dark', () => {
-    const { attrs, meta } = boot({ stored: null, systemDark: true });
+  it('follows the operating system by default (light when system is light, dark when system is dark)', () => {
+    const lightSys = boot({ stored: null, systemDark: false });
+    expect(lightSys.attrs['data-theme']).toBe('light');
+    expect(lightSys.attrs['data-theme-pref']).toBe('system');
+    expect(lightSys.meta.content).toBe(THEME_COLORS.light);
+
+    const darkSys = boot({ stored: null, systemDark: true });
+    expect(darkSys.attrs['data-theme']).toBe('dark');
+    expect(darkSys.attrs['data-theme-pref']).toBe('system');
+    expect(darkSys.meta.content).toBe(THEME_COLORS.dark);
+  });
+
+  it('applies a stored override when present', () => {
+    const { attrs, meta } = boot({ stored: 'light', systemDark: true });
     expect(attrs['data-theme']).toBe('light');
     expect(attrs['data-theme-pref']).toBe('light');
     expect(meta.content).toBe(THEME_COLORS.light);
   });
 
-  it('applies a stored dark preference', () => {
-    const { attrs, meta } = boot({ stored: 'dark', systemDark: false });
-    expect(attrs['data-theme']).toBe('dark');
-    expect(attrs['data-theme-pref']).toBe('dark');
-    expect(meta.content).toBe(THEME_COLORS.dark);
-  });
-
-  it('follows the operating system only for a stored "system" preference', () => {
+  it('follows the operating system for a stored "system" preference', () => {
     expect(boot({ stored: 'system', systemDark: true }).attrs['data-theme']).toBe('dark');
     expect(boot({ stored: 'system', systemDark: false }).attrs['data-theme']).toBe('light');
     expect(boot({ stored: 'system', systemDark: true }).attrs['data-theme-pref']).toBe('system');

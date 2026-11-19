@@ -2,6 +2,7 @@ import { manualPaymentQueue, queuedPayouts } from '@/lib/admin/queries';
 import { getDb } from '@/lib/db/client';
 import { requireAdminPage } from '../../session';
 import { formatUsd } from '@/lib/format';
+import { ConfirmActionButton } from '../../../_components/confirm-dialog';
 import { approveManualPaymentAction, markPayoutPaidAction, rejectManualPaymentAction } from '../actions';
 import { Flash, type FlashParams } from '../flash';
 
@@ -20,7 +21,7 @@ export default async function PayoutsPage({ searchParams }: { searchParams: Prom
       </p>
       {manual.length === 0 ? <p>No hay comprobantes pendientes.</p> : null}
       {manual.length > 0 ? (
-        <div className="admin-table-wrap">
+        <div className="admin-table-wrap" role="region" aria-label="Comprobantes por revisar" tabIndex={0}>
           <table className="admin-table">
             <thead>
               <tr><th>Referencia</th><th>Evento</th><th>Método</th><th>Monto</th><th>Comprobante</th><th>Acciones</th></tr>
@@ -46,10 +47,15 @@ export default async function PayoutsPage({ searchParams }: { searchParams: Prom
                     {m.deliveryMode !== 'file' ? (
                       <span className="admin-muted">Solo se puede rechazar (entrega por transferencia)</span>
                     ) : (
-                      <form action={approveManualPaymentAction} className="admin-inline">
-                        <input type="hidden" name="orderId" value={m.orderId} />
-                        <button className="btn" type="submit">Aprobar pago</button>
-                      </form>
+                      <ConfirmActionButton
+                        action={approveManualPaymentAction}
+                        fields={{ orderId: m.orderId }}
+                        triggerLabel="Aprobar pago"
+                        triggerClassName="btn"
+                        title={`¿Aprobar pago de ${formatUsd(m.priceCents)}?`}
+                        description={`Confirma que ya verificaste la referencia ${m.ref} en el banco. Al aprobar, el comprador podrá descargar su entrada.`}
+                        confirmLabel="Aprobar pago"
+                      />
                     )}
                     <form action={rejectManualPaymentAction} className="admin-inline">
                       <input type="hidden" name="orderId" value={m.orderId} />
@@ -68,7 +74,7 @@ export default async function PayoutsPage({ searchParams }: { searchParams: Prom
         Transfiere desde la cuenta de la empresa y anota aquí la referencia del banco. Solo se pueden pagar las órdenes liberadas.
       </p>
       {rows.length === 0 ? <p>No hay pagos en cola.</p> : null}
-      <div className="admin-table-wrap">
+      <div className="admin-table-wrap" role="region" aria-label="Pagos a vendedores" tabIndex={0}>
         <table className="admin-table">
           <thead>
             <tr><th>Evento</th><th>Vendedor</th><th>Monto</th><th>Estado de la orden</th><th>Registrar pago</th></tr>

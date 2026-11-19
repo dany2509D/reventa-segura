@@ -4,6 +4,7 @@ import { getDb } from '@/lib/db/client';
 import { formatUsd } from '@/lib/format';
 import { listVerifiedListings } from '@/lib/tickets/listings';
 import { longDateLabel, panamaDateParts } from '@/lib/ui/dates';
+import { eventCoverImage } from '@/lib/ui/event-cover';
 import BackLink from '../../_components/back-link';
 import EmptyState from '../../_components/empty-state';
 import EventPoster from '../../_components/event-poster';
@@ -21,11 +22,19 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
   const date = panamaDateParts(event.startsAt);
   return (
     <main className="page wide">
-      <BackLink href="/">Todos los eventos</BackLink>
+      <BackLink href="/eventos">Todos los eventos</BackLink>
       <div className="event-layout">
         {/* Same generative poster as the event's cards; `poster-hero` is the shared element of the page transition. */}
         <div className="event-art">
-          <EventPoster seed={event.id} title={event.name} size="hero" className="poster-hero" />
+          <EventPoster
+            seed={event.id}
+            title={event.name}
+            image={eventCoverImage(event.id, event.name, event.venue)}
+            size="hero"
+            sizes="(max-width: 1023px) 100vw, 45vw"
+            priority
+            className="poster-hero"
+          />
         </div>
         <div className="event-main">
           <p className="eyebrow">
@@ -72,15 +81,27 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
               ) : (
                 <>
                   <ul className="offers">
-                    {offers.map((o) => (
-                      <li key={o.id} className="card offer">
+                    {offers.map((o, i) => (
+                      <li key={o.id} className={`card offer reveal reveal-${Math.min(i, 4)}`}>
                         <div>
                           <span className="price-label">Precio</span>
                           <div className="price">{formatUsd(o.askCents)}</div>
                           <div className="tags">
                             <span className="tag">
+                              {o.deliveryMode === 'transfer' ? (
+                                <svg className="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                  <path d="M7 7h11l-3-3M17 17H6l3 3" />
+                                </svg>
+                              ) : (
+                                <svg className="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                  <path d="M4 8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v1.5a2.5 2.5 0 0 0 0 5V16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-1.5a2.5 2.5 0 0 0 0-5z" />
+                                </svg>
+                              )}
                               {o.deliveryMode === 'transfer' ? 'Te la transfieren en la boletera' : 'Recibes la entrada en la app'}
                             </span>
+                            {o.askCents < event.faceValueCents ? (
+                              <span className="tag offer-deal">Bajo valor nominal</span>
+                            ) : null}
                           </div>
                         </div>
                         <a className="btn" href={`/comprar/${o.id}`}>

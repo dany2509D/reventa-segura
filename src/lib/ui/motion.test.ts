@@ -1,11 +1,17 @@
 import { describe, expect, it } from 'vitest';
 import {
   FINE_POINTER_QUERY,
+  FRAME_PACE_MS,
+  MIN_FRAME_INTERVAL_MS,
   REDUCED_MOTION_QUERY,
+  TARGET_FPS_MAX,
+  TARGET_FPS_MIN,
   clamp,
   magneticOffset,
   motionAllowed,
   pointerEffectsAllowed,
+  shouldStepFrame,
+  valueChanged,
   viewOffset,
   viewProgress,
 } from './motion';
@@ -86,5 +92,27 @@ describe('viewOffset', () => {
     expect(viewOffset(5000, 200, 1000)).toBe(-1);
     expect(viewOffset(-5000, 200, 1000)).toBe(1);
     expect(viewOffset(0, 100, 0)).toBe(0);
+  });
+});
+
+describe('60-120 FPS frame pacing', () => {
+  it('defines the [60, 120] FPS envelope and 120 Hz pacing threshold', () => {
+    expect(TARGET_FPS_MIN).toBe(60);
+    expect(TARGET_FPS_MAX).toBe(120);
+    expect(MIN_FRAME_INTERVAL_MS).toBeCloseTo(1000 / 120);
+    expect(FRAME_PACE_MS).toBeCloseTo(7.5);
+  });
+
+  it('allows initial frame, 60 Hz (~16.6 ms), and 120 Hz (~8.3 ms) while capping 240 Hz (~4.1 ms)', () => {
+    expect(shouldStepFrame(100, -1)).toBe(true);
+    expect(shouldStepFrame(104.1, 100)).toBe(false);
+    expect(shouldStepFrame(108.3, 100)).toBe(true);
+    expect(shouldStepFrame(116.7, 100)).toBe(true);
+  });
+
+  it('skips redundant DOM updates for negligible deltas', () => {
+    expect(valueChanged(0, null)).toBe(true);
+    expect(valueChanged(0.5002, 0.5)).toBe(false);
+    expect(valueChanged(0.505, 0.5)).toBe(true);
   });
 });

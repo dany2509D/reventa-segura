@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from 'react';
 import { errorText, postMultipart } from '@/lib/client/http';
 import { prepareImage } from '@/lib/client/image';
+import SuccessCard from '../../_components/success-card';
 
 type Coords = { lat: number; lng: number } | null;
 
@@ -49,12 +50,12 @@ export default function EntryForm({ orderId }: { orderId: string }) {
 
   if (done) {
     return (
-      <div className="card pastel tone-mint">
+      <SuccessCard tone="mint">
         <h3>¡Ingreso confirmado!</h3>
         <p>Gracias. Si hubo algún problema con la entrada, puedes avisarnos desde Mis órdenes hasta que cierre la ventana de disputas.</p>
         {!done.geoOk ? <p className="muted">No pudimos verificar tu ubicación, pero tu confirmación quedó registrada.</p> : null}
         <a className="btn" href="/mis-ordenes">Ir a mis órdenes</a>
-      </div>
+      </SuccessCard>
     );
   }
 
@@ -62,7 +63,8 @@ export default function EntryForm({ orderId }: { orderId: string }) {
     <form className="form" onSubmit={submit}>
       <label>
         Foto del escaneo de tu entrada
-        <input type="file" accept="image/*" capture="environment" onChange={(e) => setPhoto(e.target.files?.[0] ?? null)} required />
+        <input aria-invalid={false} type="file" accept="image/*" capture="environment" onChange={(e) => setPhoto(e.target.files?.[0] ?? null)} required />
+        {photo ? <span className="file-picked">{photo.name}</span> : null}
       </label>
       <p className="muted">Te pediremos tu ubicación solo para comprobar que estás en el recinto. Si no la compartes, igual puedes confirmar.</p>
       {error ? <p role="alert" className="error">{error}</p> : null}

@@ -15,7 +15,7 @@ export default async function ManualReviewPage() {
         Resuélvelos con el comprador y el vendedor y deja constancia fuera del sistema.
       </p>
       {rows.length === 0 ? <p>No hay órdenes pendientes de revisión.</p> : null}
-      <div className="admin-table-wrap">
+      <div className="admin-table-wrap" role="region" aria-label="Órdenes a revisar a mano" tabIndex={0}>
         <table className="admin-table">
           <thead>
             <tr><th>Orden</th><th>Evento</th><th>Comprador</th><th>Vendedor</th><th>Monto</th><th>Estado</th><th>Creada</th></tr>

@@ -3,6 +3,7 @@ import { listingOffer } from '@/lib/account/queries';
 import { getDb } from '@/lib/db/client';
 import { formatUsd } from '@/lib/format';
 import { longDateLabel, panamaDateParts } from '@/lib/ui/dates';
+import { eventCoverImage } from '@/lib/ui/event-cover';
 import BackLink from '../../_components/back-link';
 import EventPoster from '../../_components/event-poster';
 import { IconShieldCheck } from '../../_components/icons';
@@ -29,38 +30,47 @@ export default async function BuyPage({ params }: { params: Promise<{ listingId:
       </header>
       <div className="buy-layout">
         {/* The purchase as a ticket: event on the body, price on the stub */}
-        <section className="ticket summary" aria-labelledby="resumen-title">
-          <div className="summary-art">
-            <EventPoster seed={offer.eventId} title={offer.eventName} size="card" />
-          </div>
-          <div className="ticket-main">
-            <h2 id="resumen-title">{offer.eventName}</h2>
-            <dl className="facts">
-              <div>
-                <dt>Lugar</dt>
-                <dd>{offer.venue}</dd>
-              </div>
-              <div>
-                <dt>Fecha</dt>
-                <dd>
-                  <time dateTime={date.iso}>{longDateLabel(date)}</time>
-                </dd>
-              </div>
-              <div>
-                <dt>Entrega</dt>
-                <dd>
-                  {offer.deliveryMode === 'transfer'
-                    ? 'El vendedor te transfiere la entrada en la boletera (Panatickets, Ticketplus u otra).'
-                    : 'Verás tu entrada aquí mismo después de pagar.'}
-                </dd>
-              </div>
-            </dl>
-          </div>
-          <div className="ticket-stub">
-            <span className="price-label">Total a pagar</span>
-            <p className="price price-lg">{formatUsd(offer.askCents)}</p>
-          </div>
-        </section>
+        <div className="ticket-slot">
+          <section className="ticket summary" aria-labelledby="resumen-title">
+            <div className="summary-art">
+              <EventPoster
+                seed={offer.eventId}
+                title={offer.eventName}
+                image={eventCoverImage(offer.eventId, offer.eventName, offer.venue)}
+                size="card"
+                sizes="(max-width: 1023px) 100vw, 50vw"
+                priority
+              />
+            </div>
+            <div className="ticket-main">
+              <h2 id="resumen-title">{offer.eventName}</h2>
+              <dl className="facts">
+                <div>
+                  <dt>Lugar</dt>
+                  <dd>{offer.venue}</dd>
+                </div>
+                <div>
+                  <dt>Fecha</dt>
+                  <dd>
+                    <time dateTime={date.iso}>{longDateLabel(date)}</time>
+                  </dd>
+                </div>
+                <div>
+                  <dt>Entrega</dt>
+                  <dd>
+                    {offer.deliveryMode === 'transfer'
+                      ? 'El vendedor te transfiere la entrada en la boletera (Panatickets, Ticketplus u otra).'
+                      : 'Verás tu entrada aquí mismo después de pagar.'}
+                  </dd>
+                </div>
+              </dl>
+            </div>
+            <div className="ticket-stub">
+              <span className="price-label">Total a pagar</span>
+              <p className="price price-lg">{formatUsd(offer.askCents)}</p>
+            </div>
+          </section>
+        </div>
 
         <div className="buy-side">
           <section className="protect on-scrim" aria-labelledby="proteccion-title">

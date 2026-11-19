@@ -25,6 +25,8 @@ export type EventView = {
   dateLong: string;
   /** Cheapest verified listing ("$150.00"), or null when there is none. */
   from: string | null;
+  /** Numeric price of the cheapest listing in cents (for pure deterministic price filters). */
+  fromCents: number | null;
   /** Verified listings on sale. */
   count: number;
   resaleProhibited: boolean;
@@ -37,6 +39,8 @@ export type HomeData = {
   featured: EventView[];
   /** True when the featured events all have tickets on sale (drives the section's wording). */
   featuredHaveTickets: boolean;
+  /** The event the hero poster shows: the first featured one (on sale when any is). */
+  hero: EventView | null;
   /** The soonest event, for the hero ticket. */
   next: EventView | null;
   totals: { events: number; listings: number };
@@ -53,6 +57,7 @@ export function toEventView(row: EventRow): EventView {
     dateShort: shortDateLabel(date),
     dateLong: longDateLabel(date),
     from: onSale && row.fromCents !== null ? formatUsd(row.fromCents) : null,
+    fromCents: onSale ? row.fromCents : null,
     count: onSale ? row.listingCount : 0,
     resaleProhibited: row.resaleProhibited,
   };
@@ -78,6 +83,7 @@ export function buildHomeData(rows: readonly EventRow[]): HomeData {
     events,
     featured,
     featuredHaveTickets: haveTickets,
+    hero: featured[0] ?? null,
     next: events[0] ?? null,
     totals: { events: events.length, listings: events.reduce((sum, e) => sum + e.count, 0) },
   };

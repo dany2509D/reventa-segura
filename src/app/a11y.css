@@ -1,0 +1,10 @@
+/* Accessibility-only styles, kept apart from globals.css. Windows High Contrast ("forced colors")
+   removes backgrounds and shadows, so states that rely on them alone are redrawn with borders and
+   system colour keywords. Nothing here changes the normal look. */
+@media (forced-colors: active) {
+  .nav-item .nav-pill { border: 2px solid Highlight; }
+  .tab-item .nav-pill { border: 2px solid Highlight; }
+  .chip::before { background: CanvasText; }
+  .gw-tab[aria-selected='true'] { border: 3px solid Highlight; }
+  .skeleton { border: 1px solid GrayText; }
+}

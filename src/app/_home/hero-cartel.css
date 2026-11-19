@@ -1,0 +1,172 @@
+/* Home poster (direction C). Always dark, whatever the site theme: its own scoped colours. */
+.hero-cartel {
+  --hc-bg: #0e0e0e;
+  --hc-ink: #f2ede4;
+  --hc-muted: #c9c3b8;
+  --hc-accent: #ff5a1f;
+  --hc-accent-hover: #ff7340;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-height: min(92svh, 900px);
+  display: flex;
+  background: var(--hc-bg);
+  color: var(--hc-ink);
+}
+.hero-cartel-video {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.5;
+}
+.hero-cartel-shade {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(90deg, rgb(14 14 14 / 0.92) 0%, rgb(14 14 14 / 0.55) 55%, rgb(14 14 14 / 0.2) 100%);
+}
+.hero-cartel-inner {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  width: 100%;
+  padding-block: var(--space-16) calc(var(--space-16) + var(--space-4));
+}
+.hero-cartel-grid {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-8);
+}
+.hero-cartel-head {
+  flex: 999 1 34rem;
+  min-width: 0;
+}
+.hero-cartel-side {
+  flex: 1 1 15rem;
+  max-width: 18rem;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.hero-cartel-eyebrow {
+  margin: 0 0 var(--space-3);
+  color: var(--hc-accent);
+  font-size: clamp(0.8125rem, 0.78rem + 0.2vw, 0.9375rem);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.hero-cartel-title {
+  margin: 0;
+  font-family: var(--font-display), 'Arial Black', sans-serif;
+  font-weight: 400;
+  font-size: clamp(2.15rem, 10.5vw, 9.5rem);
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+  overflow-wrap: break-word;
+}
+.hero-cartel-mask {
+  display: block;
+  overflow: hidden;
+  padding-block: 0.08em 0.05em;
+  margin-block: -0.08em -0.05em;
+}
+.hero-cartel-line {
+  display: block;
+  transform: translateY(108%);
+  animation: hc-rise var(--dur-complex) var(--ease-in-out) forwards;
+}
+.hero-cartel-mask + .hero-cartel-mask .hero-cartel-line {
+  animation-delay: 120ms;
+}
+.hero-cartel-line.is-accent {
+  color: var(--hc-accent);
+}
+.hero-cartel-side > * {
+  opacity: 0;
+  transform: translateY(10px);
+  animation: hc-in var(--dur-enter) var(--ease-out) forwards;
+}
+.hero-cartel-side > :nth-child(1) { animation-delay: 700ms; }
+.hero-cartel-side > :nth-child(2) { animation-delay: 760ms; }
+.hero-cartel-side > :nth-child(3) { animation-delay: 820ms; }
+.hero-cartel-side > :nth-child(4) { animation-delay: 880ms; }
+.hero-cartel-count,
+.hero-cartel-note {
+  margin: 0;
+  color: var(--hc-muted);
+}
+.hero-cartel-note {
+  color: var(--hc-ink);
+  line-height: 1.5;
+}
+.hero-cartel-price {
+  margin: 0;
+  font-family: var(--font-display), 'Arial Black', sans-serif;
+  font-size: clamp(2.75rem, 6vw, 4.5rem);
+  line-height: 0.92;
+  font-variant-numeric: tabular-nums;
+}
+.hero-cartel-cta {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;
+  padding: var(--space-3) var(--space-6);
+  background: var(--hc-accent);
+  color: var(--hc-bg);
+  text-decoration: none;
+  font-family: var(--font-display), 'Arial Black', sans-serif;
+  font-size: 0.9375rem;
+  line-height: 1.15;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transition: transform var(--dur-micro) var(--ease-out), background-color var(--dur-micro) ease;
+}
+.hero-cartel-cta:active { transform: scale(0.97); }
+.hero-cartel-cta:focus-visible { outline: 3px solid var(--hc-ink); outline-offset: 3px; }
+.hero-cartel-pause {
+  position: absolute;
+  right: var(--gutter);
+  bottom: var(--space-4);
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  border: 1px solid rgb(242 237 228 / 0.45);
+  background: rgb(14 14 14 / 0.72);
+  color: var(--hc-ink);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color var(--dur-micro) ease, border-color var(--dur-micro) ease;
+}
+.hero-cartel-pause:focus-visible { outline: 3px solid var(--hc-ink); outline-offset: 3px; }
+@media (hover: hover) and (pointer: fine) {
+  .hero-cartel-cta:hover { background: var(--hc-accent-hover); }
+  .hero-cartel-pause:hover { background: rgb(14 14 14 / 0.92); border-color: var(--hc-ink); }
+}
+@media (max-width: 767.98px) {
+  .hero-cartel { min-height: min(82svh, 760px); }
+  .hero-cartel-shade {
+    background: linear-gradient(180deg, rgb(14 14 14 / 0.25) 0%, rgb(14 14 14 / 0.78) 55%, rgb(14 14 14 / 0.94) 100%);
+  }
+  .hero-cartel-inner { padding-block: var(--space-12) calc(var(--space-16) + var(--space-6)); }
+  .hero-cartel-grid { gap: var(--space-6); }
+  .hero-cartel-side { max-width: none; }
+}
+@keyframes hc-rise { to { transform: translateY(0); } }
+@keyframes hc-in { to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) {
+  .hero-cartel-line,
+  .hero-cartel-side > * {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}

@@ -1,82 +1,124 @@
-/* Admin panel: same tokens and rounded language as the member app, but dense and utilitarian.
-   Colours come from globals.css tokens, so dark mode needs no overrides here. */
+/* Admin panel: Club Nocturno + Azul operational precision.
+   All colours resolve via tokens in globals.css so both dark (default) and light themes adapt cleanly. */
 
-.admin-shell { max-width: 1100px; margin: 0 auto; padding: var(--space-4) var(--space-4) var(--space-10); }
-.admin-narrow { max-width: 420px; margin: var(--space-10) auto; padding: 0 var(--space-4); }
-.admin-shell h1,
-.admin-narrow h1 { font-size: 1.75rem; }
-.admin-shell h2 { font-size: 1.125rem; margin-top: var(--space-6); }
+.admin-shell {
+  width: 100%;
+  max-width: calc(var(--container) + 2 * var(--gutter));
+  margin: 0 auto;
+  padding: var(--space-6) var(--gutter) var(--space-16);
+}
+.admin-narrow {
+  max-width: 460px;
+  margin: var(--space-10) auto;
+  padding: 0 var(--gutter);
+  display: grid;
+  gap: var(--space-4);
+}
+.admin-narrow h1 { font-size: clamp(1.75rem, 1.4rem + 1vw, 2.25rem); margin: 0; }
+.admin-narrow .lead { margin: 0 0 var(--space-2); }
+.admin-shell h1 { font-size: clamp(1.75rem, 1.4rem + 1.2vw, 2.5rem); margin-bottom: var(--space-5); }
+.admin-shell h2 { font-size: 1.1875rem; margin-top: var(--space-8); }
 
 .admin-nav {
   display: flex;
-  gap: var(--space-1);
-  overflow-x: auto;
-  scrollbar-width: thin;
-  padding: var(--space-1);
-  margin-bottom: var(--space-5);
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 6px;
+  margin-bottom: var(--space-6);
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-lg);
 }
-.admin-nav a {
+@media (max-width: 767.98px) {
+  .admin-nav {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .admin-nav::-webkit-scrollbar { display: none; }
+}
+.admin-tab {
+  position: relative;
   flex: none;
   display: inline-flex;
   align-items: center;
-  min-height: 44px;
-  padding: 0 var(--space-4);
-  border-radius: var(--radius-pill);
+  min-height: 40px;
+  padding: 0 16px;
+  border-radius: var(--radius-md);
   color: var(--text-muted);
-  font-weight: 600;
+  font-weight: 500;
   font-size: var(--fs-small);
+  letter-spacing: -0.01em;
   text-decoration: none;
   white-space: nowrap;
+  transition: background-color var(--ease), color var(--ease);
 }
-.admin-nav a:hover { background: var(--surface-2); color: var(--text); }
+.admin-tab:hover { background: var(--surface-2); color: var(--text); }
+.admin-tab[aria-current='page'] {
+  background: var(--sky-soft);
+  color: var(--accent-ink);
+  font-weight: 650;
+}
 
 /* Summary tiles */
-.admin-stats { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-3); grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+.admin-stats { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
 .admin-stat {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
-  min-height: 112px;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: 120px;
   padding: var(--space-5);
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
   color: var(--text);
   font-weight: 600;
   text-decoration: none;
+  transition: border-color var(--ease), transform var(--dur-short) var(--ease-out);
 }
-.admin-stat:hover { border-color: var(--border-strong); }
-.admin-stat strong { font-size: 2rem; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
+@media (hover: hover) {
+  .admin-stat:hover { border-color: var(--accent); transform: translate3d(0, -2px, 0); }
+}
+.admin-stat span { color: var(--text-muted); font-size: var(--fs-small); }
+.admin-stat strong {
+  font-size: 2.25rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: var(--accent-ink);
+  font-variant-numeric: tabular-nums;
+}
 
-/* Tables (the wrapper scrolls horizontally on small screens) */
+/* Tables (horizontal scroll wrapper on compact screens) */
 .admin-table-wrap {
   overflow-x: auto;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
 }
 .admin-table { border-collapse: separate; border-spacing: 0; width: 100%; font-size: var(--fs-small); font-variant-numeric: tabular-nums; }
 .admin-table th,
-.admin-table td { border-bottom: 1px solid var(--border); padding: 12px 14px; text-align: left; vertical-align: top; }
+.admin-table td { border-bottom: 1px solid var(--border); padding: 13px 16px; text-align: left; vertical-align: top; }
 .admin-table th {
   background: var(--surface-2);
   color: var(--text-muted);
+  font-family: var(--font-mono);
   font-size: var(--fs-caption);
-  font-weight: 700;
-  letter-spacing: 0.04em;
+  font-weight: 600;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   white-space: nowrap;
 }
+.admin-table tbody tr { transition: background-color var(--ease); }
+@media (hover: hover) {
+  .admin-table tbody tr:hover td { background: var(--surface-2); }
+}
 .admin-table tbody tr:last-child td { border-bottom: 0; }
-.admin-table td a { font-weight: 600; }
+.admin-table td a { font-weight: 600; color: var(--link); }
 
 /* Forms */
-.admin-form { display: grid; gap: var(--space-3); max-width: 420px; }
+.admin-form { display: grid; gap: var(--space-4); max-width: 460px; }
 .admin-form label { display: grid; gap: 6px; font-weight: 600; font-size: 0.9375rem; }
 .admin-form label:has(> input[type='checkbox']) { display: flex; align-items: center; gap: 10px; font-weight: 500; min-height: 44px; }
 .admin-inline { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; }
@@ -88,33 +130,38 @@
 .admin-inline input:not([type='checkbox']):not([type='hidden']) {
   min-height: 44px;
   padding: 10px 14px;
-  border: 1.5px solid var(--border-strong);
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
   background: var(--surface);
   color: var(--text);
   font: inherit;
+  transition: border-color var(--ease);
 }
 .admin-form input:focus,
-.admin-inline input:focus { border-color: var(--focus); }
-.admin-shell input[type='checkbox'] { width: 20px; height: 20px; margin: 0; accent-color: var(--brand); }
+.admin-form select:focus,
+.admin-form textarea:focus,
+.admin-inline input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
+.admin-shell input[type='checkbox'] { width: 20px; height: 20px; margin: 0; accent-color: var(--accent); }
 
-/* Buttons without a variant class render as secondary pills */
+/* Buttons without a variant class render as clean matte secondary pills */
 .admin-shell button:not(.btn),
 .admin-narrow button:not(.btn) {
-  min-height: 44px;
-  padding: 0 18px;
-  border: 1.5px solid transparent;
+  min-height: 40px;
+  padding: 0 16px;
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-pill);
   background: var(--surface-2);
   color: var(--text);
   font: inherit;
-  font-weight: 700;
+  font-size: var(--fs-small);
+  font-weight: 600;
   cursor: pointer;
+  transition: border-color var(--ease), background-color var(--ease);
 }
 .admin-shell button:not(.btn):hover,
-.admin-narrow button:not(.btn):hover { border-color: var(--border-strong); }
+.admin-narrow button:not(.btn):hover { border-color: var(--accent); background: var(--surface-3); }
 .admin-shell .btn,
-.admin-narrow .btn { min-height: 44px; padding: 0 18px; }
+.admin-narrow .btn { min-height: 40px; padding: 0 18px; font-size: var(--fs-small); }
 .admin-form > .btn { justify-self: start; }
 
 /* Messages */

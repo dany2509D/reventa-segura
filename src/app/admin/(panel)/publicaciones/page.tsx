@@ -14,7 +14,7 @@ export default async function ListingsPage({ searchParams }: { searchParams: Pro
       <h1>Publicaciones por verificar</h1>
       <Flash params={await searchParams} />
       {rows.length === 0 ? <p>No hay publicaciones pendientes.</p> : null}
-      <div className="admin-table-wrap">
+      <div className="admin-table-wrap" role="region" aria-label="Publicaciones por verificar" tabIndex={0}>
         <table className="admin-table">
           <thead>
             <tr>
