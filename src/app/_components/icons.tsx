@@ -66,7 +66,13 @@ export const IconSell = () => (
 export const IconAdmin = () => <Icon d="M12 3l7 3v5.5c0 4.3-2.9 8-7 9.5-4.1-1.5-7-5.2-7-9.5V6z" />;
 export const IconUser = () => <Icon d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4.5 21a7.5 7.5 0 0 1 15 0" />;
 export const IconLogout = () => <Icon d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4M15 16l4-4-4-4M19 12H9" />;
-export const IconArrowRight = () => <Icon d="M5 12h14M13 6l6 6-6 6" />;
+export const IconPin = () => <Icon d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11zM12 12.2a2.2 2.2 0 1 0 0-4.4 2.2 2.2 0 0 0 0 4.4z" />;
+export const IconPhoneCheck = () => <Icon d="M8 3h8a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zM9.8 12l1.6 1.6 3-3.2M11 18h2" />;
+export const IconLock = () => <Icon d="M6 11h12a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1zM8 11V8a4 4 0 0 1 8 0v3M12 14.5v2" />;
+export const IconCard = () => <Icon d="M4 6h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1zM3 10h18M7 15h3" />;
+export const IconTicketCheck = () => <Icon d="M4 8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v1.5a2.5 2.5 0 0 0 0 5V16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-1.5a2.5 2.5 0 0 0 0-5zM9.5 12l2 2 3.5-3.6" />;
+export const IconBanknote = () => <Icon d="M3 7a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1zM12 14.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM6.5 9.5v.01M17.5 14.5v.01" />;
+export const IconArrowRight =() => <Icon d="M5 12h14M13 6l6 6-6 6" />;
 export const IconArrowUpRight = () => <Icon d="M7 17L17 7M8 7h9v9" />;
 export const IconArrowDown = () => <Icon d="M12 5v14M6 13l6 6 6-6" />;
 export const IconShieldCheck = () => <Icon d="M12 3l7 3v5.5c0 4.3-2.9 8-7 9.5-4.1-1.5-7-5.2-7-9.5V6zM9 12l2 2 4-4" />;
