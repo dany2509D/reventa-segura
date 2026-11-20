@@ -1,0 +1,27 @@
+/* Explicit-consent checkbox of forms, and the honeypot field bots fill in. */
+
+/* A row: the box, then the sentence with its links. Overrides the stacked `.form label` layout. */
+.form .consent {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  font-weight: 400;
+  font-size: var(--fs-small);
+  letter-spacing: 0;
+  line-height: 1.5;
+  color: var(--text);
+  cursor: pointer;
+}
+.form .consent input { margin-top: 1px; }
+.form .consent a { color: var(--link); text-underline-offset: 3px; }
+
+/* Off-screen, not display:none: a bot that fills "every visible-looking field" still finds it.
+   People never reach it (aria-hidden, tabindex -1) and screen readers skip it. */
+.hp-field {
+  position: absolute;
+  left: -10000px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}

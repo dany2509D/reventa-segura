@@ -1,7 +1,11 @@
+import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { cache } from 'react';
 import { eventDetail } from '@/lib/account/queries';
 import { getDb } from '@/lib/db/client';
 import { formatUsd } from '@/lib/format';
+import { eventLd, serializeJsonLd } from '@/lib/seo/json-ld';
+import { pageMetadata } from '@/lib/seo/metadata';
 import { listVerifiedListings } from '@/lib/tickets/listings';
 import { longDateLabel, panamaDateParts } from '@/lib/ui/dates';
 import { eventCoverImage } from '@/lib/ui/event-cover';
@@ -13,15 +17,36 @@ import { TestModeNotice } from '../../_components/test-mode';
 
 export const dynamic = 'force-dynamic';
 
+// One query for the page and for its metadata.
+const loadEvent = cache(async (id: string) => eventDetail(getDb(), id));
+
+/**
+ * Title = the event's name; the description reads "long date · venue · Entradas de reventa en Panamá".
+ * Canonical and social card come from pageMetadata (the shared preview image, since events have no photo).
+ * An event that is missing or not active returns no metadata: the page itself answers 404.
+ */
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  const event = await loadEvent(id);
+  if (!event || event.status !== 'active') return {};
+  const description = `${longDateLabel(panamaDateParts(event.startsAt))} · ${event.venue} · Entradas de reventa en Panamá`;
+  return pageMetadata({ title: event.name, description, path: `/eventos/${event.id}` });
+}
+
 export default async function EventPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const db = getDb();
-  const event = await eventDetail(db, id);
+  const event = await loadEvent(id);
   if (!event || event.status !== 'active') notFound();
   const offers = event.resaleProhibited ? [] : await listVerifiedListings(db, id);
   const date = panamaDateParts(event.startsAt);
   return (
     <main className="page wide">
+      {/* Structured data (schema.org Event): a data block, not a script, so the CSP does not block it. */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(eventLd({ id: event.id, name: event.name, startsAt: event.startsAt, venue: event.venue })) }}
+      />
       <BackLink href="/eventos">Todos los eventos</BackLink>
       <div className="event-layout">
         {/* Same generative poster as the event's cards; `poster-hero` is the shared element of the page transition. */}

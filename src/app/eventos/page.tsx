@@ -1,5 +1,6 @@
 import { upcomingEvents } from '@/lib/account/queries';
 import { getDb } from '@/lib/db/client';
+import { pageMetadata } from '@/lib/seo/metadata';
 import SectionShell from '../_components/section-shell';
 import EventAgenda from '../_home/event-agenda';
 import EventSearch from '../_home/event-search';
@@ -7,7 +8,11 @@ import { SearchProvider } from '../_home/search-context';
 import { buildHomeData, eventCountLabel, ticketCountLabel } from '../_home/view-model';
 import '../_home/home.css';
 
-export const metadata = { title: 'Eventos en Panamá' };
+export const metadata = pageMetadata({
+  title: 'Eventos en Panamá',
+  description: 'Cartelera de conciertos, partidos y obras en Panamá con entradas de reventa verificadas y pago retenido hasta después del evento.',
+  path: '/eventos',
+});
 export const dynamic = 'force-dynamic';
 
 export default async function EventsDirectoryPage({

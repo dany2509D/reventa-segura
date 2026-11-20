@@ -4,6 +4,8 @@
  * assets the proxy skips. Keep this file free of Node-only imports: next.config.ts loads it too.
  */
 
+import { analyticsId } from '../site/site-config';
+
 export const SECURITY_HEADERS: Readonly<Record<string, string>> = {
   'Strict-Transport-Security': 'max-age=63072000; includeSubDomains',
   'X-Content-Type-Options': 'nosniff',
@@ -20,18 +22,31 @@ export const SECURITY_HEADERS: Readonly<Record<string, string>> = {
  * `style` attributes into the server HTML, which a nonce cannot cover, and style injection is far
  * less dangerous than script injection.
  */
-export function buildCsp({ nonce, dev = false }: { nonce?: string; dev?: boolean }): string {
+export function buildCsp({
+  nonce,
+  dev = false,
+  analytics = analyticsId() !== undefined,
+}: {
+  nonce?: string;
+  dev?: boolean;
+  /** Allow Google Analytics 4 to send its measurements. Defaults to "an ANALYTICS_GA4_ID is configured". */
+  analytics?: boolean;
+}): string {
   const script = ["'self'"];
   if (nonce) script.push(`'nonce-${nonce}'`, "'strict-dynamic'");
   if (dev) script.push("'unsafe-eval'"); // React dev tooling only; never in production
+  // Analytics (only when configured, and only loaded after the visitor accepts it): the tag itself
+  // is trusted through the nonce + 'strict-dynamic' chain; these are the places it reports to.
+  const ga = analytics ? ' https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com' : '';
+  const gaImg = analytics ? ' https://*.google-analytics.com https://*.googletagmanager.com' : '';
   return [
     "default-src 'self'",
     `script-src ${script.join(' ')}`,
     "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' data: blob:",
+    `img-src 'self' data: blob:${gaImg}`,
     "font-src 'self'",
     // Firebase Phone Auth: Identity Toolkit/Secure Token APIs and the reCAPTCHA widget (iframe + XHR).
-    "connect-src 'self' https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.google.com https://www.gstatic.com",
+    `connect-src 'self' https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.google.com https://www.gstatic.com${ga}`,
     "frame-src https://www.google.com https://recaptcha.google.com https://*.firebaseapp.com",
     "worker-src 'self'",
     "manifest-src 'self'",

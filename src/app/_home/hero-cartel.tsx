@@ -25,7 +25,7 @@ async function HeroContent({ data }: { data: Promise<HomeData> }) {
     return (
       <HeroCopy lines={['CARTELERA', 'DE REVENTA']}>
         <p className="hero-cartel-note">Cuando el equipo publique un evento, lo verás aquí.</p>
-        <a className="hero-cartel-cta" href="/vender">Vender una entrada</a>
+        <a className="hero-cartel-cta" href="/vender" data-track="sell_cta_click" data-track-label="home-hero">Vender una entrada</a>
       </HeroCopy>
     );
   }

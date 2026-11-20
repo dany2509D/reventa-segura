@@ -1,8 +1,13 @@
+import { pageMetadata } from '@/lib/seo/metadata';
 import BackLink from '../_components/back-link';
 import HowItWorks from '../_home/how-it-works';
 import '../_home/home.css';
 
-export const metadata = { title: 'Cómo funciona el escrow' };
+export const metadata = pageMetadata({
+  title: 'Cómo funciona el pago protegido',
+  description: 'Así funciona Reventa Segura: el pago se retiene, el vendedor entrega la entrada y cobra cuando cierra el plazo de reportes, 12 horas después del inicio del evento.',
+  path: '/como-funciona',
+});
 
 export default function HowItWorksPage() {
   return (

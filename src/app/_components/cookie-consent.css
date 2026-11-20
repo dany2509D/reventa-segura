@@ -1,0 +1,88 @@
+/* Cookie notice: a compact card at the bottom, a modal dialog for the categories.
+   Colours, radii and spacing come from the design tokens in globals.css (both themes). */
+
+.cookie-banner {
+  position: fixed;
+  z-index: 60;
+  left: max(var(--space-4), env(safe-area-inset-left));
+  bottom: max(var(--space-4), env(safe-area-inset-bottom));
+  width: min(440px, calc(100vw - 2 * var(--space-4)));
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+}
+
+.cookie-title {
+  margin: 0;
+  font-size: 1.0625rem;
+  letter-spacing: -0.02em;
+}
+
+.cookie-text {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--fs-small);
+  line-height: 1.5;
+}
+.cookie-text a { color: var(--link); text-underline-offset: 3px; }
+
+.cookie-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+/* Phones: full-width card standing on the floating tab bar. */
+@media (max-width: 767.98px) {
+  .cookie-banner {
+    left: max(12px, env(safe-area-inset-left));
+    right: max(12px, env(safe-area-inset-right));
+    bottom: calc(var(--tabbar-space) + var(--space-2));
+    width: auto;
+    max-width: 440px;
+    margin: 0 auto;
+  }
+}
+
+.cookie-dialog {
+  width: min(520px, calc(100vw - 2 * var(--space-4)));
+  max-height: calc(100dvh - 2 * var(--space-4));
+  padding: 0;
+  overflow: auto;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+}
+.cookie-dialog::backdrop { background: rgb(17 19 24 / 0.55); }
+.cookie-dialog-body { display: grid; gap: var(--space-4); padding: var(--space-6); }
+
+.cookie-row {
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  gap: var(--space-3);
+  align-items: start;
+  padding: var(--space-4);
+  background: var(--surface-2);
+  border-radius: var(--radius-md);
+}
+.cookie-row input { width: 20px; height: 20px; margin: 2px 0 0; accent-color: var(--brand); }
+.cookie-row input:disabled + label { opacity: 0.85; }
+.cookie-row label { display: grid; gap: var(--space-1); cursor: pointer; }
+.cookie-row label span { color: var(--text-muted); font-size: var(--fs-small); line-height: 1.45; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .cookie-banner { animation: cookie-rise var(--dur-enter) var(--ease-out) both; }
+  @keyframes cookie-rise {
+    from { opacity: 0; transform: translate3d(0, 12px, 0); }
+    to { opacity: 1; transform: none; }
+  }
+}
+
+@media print { .cookie-banner { display: none; } }

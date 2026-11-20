@@ -81,7 +81,7 @@ export default function BuyButton({ listingId, total }: { listingId: string; tot
           </label>
         ))}
       </fieldset>
-      <button className="btn block" type="button" onClick={pay} disabled={busy}>
+      <button className="btn block" type="button" onClick={pay} disabled={busy} data-track="begin_checkout" data-track-label="pagar">
         {busy ? 'Preparando el pago…' : method === 'card' ? `Pagar ${total}` : `Continuar con ${method === 'yappy' ? 'Yappy' : 'ACH'} · ${total}`}
       </button>
     </div>

@@ -1,5 +1,8 @@
 import { NextResponse, type NextRequest } from 'next/server';
+import { canonicalRedirect } from '@/lib/security/canonical';
+import { isPrivatePath } from '@/lib/seo/private-paths';
 import { SECURITY_HEADERS, buildCsp, newNonce } from '@/lib/security/headers';
+import { siteUrl } from '@/lib/site/site-config';
 
 /**
  * Next 16 proxy (formerly middleware): runs before every page, API route and server action.
@@ -10,8 +13,18 @@ import { SECURITY_HEADERS, buildCsp, newNonce } from '@/lib/security/headers';
  * server action checks the session itself.
  */
 export function proxy(request: NextRequest) {
-  // Sandbox routes do not exist in production, whatever env flags are set.
   if (process.env.NODE_ENV === 'production') {
+    // One address per page: HTTP → HTTPS and www ↔ apex → the host in SITE_URL, permanently (301).
+    const target = canonicalRedirect({
+      url: request.nextUrl,
+      method: request.method,
+      forwardedProto: request.headers.get('x-forwarded-proto'),
+      host: request.headers.get('x-forwarded-host') ?? request.headers.get('host'),
+      siteUrl: siteUrl(),
+    });
+    if (target) return NextResponse.redirect(target, 301);
+
+    // Sandbox routes do not exist in production, whatever env flags are set.
     const p = request.nextUrl.pathname;
     if (p === '/pago-de-prueba' || p.startsWith('/pago-de-prueba/')) {
       return new NextResponse(null, { status: 404, headers: { 'cache-control': 'no-store' } });
@@ -27,6 +40,8 @@ export function proxy(request: NextRequest) {
   const response = NextResponse.next({ request: { headers: requestHeaders } });
   response.headers.set('content-security-policy', csp);
   for (const [name, value] of Object.entries(SECURITY_HEADERS)) response.headers.set(name, value);
+  // Account, checkout, order and admin pages never belong in search results (public pages carry no such header).
+  if (isPrivatePath(request.nextUrl.pathname)) response.headers.set('X-Robots-Tag', 'noindex, nofollow');
   return response;
 }
 

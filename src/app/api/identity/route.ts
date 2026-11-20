@@ -22,7 +22,7 @@ const json = (body: object, status: number) =>
 const ALREADY_SUBMITTED = 'Tu verificación ya está en revisión o aprobada.';
 
 // Seller identity upload (RF-02): multipart with `doc` (cédula/pasaporte: image
-// or PDF) and `selfie` (image). Stores only private paths; never returns them.
+// or PDF), `selfie` (image) and `consent=yes` (the person authorised the processing). Stores only private paths; never returns them.
 export async function POST(req: Request) {
   const blocked = rejectUnsafeUpload(req);
   if (blocked) return blocked;
@@ -46,6 +46,12 @@ export async function POST(req: Request) {
     const selfie = form && (await fileField(form, 'selfie'));
     if (!doc || !selfie) {
       return json({ error: 'Adjunta tu documento de identidad y una selfie.' }, 400);
+    }
+
+    // Explicit consent to process identity data (Ley 81 de 2019): the form sends `consent=yes` only
+    // after the person ticks the box, so a request without it is not a submission we may keep.
+    if (form?.get('consent') !== 'yes') {
+      return json({ error: 'Debes autorizar el tratamiento de tu documento y tu selfie para continuar.' }, 400);
     }
 
     const docFile = await validateUpload(doc.data, doc.type);
